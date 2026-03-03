@@ -6,19 +6,53 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+ installed
+- Access to the Supabase database (contact repository owner for credentials)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/saad-subhani/imei.info.git
+   cd imei.info/my-app
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env.local
+   ```
+   
+   Then edit `.env.local` and add your Supabase database password:
+   - Get the password from: https://supabase.com/dashboard/project/jitbshriojfiobfybivm → Settings → Database
+   - Replace `your_supabase_database_password_here` with the actual password
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   # or
+   bun dev
+   ```
+
+5. **Open your browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+
+### Important Notes
+
+- The `.env.local` file is gitignored and won't be committed to the repository
+- Each developer needs to create their own `.env.local` file with the Supabase credentials
+- The server-side API routes require the database connection to work properly
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
