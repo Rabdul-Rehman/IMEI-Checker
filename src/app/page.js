@@ -33,6 +33,42 @@ export default function Home() {
           height={100}
           priority  
         />
+        <div className="section-content">
+          <h1>IMEI Check Service</h1>
+          <div className="container my-4">
+            <form
+              className="d-flex align-items-center imei-form"
+              id="imeiForm"
+            >
+              <input
+                type="text"
+                className="imei-input"
+                placeholder="Enter IMEI number: 123456789012347"
+                maxLength="15"
+                name="inputNumber"
+                id="imeiInput"
+              />
+              <a
+                href="#"
+                className="btn btn-circle question-btn ms-2"
+                title="What is IMEI?"
+              >
+                ?
+              </a>
+              <button type="submit" className="btn btn-primary ms-2">
+                Check IMEI
+              </button>
+            </form>
+          </div>
+          <div className="mx-auto mt-3 paragraph">
+            <p className="text-center">
+              Every mobile phone, GSM modem or device with a built-in phone /
+              modem has a unique 15 digit IMEI number. Based on this number, you
+              can check some information about the device, eg brand or model.{" "}
+              <span className="bold">Enter the IMEI number above.</span>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Section 2 */}
