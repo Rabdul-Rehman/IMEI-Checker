@@ -58,7 +58,6 @@ export default function RootLayout({ children }) {
 
         {/* Page Content */}
         <main>{children}</main>
-
         {/* Footer */}
         <footer>
         <div className="container-fluid footer">
