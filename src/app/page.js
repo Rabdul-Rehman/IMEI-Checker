@@ -149,6 +149,9 @@ export default function Home() {
 
         {/* Hero Right Visual */}
         <div className="hero-right d-none d-lg-flex">
+          {/* Decorative angled navy background shape */}
+          <div className="hero-bg-shape" aria-hidden="true"></div>
+
           <div className="hero-visual">
             <svg className="floating-shape shape-1" viewBox="0 0 100 100">
               <polygon points="50,5 90,30 90,70 50,95 10,70 10,30" fill="none" stroke="#66b2ff" strokeWidth="2" />
