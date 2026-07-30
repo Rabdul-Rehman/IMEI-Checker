@@ -354,6 +354,7 @@ html, body {
   border: 1px solid #4a4a4a;
   border-radius: 20px;
   padding: 50px 40px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .cta-title {
@@ -713,11 +714,18 @@ html, body {
 }
 
 .imei-gen-card {
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   padding: 30px;
   margin-bottom: 26px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imei-gen-card:hover {
+  border-color: rgba(78, 168, 245, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(78, 168, 245, 0.1);
 }
 
 .imei-gen-card-title {
@@ -859,11 +867,18 @@ html, body {
 }
 
 .imei-gen-info-card {
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   padding: 22px;
   text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imei-gen-info-card:hover {
+  border-color: rgba(78, 168, 245, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(78, 168, 245, 0.1);
 }
 
 .imei-gen-info-code {
@@ -1132,10 +1147,17 @@ html, body {
 
 .phone-spec-card {
   background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   padding: 18px 20px;
   height: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.phone-spec-card:hover {
+  border-color: rgba(78, 168, 245, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(78, 168, 245, 0.1);
 }
 
 .phone-spec-label {
