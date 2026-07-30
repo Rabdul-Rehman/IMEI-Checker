@@ -30,8 +30,8 @@ html, body {
   position: relative;
   /* height: 420px;  <-- remove this line */
   overflow: hidden; /* optional — remove if it's hiding content */
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .container-fluid{
