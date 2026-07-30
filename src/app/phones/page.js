@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { popularDevices } from "../data/devices";
+import DevicePhoto from "../components/DevicePhoto";
 
 export default function PhoneDatabasePage() {
   const [query, setQuery] = useState("");
@@ -74,19 +75,7 @@ export default function PhoneDatabasePage() {
               >
                 <div className="device-card">
                   <div className="device-photo">
-                    <img
-                      src={device.image}
-                      alt={device.name}
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling.style.display =
-                          "flex";
-                      }}
-                    />
-                    <i
-                      className="fas fa-mobile-screen-button device-icon-fallback"
-                      style={{ display: "none" }}
-                    ></i>
+                    <DevicePhoto src={device.image} alt={device.name} />
                   </div>
                   <div className="device-brand">{device.brand}</div>
                   <h3 className="device-name">{device.name}</h3>

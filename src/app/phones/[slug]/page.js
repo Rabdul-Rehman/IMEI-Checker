@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { popularDevices } from "../../data/devices";
+import DevicePhoto from "../../components/DevicePhoto";
 
 export function generateStaticParams() {
   return popularDevices.map((device) => ({ slug: device.slug }));
@@ -24,18 +25,7 @@ export default function PhoneDetailPage({ params }) {
       {/* Top section: image + info */}
       <div className="phone-detail-top">
         <div className="phone-detail-image">
-          <img
-            src={device.image}
-            alt={device.name}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              e.currentTarget.nextElementSibling.style.display = "flex";
-            }}
-          />
-          <i
-            className="fas fa-mobile-screen-button device-icon-fallback"
-            style={{ display: "none" }}
-          ></i>
+          <DevicePhoto src={device.image} alt={device.name} />
         </div>
 
         <div className="phone-detail-info">
