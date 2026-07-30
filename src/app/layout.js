@@ -90,7 +90,6 @@ export default function RootLayout({ children }) {
               <Link href="/report-lost">REPORT LOST IMEI</Link>
               <Link href="/carrier-lookup">CARRIER LOOKUP</Link>
               {/* ... */}
-              
             </div>
           </div>
         </footer>
