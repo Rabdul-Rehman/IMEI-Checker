@@ -10,9 +10,9 @@ export default function NotFound() {
         </div>
 
         <div className="not-found-code" aria-hidden="true">
-          <span>40</span>
+          <span>4</span>
           <span className="not-found-code-dash">-</span>
-          <span>404040</span>
+          <span>0</span>
           <span className="not-found-code-dash">-</span>
           <span>4</span>
         </div>
