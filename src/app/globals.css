@@ -5,6 +5,7 @@ html, body {
   line-height: 1.334em;
   background-color: #282828;
   color: white;
+  overflow-x: hidden;
 }
 
 .navbar {
@@ -23,8 +24,18 @@ html, body {
 }
 .section-1 {
   position: relative;
-  /* height: 420px;  <-- remove this line */
-  overflow: hidden; /* optional — remove if it's hiding content */
+  min-height: 640px;
+  overflow: hidden; /* keep the decorative art clipped inside this section */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.section-1 .hero-right {
+  flex: 1;
+}
+
+.section-1 .hero-left {
+  flex: 1.2;
 }
 
 .container-fluid{
@@ -35,17 +46,25 @@ html, body {
   background-size: cover;
   /* aspect-ratio: 1728 / 3319; */
   width: 100%;
+  overflow-x: hidden;
 }
 
 
 .img-header {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  right: 0;
+  left: auto;
+  width: 55%;
+  max-width: 780px;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  opacity: 0.28;
   z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 100%);
 }
 
 .section-content {
@@ -204,6 +223,267 @@ html, body {
 
 .hero-feature .feature-icon.check {
   color: #28a745;
+}
+
+.hero-select {
+  background-color: #2b2b2b !important;
+  color: #fff;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1px solid #41474a;
+  cursor: pointer;
+}
+
+.hero-select:focus {
+  border-color: #66b2ff;
+  box-shadow: 0 0 10px rgba(102, 178, 255, 0.3);
+  outline: none;
+}
+
+/* ===== Hero Right Visual (phone mockup + floating shapes) ===== */
+.hero-right {
+  position: relative;
+  z-index: 1;
+  padding-top: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.hero-visual {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 420px;
+}
+
+.hero-phone {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  width: 240px;
+  height: 340px;
+  border-radius: 32px;
+  border: 2px solid #41474a;
+  background: linear-gradient(160deg, #2b2b2b 0%, #1f1f1f 100%);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  padding: 18px 16px;
+  color: #66b2ff;
+  z-index: 2;
+}
+
+.hero-phone.phone-back {
+  top: 20px;
+  left: 130px;
+  z-index: 1;
+  opacity: 0.55;
+  filter: blur(0.3px);
+}
+
+.hero-phone .phone-notch {
+  width: 60px;
+  height: 8px;
+  border-radius: 6px;
+  background: #111;
+  margin: 0 auto 14px;
+}
+
+.hero-phone .phone-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #8fb9d6;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.hero-phone .phone-value {
+  font-size: 13px;
+  color: #cfe8ff;
+  font-weight: 600;
+  margin-bottom: 14px;
+  word-break: break-all;
+}
+
+.hero-phone .phone-barcode {
+  height: 18px;
+  background: repeating-linear-gradient(90deg, #66b2ff 0px, #66b2ff 1px, transparent 1px, transparent 3px);
+  opacity: 0.7;
+  margin-bottom: 14px;
+  border-radius: 2px;
+}
+
+.floating-shape {
+  position: absolute;
+  opacity: 0.5;
+  animation: floatShape 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.floating-shape.shape-1 {
+  top: 10px;
+  left: 0px;
+  width: 70px;
+  height: 70px;
+  animation-delay: 0s;
+}
+
+.floating-shape.shape-2 {
+  bottom: 20px;
+  right: -10px;
+  width: 90px;
+  height: 90px;
+  animation-delay: 1.5s;
+}
+
+.floating-shape.shape-3 {
+  bottom: 60px;
+  left: -20px;
+  width: 50px;
+  height: 50px;
+  animation-delay: 3s;
+}
+
+@keyframes floatShape {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(8deg); }
+}
+
+@media (max-width: 991px) {
+  .hero-right {
+    display: none;
+  }
+}
+
+/* ===== How It Works ===== */
+.how-it-works {
+  padding: 80px 60px 40px;
+}
+
+.how-it-works h2 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 50px;
+}
+
+.how-it-works-row {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.how-it-works-item {
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.how-it-works-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background-color: #383838;
+  border: 1px solid #41474a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #66b2ff;
+  margin: 0 auto 18px;
+}
+
+.how-it-works-step {
+  color: #66b2ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.how-it-works-item h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.how-it-works-item p {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+/* ===== Popular Devices ===== */
+.popular-devices {
+  padding: 40px 60px 80px;
+}
+
+.popular-devices h2 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.popular-devices-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.popular-device-card {
+  background-color: #383838;
+  border: 1px solid #41474a;
+  border-radius: 16px;
+  overflow: hidden;
+  width: 260px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.popular-device-card:hover {
+  transform: translateY(-4px);
+  border-color: #66b2ff;
+}
+
+.popular-device-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.popular-device-body {
+  padding: 16px;
+}
+
+.popular-device-brand {
+  font-size: 12px;
+  color: #66b2ff;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.popular-device-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.popular-device-specs {
+  font-size: 12.5px;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .how-it-works,
+  .popular-devices {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 .hero-stats-row {
