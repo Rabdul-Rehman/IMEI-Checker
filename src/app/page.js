@@ -33,41 +33,76 @@ export default function Home() {
           height={100}
           priority  
         />
-        <div className="section-content">
-          <h1>IMEI Check Service</h1>
-          <div className="container my-4">
-            <form
-              className="d-flex align-items-center imei-form"
-              id="imeiForm"
-            >
+        <div className="section-content hero-left">
+          <span className="hero-badge">⚡ SMARTPHONE INTELLIGENCE PLATFORM</span>
+
+          <h1 className="hero-heading">
+            Check Your IMEI.
+            <br />
+            Know Your Phone.
+          </h1>
+
+          <p className="hero-subtitle">
+            Identify your device and explore detailed specifications from our
+            growing mobile database of 15,000+ devices.
+          </p>
+
+          <div className="hero-card">
+            <div className="hero-tabs">
+              <button type="button" className="hero-tab active">
+                IMEI Number
+              </button>
+              <button type="button" className="hero-tab">
+                Select Device
+              </button>
+            </div>
+
+            <form className="hero-input-row" id="imeiForm">
               <input
                 type="text"
-                className="imei-input"
-                placeholder="Enter IMEI number: 123456789012347"
+                className="hero-input"
+                placeholder="Enter 15-digit IMEI number"
                 maxLength="15"
                 name="inputNumber"
                 id="imeiInput"
               />
-              <a
-                href="#"
-                className="btn btn-circle question-btn ms-2"
-                title="What is IMEI?"
-              >
-                ?
-              </a>
-              <button type="submit" className="btn btn-primary ms-2">
-                Check IMEI
+              <button type="submit" className="hero-check-btn">
+                Check IMEI <span className="arrow">→</span>
               </button>
             </form>
+
+            <div className="hero-features">
+              <span className="hero-feature">
+                <span className="feature-icon check">✓</span> 15-digit validation
+              </span>
+              <span className="hero-feature">
+                <span className="feature-icon">⚡</span> Fast lookup
+              </span>
+              <span className="hero-feature">
+                <span className="feature-icon">○</span> Secure
+              </span>
+            </div>
           </div>
-          <div className="mx-auto mt-3 paragraph">
-            <p className="text-center">
-              Every mobile phone, GSM modem or device with a built-in phone /
-              modem has a unique 15 digit IMEI number. Based on this number, you
-              can check some information about the device, eg brand or model.{" "}
-              <span className="bold">Enter the IMEI number above.</span>
-            </p>
-          </div>
+        </div>
+      </div>
+
+      {/* Hero Stats */}
+      <div className="container-fluid hero-stats-row">
+        <div className="hero-stat-box">
+          <h3>1,250,000+</h3>
+          <p>IMEI Checks</p>
+        </div>
+        <div className="hero-stat-box">
+          <h3>15,000+</h3>
+          <p>Devices</p>
+        </div>
+        <div className="hero-stat-box">
+          <h3>99.9%</h3>
+          <p>Lookup Accuracy</p>
+        </div>
+        <div className="hero-stat-box">
+          <h3>24/7</h3>
+          <p>Availability</p>
         </div>
       </div>
 
