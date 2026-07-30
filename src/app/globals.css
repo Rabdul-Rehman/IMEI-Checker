@@ -255,14 +255,15 @@ html, body {
 /* Decorative soft glowing blob shape (behind the phone mockups) */
 .hero-bg-shape {
   position: absolute;
-  top: -160px;
-  left: -280px;
-  width: 950px;
-  height: 850px;
+  top: 50%;
+  left: 50%;
+  width: 620px;
+  height: 620px;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 45% 40%, #2b3266 0%, #23274f 35%, #1a1d3a 55%, rgba(26,29,58,0) 75%);
-  filter: blur(10px);
-  opacity: 0.95;
+  background: radial-gradient(circle at 50% 45%, #2f3872 0%, #262c5c 25%, #1b2040 45%, rgba(26,29,58,0.15) 65%, rgba(26,29,58,0) 78%);
+  filter: blur(6px);
+  opacity: 0.9;
   z-index: 0;
   pointer-events: none;
 }
