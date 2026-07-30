@@ -66,36 +66,40 @@ export default function RootLayout({ children }) {
         <main>{children}</main>
 
         {/* Footer */}
-        <footer>
-        <div className="container-fluid footer">
-            <div className="row text-center">
+        <footer className="site-footer">
+          <div className="container-fluid footer">
+            <div className="row gy-4">
               <div className="col-md-3">
-                <span>Checked Today:</span>
-                <div><span id="count">103,496</span></div>
+                <div className="footer-brand">
+                  <i className="fas fa-mobile-alt"></i> IMEI CHECK
+                </div>
+                <p className="footer-desc">
+                  The most trusted IMEI lookup and mobile device information
+                  platform.
+                </p>
               </div>
               <div className="col-md-3">
-                <span>Checked Today:</span>
-                <div><span id="count">103,496</span></div>
+                <h6 className="footer-heading">Product</h6>
+                <ul className="footer-links">
+                  <li><Link href="/imei-check">IMEI Checker</Link></li>
+                  <li><Link href="/phones">Phone Database</Link></li>
+                  <li><Link href="/imei-generator">IMEI Generator</Link></li>
+                </ul>
               </div>
               <div className="col-md-3">
-                <span>Checked Today:</span>
-                <div><span id="count">103,496</span></div>
+                <h6 className="footer-heading">Company</h6>
+                <ul className="footer-links">
+                  <li><Link href="/faq">FAQ</Link></li>
+                  <li><Link href="/contact">Contact</Link></li>
+                </ul>
               </div>
               <div className="col-md-3">
-                <span>Checked Today:</span>
-                <div><span id="count">103,496</span></div>
+                <h6 className="footer-heading">Legal</h6>
+                <ul className="footer-links">
+                  <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                  <li><Link href="/terms-of-service">Terms of Service</Link></li>
+                </ul>
               </div>
-            </div>
-          </div>
-
-          <div className="line"></div>
-
-          <div className="container p-4">
-            <div className="d-flex flex-wrap justify-content-center gap-3 text-center">
-              <Link href="/imei-check">IMEI CHECK</Link>
-              <Link href="/report-lost">REPORT LOST IMEI</Link>
-              <Link href="/carrier-lookup">CARRIER LOOKUP</Link>
-              {/* ... */}
             </div>
           </div>
         </footer>

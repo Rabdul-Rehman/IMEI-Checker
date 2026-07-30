@@ -215,7 +215,7 @@ export default function Home() {
         <div className="row justify-content-center gy-4">
           <div className="col-6 col-md-3">
             <div className="device-card">
-              <div className="device-image">
+              <div className="device-photo">
                 <i className="fas fa-mobile-screen-button"></i>
               </div>
               <div className="device-brand">Apple</div>
@@ -227,7 +227,7 @@ export default function Home() {
           </div>
           <div className="col-6 col-md-3">
             <div className="device-card">
-              <div className="device-image">
+              <div className="device-photo">
                 <i className="fas fa-mobile-screen-button"></i>
               </div>
               <div className="device-brand">Samsung</div>
@@ -239,7 +239,7 @@ export default function Home() {
           </div>
           <div className="col-6 col-md-3">
             <div className="device-card">
-              <div className="device-image">
+              <div className="device-photo">
                 <i className="fas fa-mobile-screen-button"></i>
               </div>
               <div className="device-brand">Google</div>
@@ -251,7 +251,7 @@ export default function Home() {
           </div>
           <div className="col-6 col-md-3">
             <div className="device-card">
-              <div className="device-image">
+              <div className="device-photo">
                 <i className="fas fa-mobile-screen-button"></i>
               </div>
               <div className="device-brand">Xiaomi</div>
