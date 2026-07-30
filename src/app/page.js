@@ -1,6 +1,8 @@
 "use client"; // only if you're in App Router (app/page.js)
 
 import Image from "next/image";
+import Link from "next/link";
+import { popularDevices } from "./data/devices";
 import { useEffect, useRef, useState } from "react";
 import styles from "./globals.css";
 
@@ -63,33 +65,6 @@ function CountUp({ end, duration = 1800, suffix = "", decimals = 0 }) {
 
 // Put your real device photos in /public/images/devices/ using these filenames.
 // If a file is missing, the icon shows automatically as a fallback.
-const popularDevices = [
-  {
-    brand: "Apple",
-    name: "iPhone 15 Pro",
-    specs: '6.1" OLED • A17 Pro • 48MP • 8GB RAM',
-    image: "/images/devices/iphone-15-pro.jpg",
-  },
-  {
-    brand: "Samsung",
-    name: "Samsung Galaxy S24",
-    specs: '6.2" AMOLED • Snapdragon 8 Gen 3 • 50MP',
-    image: "/images/devices/galaxy-s24.jpg",
-  },
-  {
-    brand: "Google",
-    name: "Google Pixel 9",
-    specs: '6.3" OLED • Tensor G4 • 50MP • 12GB RAM',
-    image: "/images/devices/pixel-9.jpg",
-  },
-  {
-    brand: "Xiaomi",
-    name: "Xiaomi 14",
-    specs: '6.36" AMOLED • Snapdragon 8 Gen 3 • 50MP',
-    image: "/images/devices/xiaomi-14.jpg",
-  },
-];
-
 export default function Home() {
   useEffect(() => {
     const form = document.getElementById("imeiForm");
@@ -244,26 +219,28 @@ export default function Home() {
         <div className="row justify-content-center gy-4">
           {popularDevices.map((device) => (
             <div className="col-6 col-md-3" key={device.name}>
-              <div className="device-card">
-                <div className="device-photo">
-                  <img
-                    src={device.image}
-                    alt={device.name}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      e.currentTarget.nextElementSibling.style.display =
-                        "flex";
-                    }}
-                  />
-                  <i
-                    className="fas fa-mobile-screen-button device-icon-fallback"
-                    style={{ display: "none" }}
-                  ></i>
+              <Link href={`/phones/${device.slug}`} className="device-card-link">
+                <div className="device-card">
+                  <div className="device-photo">
+                    <img
+                      src={device.image}
+                      alt={device.name}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.nextElementSibling.style.display =
+                          "flex";
+                      }}
+                    />
+                    <i
+                      className="fas fa-mobile-screen-button device-icon-fallback"
+                      style={{ display: "none" }}
+                    ></i>
+                  </div>
+                  <div className="device-brand">{device.brand}</div>
+                  <h3 className="device-name">{device.name}</h3>
+                  <p className="device-specs">{device.specs}</p>
                 </div>
-                <div className="device-brand">{device.brand}</div>
-                <h3 className="device-name">{device.name}</h3>
-                <p className="device-specs">{device.specs}</p>
-              </div>
+              </Link>
             </div>
           ))}
         </div>

@@ -263,6 +263,12 @@ html, body {
   padding: 40px 20px 0;
 }
 
+.device-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
 .device-card {
   background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -530,11 +536,127 @@ html, body {
   color: #4ea8f5;
 }
 
-.line {
-  height: 1px;
-  background-color: #4e4e4e;
-  width: 80%;
-  margin: 0 auto;
+/* ===== Phone Detail Page ===== */
+.phone-detail-page {
+  background-color: transparent;
+  padding: 30px 40px 60px;
+  max-width: 1400px;
+}
+
+.phone-breadcrumb {
+  color: #8a8f98;
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+.phone-breadcrumb a {
+  color: #4ea8f5;
+  text-decoration: none;
+}
+
+.phone-breadcrumb .active {
+  color: #fff;
+  font-weight: 600;
+}
+
+.phone-detail-top {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 60px;
+}
+
+.phone-detail-image {
+  width: 260px;
+  height: 300px;
+  flex-shrink: 0;
+  background-color: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.phone-detail-info {
+  flex: 1;
+  min-width: 260px;
+  padding-top: 8px;
+}
+
+.phone-detail-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 34px;
+  margin: 6px 0 18px;
+}
+
+.phone-detail-tags {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+
+.phone-tag {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c7cbd1;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.phone-check-btn {
+  display: inline-flex;
+  padding: 12px 26px;
+}
+
+.phone-detail-specs h2 {
+  color: #fff;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.phone-spec-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 18px 20px;
+  height: 100%;
+}
+
+.phone-spec-label {
+  color: #4ea8f5;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.phone-spec-value {
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.phone-spec-sub {
+  color: #9aa0a8;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .phone-detail-image {
+    width: 100%;
+    max-width: 260px;
+  }
 }
 
 .results{
