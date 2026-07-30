@@ -264,8 +264,8 @@ html, body {
 }
 
 .device-card {
-  background-color: #12172a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #383838;
+  border: 1px solid #4a4a4a;
   border-radius: 16px;
   padding: 20px;
   height: 100%;
@@ -286,7 +286,8 @@ html, body {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background-color: #1c2338;
+  background-color: #2c2c2c;
+  border: 1px solid #4a4a4a;
   color: #4ea8f5;
   font-size: 56px;
   margin-bottom: 16px;
@@ -320,8 +321,8 @@ html, body {
 
 .cta-card {
   max-width: 820px;
-  background-color: #12172a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #383838;
+  border: 1px solid #4a4a4a;
   border-radius: 20px;
   padding: 50px 40px;
 }
