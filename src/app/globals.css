@@ -898,7 +898,7 @@ html, body {
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.imei-step-card-active {
+.imei-step-card:hover {
   border-color: #4ea8f5;
   background-color: rgba(78, 168, 245, 0.05);
 }

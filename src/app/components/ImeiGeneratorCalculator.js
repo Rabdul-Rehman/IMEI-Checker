@@ -184,7 +184,7 @@ export default function ImeiGeneratorCalculator() {
           </div>
         </div>
         <div className="col-md-4">
-          <div className="imei-step-card imei-step-card-active">
+          <div className="imei-step-card">
             <div className="imei-step-title">Step 2</div>
             <div className="imei-step-icon">
               <i className="fas fa-calculator"></i>
