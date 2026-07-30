@@ -209,139 +209,75 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Section 2 */}
-      <div className="container-fluid section-2 mt-5">
-        <h2 className="mb-4">Check IMEI of your phone</h2>
-        <div className="row justify-content-around gy-4 mt-5">
-          <div className="col-md-4">
-            <div className="card d-flex align-items-center">
-              <Image
-                src="/images/imei-card-1.svg"
-                alt=""
-                className="card-img"
-                width={120}
-                height={120}
-              />
-              <span>
-                1. Dial <span className="bold">*#06#</span> to see your device
-                IMEI
-              </span>
-            </div>
-          </div>
-
-          <div className="col-md-4">
-            <div className="card d-flex align-items-center">
-              <Image
-                src="/images/imei-card-2.svg"
-                alt=""
-                className="card-img"
-                width={120}
-                height={120}
-              />
-              <span>
-                2. <span className="bold">Enter IMEI</span> in the field above
-                and click <span className="bold">Check IMEI</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="col-md-4">
-            <div className="card d-flex align-items-center">
-              <Image
-                src="/images/imei-card-3.svg"
-                alt=""
-                className="card-img"
-                width={120}
-                height={120}
-              />
-              <span>
-                3. Get information about{" "}
-                <span className="bold">your device</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="text mt-5">
-          <p>
-            The <span className="bold">IMEI.info</span> is created based on the
-            largest <span className="bold">TAC database</span> in the world.{" "}
-            <span className="bold">Check IMEI</span> feature is one of the most
-            useful tools in the GSM industry. We add new device information and
-            specifications every day...
-          </p>
-        </div>
-      </div>
-
-      {/* Section 3 */}
-      <div className="container-fluid section-3 mt-5">
-        <h2 className="mb-4">Our Services</h2>
-        <div className="row">
-          <div className="col-md-4">{/* Add services here */}</div>
-        </div>
-      </div>
-
-      {/* Section 4 */}
-      <div className="container-fluid section-4 mt-5">
-        <h2 className="mb-4">Popular News</h2>
-        <div className="row justify-content-around gy-4 mt-5">
-          {/* Example News Card */}
-          <div className="col-md-4 d-flex justify-content-center">
-            {/* <div className="news-card text-center d-flex flex-column align-items-center">
-              <div className="img-part">
-                <Image
-                  src="/images/imei-news-1.webp"
-                  alt=""
-                  className="circle"
-                  width={200}
-                  height={200}
-                />
+      {/* Popular Devices Section */}
+      <div className="container-fluid popular-devices-section mt-5">
+        <h2 className="mb-5 text-center">Popular Devices</h2>
+        <div className="row justify-content-center gy-4">
+          <div className="col-6 col-md-3">
+            <div className="device-card">
+              <div className="device-image">
+                <i className="fas fa-mobile-screen-button"></i>
               </div>
-              <div className="content">
-                <div className="text text-start">
-                  <h3 className="mt-5">
-                    What is EID? Exploring the World of eSIMs
-                  </h3>
-                  <p className="mt-4">
-                    Forget fumbling with tiny SIM cards! eSIMs are here...
-                  </p>
-                </div>
-                <div className="p-3 text-center">
-                  <a
-                    href="#"
-                    className="btn btn-blue d-inline-flex align-items-center justify-content-center gap-2"
-                  >
-                    <i className="fas fa-newspaper fa-lg text-light"></i>
-                    <span>Read More</span>
-                  </a>
-                </div>
-              </div>
-            </div> */}
+              <div className="device-brand">Apple</div>
+              <h3 className="device-name">iPhone 15 Pro</h3>
+              <p className="device-specs">
+                6.1&quot; OLED &bull; A17 Pro &bull; 48MP &bull; 8GB RAM
+              </p>
+            </div>
           </div>
-
-          {/* Repeat other news cards... */}
+          <div className="col-6 col-md-3">
+            <div className="device-card">
+              <div className="device-image">
+                <i className="fas fa-mobile-screen-button"></i>
+              </div>
+              <div className="device-brand">Samsung</div>
+              <h3 className="device-name">Samsung Galaxy S24</h3>
+              <p className="device-specs">
+                6.2&quot; AMOLED &bull; Snapdragon 8 Gen 3 &bull; 50MP
+              </p>
+            </div>
+          </div>
+          <div className="col-6 col-md-3">
+            <div className="device-card">
+              <div className="device-image">
+                <i className="fas fa-mobile-screen-button"></i>
+              </div>
+              <div className="device-brand">Google</div>
+              <h3 className="device-name">Google Pixel 9</h3>
+              <p className="device-specs">
+                6.3&quot; OLED &bull; Tensor G4 &bull; 50MP &bull; 12GB RAM
+              </p>
+            </div>
+          </div>
+          <div className="col-6 col-md-3">
+            <div className="device-card">
+              <div className="device-image">
+                <i className="fas fa-mobile-screen-button"></i>
+              </div>
+              <div className="device-brand">Xiaomi</div>
+              <h3 className="device-name">Xiaomi 14</h3>
+              <p className="device-specs">
+                6.36&quot; AMOLED &bull; Snapdragon 8 Gen 3 &bull; 50MP
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Section 5 */}
-      <div className="container-fluid section-5 mt-5">
-        <h2 className="mb-5">What is IMEI number?</h2>
-        <div className="text mt-5">
-          <p>
-            The IMEI number (International Mobile Equipment Identity) is a
-            unique 15-digit code that identifies the device...
+      {/* CTA Section */}
+      <div className="container-fluid cta-section mt-5">
+        <div className="cta-card text-center mx-auto">
+          <h2 className="cta-title">Know More About Your Device</h2>
+          <p className="cta-text">
+            Get instant access to comprehensive device information with a
+            simple IMEI lookup.
           </p>
-        </div>
-
-        <h2 className="mb-4 mt-5">
-          Free IMEI check for any device on any network!
-        </h2>
-        <div className="text mt-5">
-          <p>
-            How to use IMEI check function? The IMEI.info is the best answer...
-          </p>
+          <a href="#imeiForm" className="btn cta-btn">
+            Check IMEI <i className="fas fa-arrow-right ms-2"></i>
+          </a>
         </div>
       </div>
+
     </div>
   );
 }
