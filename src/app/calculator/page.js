@@ -1,5 +1,5 @@
 import ImeiGeneratorCalculator from "../components/ImeiGeneratorCalculator";
 
-export default function ImeiGeneratorPage() {
+export default function CalculatorPage() {
   return <ImeiGeneratorCalculator />;
 }

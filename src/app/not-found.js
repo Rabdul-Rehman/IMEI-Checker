@@ -10,7 +10,11 @@ export default function NotFound() {
         </div>
 
         <div className="not-found-code" aria-hidden="true">
-          <span>404</span>
+          <span>40</span>
+          <span className="not-found-code-dash">-</span>
+          <span>404040</span>
+          <span className="not-found-code-dash">-</span>
+          <span>4</span>
         </div>
 
         <h1 className="not-found-title">This device isn&apos;t in our records</h1>
