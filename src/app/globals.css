@@ -53,16 +53,6 @@ html, body {
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  animation: hero-bg-rotate 60s linear infinite;
-}
-
-@keyframes hero-bg-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .section-content {
