@@ -744,7 +744,7 @@ html, body {
 .imei-gen-input {
   width: 100%;
   background-color: #41474a;
-  border: 1px solid #0c89e2;
+  border: 1px solid  #41474a;
   border-radius: 10px;
   color: #fff;
   font-size: 15px;
