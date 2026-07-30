@@ -62,6 +62,34 @@ export default function ImeiGeneratorCalculator() {
     setCalcResult(digits + checkDigit);
   };
 
+  const luhnSteps = calcResult
+    ? (() => {
+        const digits = calcResult.slice(0, 14);
+        const checkDigit = calcResult.slice(14);
+        const doubled = [];
+        for (let i = 0; i < digits.length; i++) {
+          let d = parseInt(digits[digits.length - 1 - i], 10);
+          if (i % 2 === 0) {
+            d *= 2;
+            if (d > 9) d -= 9;
+          }
+          doubled.unshift(d);
+        }
+        const original = digits
+          .split("")
+          .map((d, i) => (i % 2 === 0 ? `${d}x2` : `${d}x1`))
+          .join(", ");
+        const sum = doubled.reduce((a, b) => a + b, 0);
+        return {
+          doubledLine: `(${original}) = (${doubled.join(", ")})`,
+          sumLine: `Sum of digits = ${sum}`,
+          checkDigit,
+          first8: digits.slice(0, 8),
+          next6: digits.slice(8),
+        };
+      })()
+    : null;
+
   return (
     <div className="container-fluid imei-gen-page">
       <h1 className="imei-gen-title">IMEI Generator &amp; Calculator</h1>
@@ -136,6 +164,75 @@ export default function ImeiGeneratorCalculator() {
           </div>
         )}
       </div>
+
+      {/* Step-by-step Luhn explainer */}
+      <h2 className="imei-gen-section-title">
+        The check digit is validated in three steps:
+      </h2>
+      <div className="row gy-3 imei-steps-row">
+        <div className="col-md-4">
+          <div className="imei-step-card">
+            <div className="imei-step-title">Step 1</div>
+            <div className="imei-step-icon">
+              <i className="fas fa-clone"></i>
+            </div>
+            <div className="imei-step-tag">DOUBLE DIGITS</div>
+            <p className="imei-step-text">
+              Starting from the right, double a digit every two digits (e.g.,
+              5 → 10).
+            </p>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="imei-step-card imei-step-card-active">
+            <div className="imei-step-title">Step 2</div>
+            <div className="imei-step-icon">
+              <i className="fas fa-calculator"></i>
+            </div>
+            <div className="imei-step-tag">SUM THE DIGITS</div>
+            <p className="imei-step-text">
+              Sum the digits (e.g., 10 → 1+0). Check if the sum is divisible
+              by 10.
+            </p>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="imei-step-card">
+            <div className="imei-step-title">Step 3</div>
+            <div className="imei-step-icon">
+              <i className="fas fa-hexagon"></i>
+            </div>
+            <div className="imei-step-tag">CHOOSE THE DIGIT</div>
+            <p className="imei-step-text">
+              Conversely, one can calculate the IMEI by choosing the check
+              digit that would give a sum divisible by 10.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {luhnSteps ? (
+        <div className="imei-steps-summary">
+          <p>{luhnSteps.doubledLine}</p>
+          <p>{luhnSteps.sumLine}</p>
+          <p>
+            Luhn Digit : <strong>{luhnSteps.checkDigit}</strong>
+          </p>
+          <p>
+            IMEI:{" "}
+            <strong>
+              {luhnSteps.first8}-{luhnSteps.next6}-{luhnSteps.checkDigit}
+            </strong>
+          </p>
+        </div>
+      ) : (
+        <div className="imei-steps-summary imei-steps-placeholder">
+          <p>
+            Use the calculator above with a 14-digit IMEI to see this
+            worked example.
+          </p>
+        </div>
+      )}
 
       {/* Educational use warning */}
       <div className="imei-gen-warning">

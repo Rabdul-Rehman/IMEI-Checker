@@ -713,7 +713,7 @@ html, body {
 }
 
 .imei-gen-card {
-  background-color: #12141a;
+  background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   padding: 30px;
@@ -859,7 +859,7 @@ html, body {
 }
 
 .imei-gen-info-card {
-  background-color: #12141a;
+  background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 22px;
@@ -882,6 +882,78 @@ html, body {
 .imei-gen-info-sub {
   color: #9aa0a8;
   font-size: 13px;
+}
+
+.imei-steps-row {
+  margin-bottom: 30px;
+}
+
+.imei-step-card {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 26px 20px;
+  text-align: center;
+  height: 100%;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.imei-step-card-active {
+  border-color: #4ea8f5;
+  background-color: rgba(78, 168, 245, 0.05);
+}
+
+.imei-step-title {
+  color: #4ea8f5;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.imei-step-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border: 1px solid #4ea8f5;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4ea8f5;
+  font-size: 22px;
+}
+
+.imei-step-tag {
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.imei-step-text {
+  color: #9aa0a8;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+.imei-steps-summary {
+  text-align: center;
+  color: #c7cbd1;
+  font-size: 15px;
+  line-height: 2;
+  margin-bottom: 40px;
+}
+
+.imei-steps-summary strong {
+  color: #fff;
+  font-family: monospace;
+}
+
+.imei-steps-placeholder {
+  color: #6b7178;
+  font-size: 14px;
 }
 
 /* ===== Phone Database Listing Page ===== */
