@@ -31,7 +31,7 @@ html, body {
   /* height: 420px;  <-- remove this line */
   overflow: hidden; /* optional — remove if it's hiding content */
   margin-top: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 }
 
 .container-fluid{
