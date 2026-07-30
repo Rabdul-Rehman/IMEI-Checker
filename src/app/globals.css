@@ -53,6 +53,16 @@ html, body {
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  animation: hero-bg-rotate 60s linear infinite;
+}
+
+@keyframes hero-bg-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .section-content {
@@ -130,6 +140,27 @@ html, body {
 
 .question-btn:hover {
   background-color: #e3f2fd;
+}
+
+.imei-form .btn-primary {
+  background: linear-gradient(90deg, #1d7fe0 0%, #22c1e0 100%);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 26px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.imei-form .btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.imei-form .btn-primary:focus,
+.imei-form .btn-primary:active {
+  box-shadow: none !important;
 }
 
 .imei-btn {
@@ -936,6 +967,11 @@ html, body {
   justify-content: center;
   color: #4ea8f5;
   font-size: 22px;
+  transition: transform 1.2s ease;
+}
+
+.imei-step-card:hover .imei-step-icon {
+  transform: rotate(360deg);
 }
 
 .imei-step-tag {
