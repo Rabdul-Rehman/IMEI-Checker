@@ -536,7 +536,91 @@ html, body {
   color: #4ea8f5;
 }
 
-/* ===== Phone Detail Page ===== */
+/* ===== Phone Database Listing Page ===== */
+.phone-db-page {
+  padding: 40px 40px 70px;
+  max-width: 1400px;
+}
+
+.phone-db-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.phone-db-subtitle {
+  color: #4ea8f5;
+  font-size: 15px;
+  margin-bottom: 30px;
+}
+
+.phone-db-search {
+  position: relative;
+  max-width: 700px;
+  margin-bottom: 20px;
+}
+
+.phone-db-search-input {
+  width: 100%;
+  background-color: #12141a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  padding: 14px 46px 14px 18px;
+}
+
+.phone-db-search-input::placeholder {
+  color: #7c828d;
+}
+
+.phone-db-search-input:focus {
+  outline: none;
+  border-color: #4ea8f5;
+}
+
+.phone-db-search-icon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7c828d;
+}
+
+.phone-db-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.phone-db-pill {
+  background-color: #12141a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c7cbd1;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.phone-db-pill:hover {
+  border-color: #4ea8f5;
+}
+
+.phone-db-pill.active {
+  background: linear-gradient(90deg, #1d7fe0 0%, #22c1e0 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.phone-db-empty {
+  color: #9aa0a8;
+  padding: 20px 0;
+}
 .phone-detail-page {
   background-color: transparent;
   padding: 30px 40px 60px;

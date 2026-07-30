@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         />
       </head>
-      <body className={oxanium.className}>
+      <body className={oxanium.className} suppressHydrationWarning>
         {/* Header */}
         <header>
           <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body sticky-top" data-bs-theme="dark">
