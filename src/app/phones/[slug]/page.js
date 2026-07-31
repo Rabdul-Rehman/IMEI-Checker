@@ -21,7 +21,6 @@ export default function PhoneDetailPage({ params }) {
         <Link href="/">Home</Link> / <Link href="/">Phone Database</Link> /{" "}
         <span className="active">{device.name}</span>
       </div>
-
       {/* Top section: image + info */}
       <div className="phone-detail-top">
         <div className="phone-detail-image">
