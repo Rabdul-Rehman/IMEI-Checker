@@ -1,254 +1,211 @@
-"use client"; // only if you're in App Router (app/page.js)
+"use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { popularDevices } from "./data/devices";
 import DevicePhoto from "./components/DevicePhoto";
-import { useEffect, useRef, useState } from "react";
-import styles from "./globals.css";
 
-// Reusable count-up number component (runs once, on scroll into view)
-function CountUp({ end, duration = 1800, suffix = "", decimals = 0 }) {
-  const [value, setValue] = useState(0);
-  const ref = useRef(null);
-  const started = useRef(false);
+const services = [
+  { icon: "fa-shield-halved", title: "Blacklist check", text: "Check whether a device may be reported lost, stolen or blocked.", href: "#imei-check" },
+  { icon: "fa-sim-card", title: "Carrier information", text: "Identify network and carrier details available for a device.", href: "/carriers" },
+  { icon: "fa-mobile-screen-button", title: "Device details", text: "Explore model, release, display, chipset, battery and camera data.", href: "/phones" },
+];
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
+const news = [
+  { icon: "fa-fingerprint", title: "What is an IMEI number?", text: "Learn what the 15-digit International Mobile Equipment Identity means and how it identifies a mobile device." },
+  { icon: "fa-cart-shopping", title: "Check IMEI before buying a used phone", text: "A quick IMEI check can help you make a more informed decision before purchasing a second-hand device." },
+  { icon: "fa-sim-card", title: "eSIM, EID and IMEI explained", text: "Understand the identifiers used by modern phones and how they relate to mobile connectivity." },
+];
 
-    const runCount = () => {
-      if (started.current) return;
-      started.current = true;
-      const startTime = performance.now();
-      const step = (now) => {
-        const progress = Math.min((now - startTime) / duration, 1);
-        // easeOutCubic for a smooth deceleration
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = eased * end;
-        setValue(current);
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          setValue(end);
-        }
-      };
-      requestAnimationFrame(step);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            runCount();
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [end, duration]);
-
-  const display =
-    decimals > 0
-      ? value.toFixed(decimals)
-      : Math.floor(value).toLocaleString();
-
-  return (
-    <span ref={ref}>
-      {display}
-      {suffix}
-    </span>
-  );
+function Count({ value }) {
+  return <span>{value.toLocaleString()}</span>;
 }
 
-// Put your real device photos in /public/images/devices/ using these filenames.
-// If a file is missing, the icon shows automatically as a fallback.
 export default function Home() {
-  useEffect(() => {
-    const form = document.getElementById("imeiForm");
-    if (form) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const imei = document.getElementById("imeiInput").value.trim();
-        if (!/^\d{15}$/.test(imei)) {
-          alert("Please enter a valid 15-digit IMEI number.");
-          return;
-        }
-        // redirect to results page in Next.js
-        window.location.href = `/results/${imei}`;
-      });
+  const [imei, setImei] = useState("");
+  const [error, setError] = useState("");
+
+  function checkImei(e) {
+    e.preventDefault();
+    const value = imei.replace(/\D/g, "");
+    if (value.length !== 15) {
+      setError("Enter a valid 15-digit IMEI number.");
+      return;
     }
-  }, []);
+    setError("");
+    window.location.href = `/results/${value}`;
+  }
 
   return (
-    <div className="container-fluid full-container">
-      {/* Section 1 */}
-      <div className="container-fluid section-1">
-        <Image
-          src="/images/imeinet.svg"
-          alt="IMEI Logo"
-          className="img-header"
-          width={300}
-          height={100}
-          priority  
-        />
-        <div className="section-content">
-          <h1>IMEI Check Service</h1>
-          <div className="container my-4">
-            <form
-              className="d-flex align-items-center imei-form"
-              id="imeiForm"
-            >
-              <input
-                type="text"
-                className="imei-input"
-                placeholder="Enter IMEI number: 123456789012347"
-                maxLength="15"
-                name="inputNumber"
-                id="imeiInput"
-              />
-              <a
-                href="#"
-                className="btn btn-circle question-btn ms-2"
-                title="What is IMEI?"
-              >
-                ?
-              </a>
-              <button type="submit" className="btn btn-primary ms-2">
-                Check IMEI
+    <div className="home-page">
+      <section className="hero-modern">
+        <div className="hero-glow hero-glow-one" />
+        <div className="hero-glow hero-glow-two" />
+
+        <div className="container-fluid hero-inner">
+          <div className="hero-copy">
+            <div className="hero-kicker"><span /> DEVICE INTELLIGENCE</div>
+            <h1>Check your phone.<br /><strong>Know your device.</strong></h1>
+            <p className="hero-lead">
+              Get fast access to IMEI information, device specifications and
+              network details with one simple lookup.
+            </p>
+
+            <form id="imei-check" className="imei-check-card" onSubmit={checkImei}>
+              <div className="imei-input-wrap">
+                <i className="fas fa-mobile-screen-button" />
+                <input
+                  value={imei}
+                  onChange={(e) => setImei(e.target.value.replace(/\D/g, "").slice(0, 15))}
+                  inputMode="numeric"
+                  maxLength={15}
+                  placeholder="Enter 15-digit IMEI number"
+                  aria-label="IMEI number"
+                />
+                <span className="imei-count">{imei.length}/15</span>
+              </div>
+              <button type="submit" className="primary-action">
+                Check IMEI <i className="fas fa-arrow-right" />
               </button>
             </form>
-          </div>
-          <div className="mx-auto mt-3 paragraph">
-            <p className="text-center">
-              Every mobile phone, GSM modem or device with a built-in phone /
-              modem has a unique 15 digit IMEI number. Based on this number, you
-              can check some information about the device, eg brand or model.{" "}
-              <span className="bold">Enter the IMEI number above.</span>
-            </p>
-          </div>
-        </div>
-      </div>
+            {error && <p className="form-error"><i className="fas fa-circle-exclamation" /> {error}</p>}
 
-      {/* Stats Section */}
-      <div className="container-fluid stats-section mt-5">
-        <div className="row justify-content-center gy-4">
-          <div className="col-6 col-md-3">
-            <div className="stat-card">
-              <div className="stat-number">
-                <CountUp end={1250000} suffix="+" />
-              </div>
-              <div className="stat-label">IMEI Checks</div>
+            <div className="hero-trust">
+              <span><i className="fas fa-check" /> Free lookup</span>
+              <span><i className="fas fa-bolt" /> Fast results</span>
+              <span><i className="fas fa-lock" /> Privacy focused</span>
             </div>
           </div>
-          <div className="col-6 col-md-3">
-            <div className="stat-card">
-              <div className="stat-number">
-                <CountUp end={15000} suffix="+" />
-              </div>
-              <div className="stat-label">Devices</div>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="stat-card">
-              <div className="stat-number">
-                <CountUp end={99.9} suffix="%" decimals={1} />
-              </div>
-              <div className="stat-label">Lookup Accuracy</div>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="stat-card">
-              <div className="stat-number">24/7</div>
-              <div className="stat-label">Availability</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* How It Works Section */}
-      <div className="container-fluid how-it-works-section mt-5">
-        <h2 className="mb-5 text-center">How It Works</h2>
-        <div className="row justify-content-around gy-4">
-          <div className="col-md-4">
-            <div className="how-it-works-card text-center">
-              <div className="hiw-icon">
-                <i className="fas fa-keyboard"></i>
-              </div>
-              <div className="hiw-step">01</div>
-              <h3 className="hiw-title">Enter IMEI</h3>
-              <p className="hiw-text">
-                Type or paste your 15-digit IMEI number into the search field.
-              </p>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="how-it-works-card text-center">
-              <div className="hiw-icon">
-                <i className="fas fa-search"></i>
-              </div>
-              <div className="hiw-step">02</div>
-              <h3 className="hiw-title">Identify Device</h3>
-              <p className="hiw-text">
-                Our system decodes the TAC and matches it against our
-                database.
-              </p>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="how-it-works-card text-center">
-              <div className="hiw-icon">
-                <i className="fas fa-file-alt"></i>
-              </div>
-              <div className="hiw-step">03</div>
-              <h3 className="hiw-title">Get Details</h3>
-              <p className="hiw-text">
-                Get full device specifications, network info, and
-                verification status.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Popular Devices Section */}
-      <div className="container-fluid popular-devices-section mt-5">
-        <h2 className="mb-5 text-center">Popular Devices</h2>
-        <div className="row justify-content-center gy-4">
-          {popularDevices.map((device) => (
-            <div className="col-6 col-md-3" key={device.name}>
-              <Link href={`/phones/${device.slug}`} className="device-card-link">
-                <div className="device-card">
-                  <div className="device-photo">
-                    <DevicePhoto src={device.image} alt={device.name} />
-                  </div>
-                  <div className="device-brand">{device.brand}</div>
-                  <h3 className="device-name">{device.name}</h3>
-                  <p className="device-specs">{device.specs}</p>
+          <div className="hero-visual">
+            <div className="device-orbit orbit-one" />
+            <div className="device-orbit orbit-two" />
+            <div className="hero-phone-card">
+              <div className="phone-top-speaker" />
+              <div className="phone-screen">
+                <div className="phone-status"><span>9:41</span><span><i className="fas fa-signal" /> <i className="fas fa-battery-three-quarters" /></span></div>
+                <div className="phone-screen-label">DEVICE CHECK</div>
+                <div className="phone-screen-icon"><i className="fas fa-mobile-screen-button" /></div>
+                <div className="phone-screen-title">IMEI verified</div>
+                <div className="phone-screen-sub">Device information ready</div>
+                <div className="phone-mini-list">
+                  <span><b>Model</b><em>iPhone 17 Pro</em></span>
+                  <span><b>Status</b><em className="success">Available</em></span>
+                  <span><b>Network</b><em>5G / LTE</em></span>
                 </div>
-              </Link>
+              </div>
+            </div>
+            <div className="floating-info floating-info-top"><i className="fas fa-shield-halved" /><div><b>IMEI Check</b><small>Device identity</small></div></div>
+            <div className="floating-info floating-info-bottom"><i className="fas fa-database" /><div><b>Device database</b><small>Specifications &amp; models</small></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="stats-strip">
+        <div className="container-fluid stats-grid">
+          <div><strong><Count value={99094} /></strong><span>Checks today</span></div>
+          <div><strong><Count value={11320145} /></strong><span>Checks this month</span></div>
+          <div><strong><Count value={464113539} /></strong><span>Total checks</span></div>
+          <div><strong><Count value={303159} /></strong><span>TAC records</span></div>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="section-heading">
+          <span className="section-eyebrow">HOW IT WORKS</span>
+          <h2>Check an IMEI in three simple steps</h2>
+          <p>No complicated setup. Find the IMEI, enter it above and explore the available device information.</p>
+        </div>
+        <div className="steps-grid">
+          {[
+            ["01", "fa-phone-volume", "Find your IMEI", "Dial *#06# on your phone to display its IMEI number."],
+            ["02", "fa-keyboard", "Enter the number", "Enter the 15 digits into the secure checker above."],
+            ["03", "fa-circle-check", "Explore results", "Review the device identity and available information."],
+          ].map(([number, icon, title, text]) => (
+            <div className="modern-step-card" key={number}>
+              <span className="step-number">{number}</span>
+              <div className="step-icon"><i className={`fas ${icon}`} /></div>
+              <h3>{title}</h3><p>{text}</p>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="container-fluid cta-section mt-5">
-        <div className="cta-card text-center mx-auto">
-          <h2 className="cta-title">Know More About Your Device</h2>
-          <p className="cta-text">
-            Get instant access to comprehensive device information with a
-            simple IMEI lookup.
-          </p>
-          <a href="#imeiForm" className="btn cta-btn">
-            Check IMEI <i className="fas fa-arrow-right ms-2"></i>
-          </a>
+      <section className="content-section service-section">
+        <div className="section-heading">
+          <span className="section-eyebrow">EXPLORE IMEI.INFO</span>
+          <h2>Tools built around your device</h2>
+          <p>Move beyond a basic number lookup and explore the information that matters.</p>
         </div>
-      </div>
+        <div className="services-grid">
+          {services.map((service) => (
+            <Link href={service.href} className="service-modern-card" key={service.title}>
+              <div className="service-icon"><i className={`fas ${service.icon}`} /></div>
+              <div><h3>{service.title}</h3><p>{service.text}</p><span>Explore <i className="fas fa-arrow-right" /></span></div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
+      <section className="content-section devices-section">
+        <div className="section-heading split-heading">
+          <div><span className="section-eyebrow">PHONE DATABASE</span><h2>Popular devices</h2><p>Browse the devices currently represented in this project&apos;s catalog.</p></div>
+          <Link href="/phones" className="outline-action">View phone database <i className="fas fa-arrow-right" /></Link>
+        </div>
+        <div className="device-grid-modern">
+          {popularDevices.map((device) => (
+            <Link href={`/phones/${device.slug}`} key={device.slug} className="device-modern-card">
+              <div className="device-modern-photo"><DevicePhoto src={device.image} alt={device.name} /></div>
+              <span className="device-modern-brand">{device.brand}</span>
+              <h3>{device.name}</h3>
+              <p>{device.specs}</p>
+              <span className="device-modern-link">View specifications <i className="fas fa-arrow-right" /></span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-section info-band">
+        <div className="info-band-copy">
+          <span className="section-eyebrow">WHY IMEI MATTERS</span>
+          <h2>A unique identity for every mobile device.</h2>
+          <p>
+            An IMEI is a unique identifier used by mobile networks to distinguish
+            devices. The first eight digits form the TAC, followed by the serial
+            number and check digit.
+          </p>
+          <Link href="/calculator" className="outline-action">Learn with the IMEI calculator <i className="fas fa-arrow-right" /></Link>
+        </div>
+        <div className="imei-breakdown">
+          <div><span>TAC</span><b>8 digits</b><small>Type Allocation Code</small></div>
+          <div><span>SNR</span><b>6 digits</b><small>Serial Number</small></div>
+          <div><span>CD</span><b>1 digit</b><small>Check Digit</small></div>
+        </div>
+      </section>
+
+      <section className="content-section news-section">
+        <div className="section-heading split-heading">
+          <div><span className="section-eyebrow">GUIDES &amp; INSIGHTS</span><h2>Useful IMEI knowledge</h2></div>
+        </div>
+        <div className="news-grid-modern">
+          {news.map((item) => (
+            <article className="news-modern-card" key={item.title}>
+              <div className="news-icon"><i className={`fas ${item.icon}`} /></div>
+              <h3>{item.title}</h3><p>{item.text}</p>
+              <span>Read guide <i className="fas fa-arrow-right" /></span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="final-cta">
+        <div>
+          <span className="section-eyebrow">READY TO CHECK?</span>
+          <h2>Start with your IMEI number.</h2>
+          <p>Use the checker above or explore the device database.</p>
+        </div>
+        <Link href="#imei-check" className="primary-action">Check IMEI <i className="fas fa-arrow-up" /></Link>
+      </section>
     </div>
   );
 }

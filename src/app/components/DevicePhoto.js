@@ -1,5 +1,5 @@
 "use client";
-
+// import DevicePhoto from "@/components/DevicePhoto";
 export default function DevicePhoto({ src, alt, iconClassName }) {
   return (
     <>

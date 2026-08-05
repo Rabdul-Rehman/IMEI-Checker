@@ -68,38 +68,14 @@ export default function RootLayout({ children }) {
         {/* Footer */}
         <footer className="site-footer">
           <div className="container-fluid footer">
-            <div className="row gy-4">
-              <div className="col-md-3">
-                <div className="footer-brand">
-                  <i className="fas fa-mobile-alt"></i> IMEI CHECK
-                </div>
-                <p className="footer-desc">
-                  The most trusted IMEI lookup and mobile device information
-                  platform.
-                </p>
-              </div>
-              <div className="col-md-3">
-                <h6 className="footer-heading">Product</h6>
-                <ul className="footer-links">
-                  <li><Link href="/imei-check">IMEI Checker</Link></li>
-                  <li><Link href="/phones">Phone Database</Link></li>
-                  <li><Link href="/imei-generator">IMEI Generator</Link></li>
-                </ul>
-              </div>
-              <div className="col-md-3">
-                <h6 className="footer-heading">Company</h6>
-                <ul className="footer-links">
-                  <li><Link href="/faq">FAQ</Link></li>
-                  <li><Link href="/contact">Contact</Link></li>
-                </ul>
-              </div>
-              <div className="col-md-3">
-                <h6 className="footer-heading">Legal</h6>
-                <ul className="footer-links">
-                  <li><Link href="/privacy-policy">Privacy Policy</Link></li>
-                  <li><Link href="/terms-of-service">Terms of Service</Link></li>
-                </ul>
-              </div>
+            <ul className="footer-links-flat">
+              <li><Link href="/">IMEI Check</Link></li>
+              <li><Link href="/carriers">Carrier Lookup</Link></li>
+              <li><Link href="/imei-generator">IMEI Generator</Link></li>
+            </ul>
+            <div className="footer-bottom-row">
+              <span>© IMEI.INFO 2026</span>
+              <span>LANGUAGE: EN</span>
             </div>
           </div>
         </footer>

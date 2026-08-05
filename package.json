@@ -4,14 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "api": "node api/server.js",
+    "api:key": "node api/create-api-key.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.111.0",
     "bootstrap": "^5.3.8",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.11.2",
     "next": "15.5.2",
-    "pg": "^8.16.3",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

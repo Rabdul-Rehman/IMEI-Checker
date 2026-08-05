@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const MANUFACTURER_TACS = {
   Apple: ["35328910", "35284910", "35325611"],
@@ -9,10 +9,8 @@ const MANUFACTURER_TACS = {
   Xiaomi: ["86234511", "86235911"],
 };
 
-// Luhn check digit calculation
 function calculateLuhnCheckDigit(first14Digits) {
   let sum = 0;
-  // Process digits right to left; double every 2nd digit (odd positions from right, 0-indexed)
   for (let i = 0; i < first14Digits.length; i++) {
     let digit = parseInt(first14Digits[first14Digits.length - 1 - i], 10);
     if (i % 2 === 0) {
@@ -21,256 +19,123 @@ function calculateLuhnCheckDigit(first14Digits) {
     }
     sum += digit;
   }
-  const checkDigit = (10 - (sum % 10)) % 10;
-  return checkDigit;
+  return (10 - (sum % 10)) % 10;
 }
 
 function randomDigits(length) {
   let result = "";
-  for (let i = 0; i < length; i++) {
-    result += Math.floor(Math.random() * 10);
-  }
+  for (let i = 0; i < length; i++) result += Math.floor(Math.random() * 10);
   return result;
+}
+
+function copyText(value) {
+  if (typeof navigator !== "undefined" && navigator.clipboard) navigator.clipboard.writeText(value);
 }
 
 export default function ImeiGeneratorCalculator() {
   const [manufacturer, setManufacturer] = useState("Apple");
   const [generatedImei, setGeneratedImei] = useState("");
-
+  const [copied, setCopied] = useState("");
   const [calcInput, setCalcInput] = useState("");
   const [calcResult, setCalcResult] = useState(null);
   const [calcError, setCalcError] = useState("");
 
+  const liveCheckDigit = useMemo(() => calcInput.length === 14 ? calculateLuhnCheckDigit(calcInput) : null, [calcInput]);
+
   const handleGenerate = () => {
     const tacOptions = MANUFACTURER_TACS[manufacturer] || ["35000000"];
     const tac = tacOptions[Math.floor(Math.random() * tacOptions.length)];
-    const serial = randomDigits(6);
-    const first14 = tac + serial;
-    const checkDigit = calculateLuhnCheckDigit(first14);
-    setGeneratedImei(first14 + checkDigit);
+    const first14 = tac + randomDigits(6);
+    setGeneratedImei(first14 + calculateLuhnCheckDigit(first14));
+    setCopied("");
   };
 
   const handleCalculate = () => {
     const digits = calcInput.trim();
     if (!/^\d{14}$/.test(digits)) {
-      setCalcError("Please enter exactly 14 digits.");
+      setCalcError("Enter exactly 14 digits to calculate the final check digit.");
       setCalcResult(null);
       return;
     }
     setCalcError("");
-    const checkDigit = calculateLuhnCheckDigit(digits);
-    setCalcResult(digits + checkDigit);
+    setCalcResult(digits + calculateLuhnCheckDigit(digits));
+    setCopied("");
   };
 
-  const luhnSteps = calcResult
-    ? (() => {
-        const digits = calcResult.slice(0, 14);
-        const checkDigit = calcResult.slice(14);
-        const doubled = [];
-        for (let i = 0; i < digits.length; i++) {
-          let d = parseInt(digits[digits.length - 1 - i], 10);
-          if (i % 2 === 0) {
-            d *= 2;
-            if (d > 9) d -= 9;
-          }
-          doubled.unshift(d);
-        }
-        const original = digits
-          .split("")
-          .map((d, i) => (i % 2 === 0 ? `${d}x2` : `${d}x1`))
-          .join(", ");
-        const sum = doubled.reduce((a, b) => a + b, 0);
-        return {
-          doubledLine: `(${original}) = (${doubled.join(", ")})`,
-          sumLine: `Sum of digits = ${sum}`,
-          checkDigit,
-          first8: digits.slice(0, 8),
-          next6: digits.slice(8),
-        };
-      })()
-    : null;
+  const luhnSteps = calcResult ? (() => {
+    const digits = calcResult.slice(0, 14);
+    const checkDigit = calcResult.slice(14);
+    const doubled = [];
+    for (let i = 0; i < digits.length; i++) {
+      let d = parseInt(digits[digits.length - 1 - i], 10);
+      if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
+      doubled.unshift(d);
+    }
+    const sum = doubled.reduce((a, b) => a + b, 0);
+    return { doubled, sum, checkDigit, first8: digits.slice(0, 8), next6: digits.slice(8) };
+  })() : null;
+
+  const handleCopy = (value, label) => {
+    copyText(value);
+    setCopied(label);
+    window.setTimeout(() => setCopied(""), 1300);
+  };
 
   return (
-    <div className="container-fluid imei-gen-page">
-      <h1 className="imei-gen-title">IMEI Generator &amp; Calculator</h1>
-      <p className="imei-gen-subtitle">
-        Generate test IMEIs and calculate check digits using the Luhn
-        algorithm.
-      </p>
-
-      {/* Generator card */}
-      <div className="imei-gen-card">
-        <h2 className="imei-gen-card-title">Generate Test IMEI</h2>
-
-        <label className="imei-gen-label">Manufacturer</label>
-        <select
-          className="imei-gen-select"
-          value={manufacturer}
-          onChange={(e) => setManufacturer(e.target.value)}
-        >
-          {Object.keys(MANUFACTURER_TACS).map((brand) => (
-            <option key={brand} value={brand}>
-              {brand}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          className="imei-gen-btn"
-          onClick={handleGenerate}
-        >
-          Generate Test IMEI
-        </button>
-
-        {generatedImei && (
-          <div className="imei-gen-result">
-            Generated IMEI: <span>{generatedImei}</span>
-          </div>
-        )}
+    <div className="modern-page-shell imei-calculator-page">
+      <div className="modern-page-head">
+        <span className="section-eyebrow">IMEI TOOLKIT</span>
+        <h1>IMEI Calculator &amp; Generator</h1>
+        <p>Calculate the Luhn check digit, generate test values for development, and understand how a 15-digit IMEI is structured.</p>
       </div>
 
-      {/* Calculator card */}
-      <div className="imei-gen-card">
-        <h2 className="imei-gen-card-title">IMEI Calculator</h2>
-        <p className="imei-gen-card-desc">
-          The last number of the IMEI is a check digit. The Check Digit is
-          calculated according to Luhn formula.
-        </p>
-
-        <label className="imei-gen-label">Enter first 14 digits of IMEI</label>
-        <div className="imei-calc-row">
-          <input
-            type="text"
-            maxLength={14}
-            className="imei-gen-input"
-            placeholder="e.g. 35145120840121"
-            value={calcInput}
-            onChange={(e) => setCalcInput(e.target.value.replace(/\D/g, ""))}
-          />
-          <button
-            type="button"
-            className="imei-calc-btn"
-            onClick={handleCalculate}
-          >
-            Calculate
-          </button>
+      <div className="calculator-hero-grid">
+        <div className="tool-card calculator-primary-card">
+          <div className="tool-card-icon"><i className="fas fa-calculator" /></div>
+          <h2>Calculate a check digit</h2>
+          <p>Enter the first 14 digits. The calculator derives the final Luhn check digit and gives you the complete 15-digit value.</p>
+          <label className="tool-label">First 14 digits</label>
+          <div className="calculator-input-row">
+            <input className="tool-input" inputMode="numeric" maxLength={14} value={calcInput} onChange={(e) => { setCalcInput(e.target.value.replace(/\D/g, "").slice(0, 14)); setCalcError(""); }} placeholder="35145120840121" />
+            <span className="calculator-counter">{calcInput.length}/14</span>
+          </div>
+          <div className="calculator-live"><span>Live check digit</span><strong>{liveCheckDigit ?? "—"}</strong></div>
+          <button type="button" className="tool-button" onClick={handleCalculate}><i className="fas fa-wand-magic-sparkles" /> Calculate full IMEI</button>
+          {calcError && <div className="tool-error"><i className="fas fa-circle-exclamation" /> {calcError}</div>}
+          {calcResult && <div className="tool-result tool-result-large"><span>Complete IMEI</span><strong>{calcResult}</strong><button type="button" onClick={() => handleCopy(calcResult, "calc")}>{copied === "calc" ? "Copied" : "Copy"}</button></div>}
         </div>
 
-        {calcError && <div className="imei-gen-error">{calcError}</div>}
-        {calcResult && (
-          <div className="imei-gen-result">
-            Full IMEI: <span>{calcResult}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Step-by-step Luhn explainer */}
-      <h2 className="imei-gen-section-title">
-        The check digit is validated in three steps:
-      </h2>
-      <div className="row gy-3 imei-steps-row">
-        <div className="col-md-4">
-          <div className="imei-step-card">
-            <div className="imei-step-title">Step 1</div>
-            <div className="imei-step-icon">
-              <i className="fas fa-clone"></i>
-            </div>
-            <div className="imei-step-tag">DOUBLE DIGITS</div>
-            <p className="imei-step-text">
-              Starting from the right, double a digit every two digits (e.g.,
-              5 → 10).
-            </p>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="imei-step-card">
-            <div className="imei-step-title">Step 2</div>
-            <div className="imei-step-icon">
-              <i className="fas fa-calculator"></i>
-            </div>
-            <div className="imei-step-tag">SUM THE DIGITS</div>
-            <p className="imei-step-text">
-              Sum the digits (e.g., 10 → 1+0). Check if the sum is divisible
-              by 10.
-            </p>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="imei-step-card">
-            <div className="imei-step-title">Step 3</div>
-            <div className="imei-step-icon">
-              <i className="fas fa-hexagon"></i>
-            </div>
-            <div className="imei-step-tag">CHOOSE THE DIGIT</div>
-            <p className="imei-step-text">
-              Conversely, one can calculate the IMEI by choosing the check
-              digit that would give a sum divisible by 10.
-            </p>
-          </div>
+        <div className="tool-card generator-card">
+          <div className="tool-card-icon"><i className="fas fa-mobile-screen-button" /></div>
+          <h2>Generate a test IMEI</h2>
+          <p>Choose a manufacturer to create a syntactically valid test value using a sample TAC and a calculated check digit.</p>
+          <label className="tool-label">Manufacturer</label>
+          <select className="tool-select" value={manufacturer} onChange={(e) => setManufacturer(e.target.value)}>
+            {Object.keys(MANUFACTURER_TACS).map((brand) => <option key={brand}>{brand}</option>)}
+          </select>
+          <button type="button" className="tool-button" onClick={handleGenerate}><i className="fas fa-shuffle" /> Generate test IMEI</button>
+          {generatedImei && <div className="tool-result tool-result-large"><span>Generated value</span><strong>{generatedImei}</strong><button type="button" onClick={() => handleCopy(generatedImei, "generated")}>{copied === "generated" ? "Copied" : "Copy"}</button></div>}
         </div>
       </div>
 
-      {luhnSteps ? (
-        <div className="imei-steps-summary">
-          <p>{luhnSteps.doubledLine}</p>
-          <p>{luhnSteps.sumLine}</p>
-          <p>
-            Luhn Digit : <strong>{luhnSteps.checkDigit}</strong>
-          </p>
-          <p>
-            IMEI:{" "}
-            <strong>
-              {luhnSteps.first8}-{luhnSteps.next6}-{luhnSteps.checkDigit}
-            </strong>
-          </p>
-        </div>
-      ) : (
-        <div className="imei-steps-summary imei-steps-placeholder">
-          <p>
-            Use the calculator above with a 14-digit IMEI to see this
-            worked example.
-          </p>
-        </div>
-      )}
-
-      {/* Educational use warning */}
-      <div className="imei-gen-warning">
-        <i className="fas fa-triangle-exclamation"></i>
-        <div>
-          <div className="imei-gen-warning-title">Educational Use Only</div>
-          <div className="imei-gen-warning-text">
-            Generated values are for testing and educational use only. Not
-            intended to identify or impersonate real devices.
-          </div>
-        </div>
+      <div className="calculator-explain-grid">
+        <div><span>01</span><h3>TAC</h3><p>The first 8 digits identify the device type allocation.</p></div>
+        <div><span>02</span><h3>Serial number</h3><p>The following 6 digits identify the individual device sequence.</p></div>
+        <div><span>03</span><h3>Check digit</h3><p>The final digit is calculated with the Luhn algorithm.</p></div>
       </div>
 
-      {/* How IMEI Works */}
-      <h2 className="imei-gen-section-title">How IMEI Works</h2>
-      <div className="row gy-3">
-        <div className="col-md-4">
-          <div className="imei-gen-info-card">
-            <div className="imei-gen-info-code">TAC</div>
-            <div className="imei-gen-info-name">Type Allocation Code</div>
-            <div className="imei-gen-info-sub">8 digits</div>
-          </div>
+      <section className="calculator-detail-panel">
+        <div><span className="section-eyebrow">HOW LUHN WORKS</span><h2>Validate the final digit in three steps</h2><p>Starting from the right, every second digit is doubled, digits are reduced when necessary, and the total is used to select a final digit that makes the sum divisible by 10.</p></div>
+        <div className="step-explainer">
+          <div className="step-explainer-card"><span>STEP 01</span><h3>Double alternating digits</h3><p>Work from the right side of the first 14 digits and double every second value.</p></div>
+          <div className="step-explainer-card"><span>STEP 02</span><h3>Sum the result</h3><p>Add the transformed values together and inspect the remainder modulo 10.</p></div>
+          <div className="step-explainer-card"><span>STEP 03</span><h3>Choose the check digit</h3><p>The final digit is the amount needed to reach the next multiple of ten.</p></div>
         </div>
-        <div className="col-md-4">
-          <div className="imei-gen-info-card">
-            <div className="imei-gen-info-code">SNR</div>
-            <div className="imei-gen-info-name">Serial Number</div>
-            <div className="imei-gen-info-sub">6 digits</div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="imei-gen-info-card">
-            <div className="imei-gen-info-code">CD</div>
-            <div className="imei-gen-info-name">Check Digit</div>
-            <div className="imei-gen-info-sub">1 digit</div>
-          </div>
-        </div>
-      </div>
+      </section>
+
+      {luhnSteps ? <div className="imei-steps-summary"><p>Transformed values: <strong>{luhnSteps.doubled.join(", ")}</strong></p><p>Sum: <strong>{luhnSteps.sum}</strong></p><p>Check digit: <strong>{luhnSteps.checkDigit}</strong></p><p>IMEI: <strong>{luhnSteps.first8}-{luhnSteps.next6}-{luhnSteps.checkDigit}</strong></p></div> : <div className="imei-steps-summary imei-steps-placeholder">Calculate an IMEI above to see the worked Luhn result.</div>}
+
+      <div className="warning-modern"><i className="fas fa-triangle-exclamation" /> <span><strong>Educational / development use.</strong> Generated values are test data and are not intended to identify, unlock, clone or impersonate real devices.</span></div>
     </div>
   );
 }
