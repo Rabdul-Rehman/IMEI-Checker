@@ -180,9 +180,9 @@ async function start() {
       =====================================================
       */
 
-      if (request.url.startsWith("/api")) {
+      /*if (request.url.startsWith("/api")) {
         return authenticateApiKey(request, reply);
-      }
+      }*/
 
     });
 

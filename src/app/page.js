@@ -24,18 +24,47 @@ function Count({ value }) {
 export default function Home() {
   const [imei, setImei] = useState("");
   const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
 
-  function checkImei(e) {
+
+  async function checkImei(e) {
     e.preventDefault();
+
     const value = imei.replace(/\D/g, "");
+
     if (value.length !== 15) {
       setError("Enter a valid 15-digit IMEI number.");
       return;
     }
-    setError("");
-    window.location.href = `/results/${value}`;
-  }
 
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/v1/phones/imei/${value}`,
+        { 
+          headers: {
+            Authorization:  `Bearer ${process.env.NEXT_PUBLIC_IMEI_API_KEY}`,
+          },
+        
+        }
+      );
+
+
+      const data = await response.json();
+
+      if (!data.success) {
+        setError(data.error);
+        return;
+      }
+      window.location.href = `/phones/${data.data.slug}`;
+
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong.");
+    }
+  }
   return (
     <div className="home-page">
       <section className="hero-modern">
@@ -68,7 +97,41 @@ export default function Home() {
                 Check IMEI <i className="fas fa-arrow-right" />
               </button>
             </form>
-            {error && <p className="form-error"><i className="fas fa-circle-exclamation" /> {error}</p>}
+            {error && <p className="form-error">
+              <i className="fas fa-circle-exclamation" /> {error}
+              </p>}
+              {result && (
+                  <div
+                    style={{
+                      marginTop: "20px",
+                      padding: "20px",
+                      borderRadius: "12px",
+                      background: "#111827",
+                      color: "#fff",
+                      border: "1px solid #2d3748",
+                    }}
+                  >
+                    <h3>Device Found</h3>
+
+                    <p><strong>TAC:</strong> {result.tac}</p>
+
+                    <p><strong>Brand:</strong> {result.brand_name}</p>
+
+                    <p><strong>Model:</strong> {result.model_name}</p>
+
+                    <p><strong>Reported Brand:</strong> {result.reported_brand}</p>
+
+                    <p><strong>Reported Model:</strong> {result.reported_model_name}</p>
+
+                    <p><strong>Model Number:</strong> {result.reported_model_number}</p>
+
+                    <p><strong>Region:</strong> {result.reported_region}</p>
+
+                    <p><strong>Year:</strong> {result.reported_year}</p>
+
+                    <p><strong>Confidence:</strong> {result.match_confidence}</p>
+                  </div>
+                )}
 
             <div className="hero-trust">
               <span><i className="fas fa-check" /> Free lookup</span>
