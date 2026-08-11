@@ -14,9 +14,11 @@
     "@fastify/cors": "^11.3.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
     "dotenv": "^17.4.2",
     "fastify": "^5.11.2",
+    "jsonwebtoken": "^9.0.3",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"

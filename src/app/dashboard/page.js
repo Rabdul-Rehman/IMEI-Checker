@@ -1,229 +1,447 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { popularDevices } from "../data/devices";
-import styles from "./dashboard.module.css";
-
-const tabs = [
-  ["overview", "Overview", "fa-chart-pie"],
-  ["devices", "Devices", "fa-mobile-screen-button"],
-  ["carriers", "Carriers", "fa-tower-cell"],
-  ["news", "News", "fa-newspaper"],
-  ["checks", "IMEI Checks", "fa-magnifying-glass"],
-  ["settings", "Settings", "fa-gear"],
-];
-
-const checks = [
-  ["356789012345678", "iPhone 17 Pro", "Verified", "2 min ago"],
-  ["351234567890123", "Galaxy S25 Ultra", "Verified", "8 min ago"],
-  ["352098765432109", "Pixel 10 Pro", "Pending", "14 min ago"],
-  ["353456789012345", "Xiaomi 15 Ultra", "Verified", "21 min ago"],
-];
-
-const carriers = [
-  ["Jazz", "Pakistan", "4G / 5G"],
-  ["Telenor", "Pakistan", "4G"],
-  ["Zong", "Pakistan", "4G / 5G"],
-  ["Ufone", "Pakistan", "4G"],
-];
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getToken, logout } from "../lib/auth";
 
 export default function Dashboard() {
-  const [tab, setTab] = useState("overview");
-  const [q, setQ] = useState("");
-  const [notice, setNotice] = useState("");
+  const router = useRouter();
 
-  const filtered = useMemo(() => {
-    const x = q.toLowerCase().trim();
-    return x
-      ? popularDevices.filter((d) => `${d.brand} ${d.name}`.toLowerCase().includes(x))
-      : popularDevices;
-  }, [q]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
 
-  const toast = (message) => {
-    setNotice(message);
-    window.clearTimeout(window.__imeiDashboardToast);
-    window.__imeiDashboardToast = window.setTimeout(() => setNotice(""), 2200);
-  };
+  useEffect(() => {
+    async function loadUser() {
+      const token = getToken();
 
-  const title = tabs.find((x) => x[0] === tab)?.[1] || "Overview";
+      // No JWT -> send user to login
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "http://localhost:8000/api/v1/auth/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        console.log("AUTH ME RESPONSE:", data);
+
+        // JWT invalid / expired
+        if (!response.ok || !data.success) {
+          logout();
+          router.replace("/login");
+          return;
+        }
+
+        // Backend returns:
+        // {
+        //   id,
+        //   name,
+        //   email
+        // }
+        setUser(data.user);
+      } catch (err) {
+        console.error("Dashboard authentication error:", err);
+        setError("Unable to load dashboard.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUser();
+  }, [router]);
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
+  }
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "#f4f6fb",
+          fontSize: "20px",
+          fontWeight: "600",
+        }}
+      >
+        Loading Dashboard...
+      </div>
+    );
+  }
+
+  // =====================================================
+  // ERROR
+  // =====================================================
+
+  if (error) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "#f4f6fb",
+        }}
+      >
+        <div
+          style={{
+            background: "#fff",
+            padding: "30px",
+            borderRadius: "12px",
+            boxShadow: "0 5px 20px rgba(0,0,0,.1)",
+          }}
+        >
+          <h2>Unable to load dashboard</h2>
+
+          <p
+            style={{
+              marginTop: "10px",
+              color: "#666",
+            }}
+          >
+            {error}
+          </p>
+
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: "20px",
+              padding: "10px 18px",
+              border: "none",
+              borderRadius: "8px",
+              background: "#111827",
+              color: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // DASHBOARD
+  // =====================================================
 
   return (
-    <div className={styles.shell}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <span className={styles.brandMark}><i className="fas fa-mobile-screen-button" /></span>
-          <div><strong>IMEI.net</strong><small>ADMIN CONSOLE</small></div>
-        </div>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f4f6fb",
+        padding: "40px",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
-        <div className={styles.sideLabel}>MANAGEMENT</div>
-        <nav className={styles.nav}>
-          {tabs.map(([id, label, icon]) => (
-            <button key={id} className={tab === id ? styles.navItemActive : styles.navItem} onClick={() => setTab(id)}>
-              <i className={`fas ${icon}`} />
-              <span>{label}</span>
-              {id === "devices" && <em>{popularDevices.length}</em>}
-            </button>
-          ))}
-        </nav>
-
-        <div className={styles.sidebarBottom}>
-          <div className={styles.systemStatus}><span /> System operational</div>
-          <Link href="/" className={styles.backLink}><i className="fas fa-arrow-left" /> Back to website</Link>
-        </div>
-      </aside>
-
-      <main className={styles.main}>
-        <header className={styles.topbar}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "35px",
+            gap: "20px",
+          }}
+        >
           <div>
-            <span className={styles.breadcrumb}>ADMIN / {tab.toUpperCase()}</span>
-            <h1>{title}</h1>
-          </div>
-          <div className={styles.profile}>
-            <div className={styles.avatar}>A</div>
-            <div><strong>Administrator</strong><span>Super Admin</span></div>
-          </div>
-        </header>
+            <p
+              style={{
+                margin: "0 0 8px",
+                color: "#6b7280",
+                fontSize: "14px",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+              }}
+            >
+              User Dashboard
+            </p>
 
-        {notice && <div className={styles.toast}><i className="fas fa-circle-check" /> {notice}</div>}
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "36px",
+                fontWeight: "800",
+                color: "#111827",
+              }}
+            >
+              Welcome back, {user?.name || "User"} 👋
+            </h1>
 
-        {tab === "overview" && <Overview setTab={setTab} toast={toast} />}
-        {tab === "devices" && <Devices q={q} setQ={setQ} devices={filtered} toast={toast} />}
-        {tab === "carriers" && (
-          <SimplePanel kicker="NETWORK DIRECTORY" title="Carrier database" button="Add carrier" toast={toast}>
-            {carriers.map(([name, country, network]) => (
-              <div className={styles.listRow} key={name}>
-                <div className={styles.listIcon}><i className="fas fa-tower-cell" /></div>
-                <div className={styles.listMain}><strong>{name}</strong><span>{country} · {network}</span></div>
-                <span className={`${styles.status} ${styles.verified}`}>Active</span>
-                <button className={styles.iconButton} onClick={() => toast(`Edit ${name}`)}><i className="fas fa-pen" /></button>
-              </div>
-            ))}
-          </SimplePanel>
-        )}
-        {tab === "news" && (
-          <SimplePanel kicker="CONTENT" title="News management" button="Publish article" toast={toast}>
-            {["iPhone 17 Pro: Everything you need to know", "How to find your IMEI number", "Understanding carrier and network information"].map((name, i) => (
-              <div className={styles.listRow} key={name}>
-                <div className={styles.listIcon}><i className="fas fa-newspaper" /></div>
-                <div className={styles.listMain}><strong>{name}</strong><span>Published · July {28 - i}, 2026</span></div>
-                <span className={`${styles.status} ${styles.verified}`}>Published</span>
-                <button className={styles.iconButton} onClick={() => toast("Article editor opened.")}><i className="fas fa-pen" /></button>
-              </div>
-            ))}
-          </SimplePanel>
-        )}
-        {tab === "checks" && (
-          <SimplePanel kicker="AUDIT LOG" title="IMEI check activity">
-            <ChecksTable />
-          </SimplePanel>
-        )}
-        {tab === "settings" && (
-          <SimplePanel kicker="CONFIGURATION" title="Dashboard settings">
-            <div className={styles.settingsGrid}>
-              <div><label>Platform name</label><input defaultValue="IMEI.net" /></div>
-              <div><label>Admin email</label><input defaultValue="admin@imei.net" /></div>
-              <div><label>Database provider</label><input value="Supabase — coming next" readOnly /></div>
-              <div><label>Public API</label><input value="Removed" readOnly /></div>
+            <p
+              style={{
+                marginTop: "10px",
+                color: "#666",
+              }}
+            >
+              Manage your IMEI account and API usage.
+            </p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "12px 22px",
+              border: "none",
+              borderRadius: "8px",
+              background: "#dc3545",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* =====================================================
+            ACCOUNT INFORMATION
+        ===================================================== */}
+
+        <section
+          style={{
+            marginBottom: "30px",
+          }}
+        >
+          <h2
+            style={{
+              marginBottom: "18px",
+              fontSize: "22px",
+              color: "#111827",
+            }}
+          >
+            Account Information
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: "20px",
+            }}
+          >
+            <Card
+              title="Name"
+              value={user?.name || "-"}
+            />
+
+            <Card
+              title="Email"
+              value={user?.email || "-"}
+            />
+
+            <Card
+              title="User ID"
+              value={user?.id || "-"}
+            />
+
+            <Card
+              title="Account Status"
+              value="Active"
+            />
+          </div>
+        </section>
+
+        {/* =====================================================
+            API / USAGE
+        ===================================================== */}
+
+        <section>
+          <h2
+            style={{
+              marginBottom: "18px",
+              fontSize: "22px",
+              color: "#111827",
+            }}
+          >
+            API & Usage
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: "20px",
+            }}
+          >
+            <Card
+              title="API Keys"
+              value="Coming Soon"
+            />
+
+            <Card
+              title="Today's Requests"
+              value="0"
+            />
+
+            <Card
+              title="Total Requests"
+              value="0"
+            />
+
+            <Card
+              title="IMEI Searches"
+              value="0"
+            />
+          </div>
+        </section>
+
+        {/* =====================================================
+            JWT STATUS
+        ===================================================== */}
+
+        <section
+          style={{
+            marginTop: "35px",
+            background: "#fff",
+            padding: "25px",
+            borderRadius: "12px",
+            boxShadow: "0 3px 12px rgba(0,0,0,.06)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
+            <div
+              style={{
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                background: "#22c55e",
+              }}
+            />
+
+            <div>
+              <h3
+                style={{
+                  margin: 0,
+                  color: "#111827",
+                }}
+              >
+                Authentication Active
+              </h3>
+
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  color: "#666",
+                }}
+              >
+                Your JWT token is valid and your account is authenticated.
+              </p>
             </div>
-            <button className={styles.primaryButton} onClick={() => toast("Settings saved locally for now.")}><i className="fas fa-save" /> Save settings</button>
-          </SimplePanel>
-        )}
-      </main>
+          </div>
+        </section>
+
+        {/* =====================================================
+            FUTURE FEATURES
+        ===================================================== */}
+
+        <section
+          style={{
+            marginTop: "35px",
+            background: "#fff",
+            padding: "25px",
+            borderRadius: "12px",
+            boxShadow: "0 3px 12px rgba(0,0,0,.06)",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#111827",
+            }}
+          >
+            Coming Next
+          </h2>
+
+          <ul
+            style={{
+              marginTop: "15px",
+              lineHeight: "2",
+              color: "#555",
+            }}
+          >
+            <li>API Key Management</li>
+            <li>IMEI Search History</li>
+            <li>Analytics Dashboard</li>
+            <li>Daily Usage</li>
+            <li>Request Logs</li>
+            <li>Account Settings</li>
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }
 
-function Overview({ setTab, toast }) {
-  const stats = [
-    ["303,159", "Device / TAC records", "fa-mobile-screen-button", "+4.8%"],
-    ["1,284", "Carrier records", "fa-tower-cell", "+2.1%"],
-    ["99,094", "IMEI checks today", "fa-magnifying-glass", "+12.6%"],
-    ["99.98%", "System availability", "fa-shield-halved", "Healthy"],
-  ];
+// =====================================================
+// CARD COMPONENT
+// =====================================================
 
+function Card({ title, value }) {
   return (
-    <>
-      <section className={styles.welcome}>
-        <div><span className={styles.eyebrow}>CONTROL CENTER</span><h2>Hello, Admin.</h2><p>Monitor devices, carriers, news and IMEI activity from one place.</p></div>
-        <button className={styles.secondaryButton} onClick={() => toast("Supabase sync will be connected later.")}><i className="fas fa-arrows-rotate" /> Sync database</button>
-      </section>
+    <div
+      style={{
+        background: "#fff",
+        padding: "25px",
+        borderRadius: "12px",
+        boxShadow: "0 3px 12px rgba(0,0,0,.06)",
+      }}
+    >
+      <div
+        style={{
+          color: "#777",
+          marginBottom: "10px",
+          fontSize: "15px",
+          fontWeight: "500",
+        }}
+      >
+        {title}
+      </div>
 
-      <section className={styles.statGrid}>
-        {stats.map(([value, label, icon, trend]) => (
-          <article className={styles.statCard} key={label}>
-            <div className={styles.statIcon}><i className={`fas ${icon}`} /></div>
-            <div className={styles.statValue}>{value}</div>
-            <div className={styles.statLabel}>{label}</div>
-            <span className={styles.trend}><i className="fas fa-arrow-trend-up" /> {trend}</span>
-          </article>
-        ))}
-      </section>
-
-      <section className={styles.twoColumn}>
-        <article className={styles.panel}>
-          <PanelHead kicker="ACTIVITY" title="Recent IMEI checks" action="View all" onClick={() => setTab("checks")} />
-          <ChecksTable />
-        </article>
-        <article className={styles.panel}>
-          <PanelHead kicker="SYSTEM" title="Platform health" action={<span className={styles.live}>LIVE</span>} />
-          {['Website', 'Database', 'IMEI checker', 'Device catalog'].map((item) => (
-            <div className={styles.healthRow} key={item}><span>{item}</span><strong><i /> Operational</strong></div>
-          ))}
-          <div className={styles.meter}><div><span>Database coverage</span><b>94%</b></div><div className={styles.track}><span /></div></div>
-        </article>
-      </section>
-
-      <section className={styles.panel}>
-        <PanelHead kicker="CATALOG" title="Featured devices" action="Manage devices" onClick={() => setTab("devices")} />
-        <div className={styles.deviceGrid}>
-          {popularDevices.map((device) => (
-            <div className={styles.deviceCard} key={device.slug}>
-              <div className={styles.deviceImage}><img src={device.image} alt={device.name} /></div>
-              <span>{device.brand}</span>
-              <h4>{device.name}</h4>
-              <p>{device.model} · {device.releaseDate}</p>
-              <button className={styles.iconButton} onClick={() => toast(`Edit ${device.name}`)}><i className="fas fa-pen" /></button>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
-
-function ChecksTable() {
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <thead><tr><th>IMEI</th><th>Device</th><th>Status</th><th>Time</th></tr></thead>
-        <tbody>{checks.map((row) => <tr key={row[0]}><td className={styles.mono}>{row[0]}</td><td>{row[1]}</td><td><span className={`${styles.status} ${row[2] === "Verified" ? styles.verified : styles.pending}`}>{row[2]}</span></td><td>{row[3]}</td></tr>)}</tbody>
-      </table>
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: "700",
+          color: "#111827",
+          wordBreak: "break-word",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
-}
-
-function Devices({ q, setQ, devices, toast }) {
-  return (
-    <SimplePanel kicker="DATABASE" title="Device catalog" button="Add device" toast={toast}>
-      <div className={styles.search}><i className="fas fa-magnifying-glass" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search devices..." /></div>
-      {devices.map((device) => (
-        <div className={styles.listRow} key={device.slug}>
-          <div className={styles.listDeviceImage}><img src={device.image} alt="" /></div>
-          <div className={styles.listMain}><strong>{device.name}</strong><span>{device.brand} · {device.model}</span></div>
-          <span className={styles.listDate}>{device.releaseDate}</span>
-          <span className={`${styles.status} ${styles.verified}`}>Published</span>
-          <button className={styles.iconButton} onClick={() => toast(`Edit ${device.name}`)}><i className="fas fa-pen" /></button>
-        </div>
-      ))}
-    </SimplePanel>
-  );
-}
-
-function PanelHead({ kicker, title, action, onClick }) {
-  return <div className={styles.panelHead}><div><span className={styles.panelKicker}>{kicker}</span><h3>{title}</h3></div>{typeof action === "string" ? <button onClick={onClick}>{action} <i className="fas fa-arrow-right" /></button> : action}</div>;
-}
-
-function SimplePanel({ kicker, title, button, toast, children }) {
-  return <section className={`${styles.panel} ${styles.fullPanel}`}><PanelHead kicker={kicker} title={title} action={button ? <button className={styles.primaryButton} onClick={() => toast?.(`${button} is ready for Supabase integration.`)}><i className="fas fa-plus" /> {button}</button> : null} />{children}</section>;
 }

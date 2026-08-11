@@ -1,7 +1,6 @@
 require("dotenv").config({
-  path: ".env.local",
+  path: "../.env.local",
 });
-
 const crypto = require("crypto");
 
 const { supabase } = require("./lib/supabase");

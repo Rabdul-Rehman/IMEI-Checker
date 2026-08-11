@@ -15,8 +15,15 @@ async function phoneRoutes(fastify) {
             offset = 0,
         } = request.query;
 
-        const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
-        const parsedOffset = Math.max(Number(offset) || 0, 0);
+        const parsedLimit = Math.min(
+            Math.max(Number(limit) || 20, 1),
+            100
+        );
+
+        const parsedOffset = Math.max(
+            Number(offset) || 0,
+            0
+        );
 
         let query = supabase
             .from("phones")
@@ -36,18 +43,31 @@ async function phoneRoutes(fastify) {
             );
 
         if (search) {
-            query = query.ilike("model_name", `%${search}%`);
+            query = query.ilike(
+                "model_name",
+                `%${search}%`
+            );
         }
 
         if (brand) {
-            query = query.eq("brands.name", brand);
+            query = query.eq(
+                "brands.name",
+                brand
+            );
         }
 
         query = query
             .order("model_name")
-            .range(parsedOffset, parsedOffset + parsedLimit - 1);
+            .range(
+                parsedOffset,
+                parsedOffset + parsedLimit - 1
+            );
 
-        const { data, error, count } = await query;
+        const {
+            data,
+            error,
+            count,
+        } = await query;
 
         if (error) {
             return reply.code(500).send({
@@ -67,15 +87,19 @@ async function phoneRoutes(fastify) {
         };
     });
 
+
     // =====================================================
-    // GET /phones/:slug
+    // GET /api/v1/phones/:slug
     // =====================================================
 
     fastify.get("/phones/:slug", async (request, reply) => {
 
         const { slug } = request.params;
 
-        const { data, error } = await supabase
+        const {
+            data,
+            error,
+        } = await supabase
             .from("phones")
             .select(`
                 phone_id,
@@ -104,84 +128,208 @@ async function phoneRoutes(fastify) {
         };
     });
 
+
     // =====================================================
-    // GET /phones/:slug/specs
+    // GET /api/v1/phones/:slug/specs
     // =====================================================
 
-    fastify.get("/phones/:slug/specs", async (request, reply) => {
+    fastify.get(
+        "/phones/:slug/specs",
+        async (request, reply) => {
 
-        const { slug } = request.params;
+            const { slug } = request.params;
 
-        const { data, error } = await supabase
-            .from("phones")
-            .select(`
-                phone_id,
-                model_name,
-                slug,
-                specs_json,
-                brands (
-                    brand_id,
-                    name
-                )
-            `)
-            .eq("slug", slug)
-            .single();
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("phones")
+                .select(`
+                    phone_id,
+                    model_name,
+                    slug,
+                    specs_json,
+                    brands (
+                        brand_id,
+                        name
+                    )
+                `)
+                .eq("slug", slug)
+                .single();
 
-        if (error || !data) {
-            return reply.code(404).send({
-                success: false,
-                error: "Phone not found",
-            });
+            if (error || !data) {
+                return reply.code(404).send({
+                    success: false,
+                    error: "Phone not found",
+                });
+            }
+
+            return {
+                success: true,
+                data: {
+                    phone_id: data.phone_id,
+                    model_name: data.model_name,
+                    slug: data.slug,
+                    brand: data.brands,
+                    specs: data.specs_json || {},
+                },
+            };
         }
+    );
 
-        return {
-            success: true,
-            data: {
-                phone_id: data.phone_id,
-                model_name: data.model_name,
-                slug: data.slug,
-                brand: data.brands,
-                specs: data.specs_json || {},
-            },
-        };
-    });
 
     // =====================================================
-    // GET /phones/imei/:imei
+    // PUBLIC IMEI LOOKUP
+    //
+    // GET /api/v1/public/imei/:imei
+    //
+    // IMPORTANT:
+    // This route is intended for YOUR WEBSITE.
+    // It does NOT require an API key.
     // =====================================================
 
-    fastify.get("/phones/imei/:imei", async (request, reply) => {
+    fastify.get(
+        "/public/imei/:imei",
+        async (request, reply) => {
 
-        const { imei } = request.params;
+            const { imei } = request.params;
 
-        if (!imei || imei.length < 8) {
-            return reply.code(400).send({
-                success: false,
-                error: "Invalid IMEI",
-            });
+            // ---------------------------------------------
+            // Validate IMEI
+            // ---------------------------------------------
+
+            if (!imei) {
+                return reply.code(400).send({
+                    success: false,
+                    error: "IMEI is required",
+                });
+            }
+
+            const cleanImei = String(imei)
+                .replace(/\D/g, "");
+
+            if (cleanImei.length !== 15) {
+                return reply.code(400).send({
+                    success: false,
+                    error: "Invalid IMEI. IMEI must contain exactly 15 digits.",
+                });
+            }
+
+            // ---------------------------------------------
+            // Extract TAC
+            // ---------------------------------------------
+
+            const tac = cleanImei.substring(0, 8);
+
+            // ---------------------------------------------
+            // Lookup TAC
+            // ---------------------------------------------
+
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("v_tac_lookup")
+                .select("*")
+                .eq("tac", tac)
+                .maybeSingle();
+
+            if (error) {
+                request.log.error(
+                    error,
+                    "Public IMEI lookup failed"
+                );
+
+                return reply.code(500).send({
+                    success: false,
+                    error: "IMEI lookup failed",
+                });
+            }
+
+            if (!data) {
+                return reply.code(404).send({
+                    success: false,
+                    error: "Device not found",
+                });
+            }
+
+            // ---------------------------------------------
+            // SUCCESS
+            // ---------------------------------------------
+
+            return {
+                success: true,
+                data: {
+                    ...data,
+                    imei: cleanImei,
+                    tac,
+                },
+            };
         }
+    );
 
-        const tac = imei.substring(0, 8);
 
-        const { data, error } = await supabase
-            .from("v_tac_lookup")
-            .select("*")
-            .eq("tac", tac)
-            .single();
+    // =====================================================
+    // ORIGINAL IMEI LOOKUP
+    //
+    // GET /api/v1/phones/imei/:imei
+    //
+    // This remains available for external API users
+    // and is still protected by the global API-key
+    // authentication in server.js.
+    // =====================================================
 
-        if (error || !data) {
-            return reply.code(404).send({
-                success: false,
-                error: "Device not found",
-            });
+    fastify.get(
+        "/phones/imei/:imei",
+        async (request, reply) => {
+
+            const { imei } = request.params;
+
+            if (!imei || imei.length < 8) {
+                return reply.code(400).send({
+                    success: false,
+                    error: "Invalid IMEI",
+                });
+            }
+
+            const cleanImei = String(imei)
+                .replace(/\D/g, "");
+
+            if (cleanImei.length !== 15) {
+                return reply.code(400).send({
+                    success: false,
+                    error: "Invalid IMEI",
+                });
+            }
+
+            const tac = cleanImei.substring(0, 8);
+
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("v_tac_lookup")
+                .select("*")
+                .eq("tac", tac)
+                .maybeSingle();
+
+            if (error || !data) {
+                return reply.code(404).send({
+                    success: false,
+                    error: "Device not found",
+                });
+            }
+
+            return {
+                success: true,
+                data: {
+                    ...data,
+                    imei: cleanImei,
+                    tac,
+                },
+            };
         }
-
-        return {
-            success: true,
-            data,
-        };
-    });
-
+    );
 }
 
 module.exports = phoneRoutes;

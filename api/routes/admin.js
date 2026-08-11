@@ -5,41 +5,23 @@ const { supabase } = require("../lib/supabase");
 =========================================================
 ADMIN AUTHENTICATION
 =========================================================
-
-Admin requests must contain:
-
-Authorization: Bearer YOUR_ADMIN_API_KEY
-
-The real key comes ONLY from:
-
-.env.local
-
-ADMIN_API_KEY=...
-
-IMPORTANT:
-Never expose the real admin key in an error response.
-=========================================================
 */
 
 function requireAdmin(request, reply) {
-  const authorization =
-    request.headers.authorization || "";
+  const authorization = request.headers.authorization || "";
 
   if (!authorization.startsWith("Bearer ")) {
     reply.code(401).send({
       success: false,
       error: "Missing admin authorization",
-      message:
-        "Use Authorization: Bearer YOUR_ADMIN_API_KEY",
     });
 
     return false;
   }
 
-  const providedKey =
-    authorization
-      .substring(7)
-      .trim();
+  const providedKey = authorization
+    .substring(7)
+    .trim();
 
   if (!providedKey) {
     reply.code(401).send({
@@ -50,8 +32,7 @@ function requireAdmin(request, reply) {
     return false;
   }
 
-  const adminKey =
-    process.env.ADMIN_API_KEY;
+  const adminKey = process.env.ADMIN_API_KEY;
 
   if (!adminKey) {
     reply.code(500).send({
@@ -62,10 +43,6 @@ function requireAdmin(request, reply) {
     return false;
   }
 
-  /*
-   * Compare the provided key with the
-   * secret stored in .env.local.
-   */
   if (providedKey !== adminKey) {
     reply.code(401).send({
       success: false,
@@ -110,7 +87,6 @@ function generateApiKey() {
     .toString("hex")}`;
 }
 
-
 function hashApiKey(apiKey) {
   return crypto
     .createHash("sha256")
@@ -126,7 +102,6 @@ ADMIN ROUTES
 */
 
 async function adminRoutes(fastify) {
-
 
   /*
   ========================================================
@@ -271,7 +246,6 @@ async function adminRoutes(fastify) {
               null
             )
             .limit(10000),
-
         ]);
 
 
@@ -287,10 +261,9 @@ async function adminRoutes(fastify) {
         ];
 
 
-        const failed =
-          results.find(
-            (item) => item.error
-          );
+        const failed = results.find(
+          (item) => item.error
+        );
 
 
         if (failed) {
@@ -300,7 +273,7 @@ async function adminRoutes(fastify) {
 
         /*
         =====================================================
-        CALCULATE AVERAGE RESPONSE TIME
+        AVERAGE RESPONSE TIME
         =====================================================
         */
 
@@ -348,13 +321,11 @@ async function adminRoutes(fastify) {
 
 
         return {
-
           success: true,
 
           data: {
 
             requests: {
-
               total:
                 requestsResult.count || 0,
 
@@ -366,37 +337,30 @@ async function adminRoutes(fastify) {
 
               errors:
                 errorCount,
-
             },
 
 
             api_keys: {
-
               total:
                 apiKeysResult.count || 0,
 
               active:
                 activeKeysResult.count || 0,
-
             },
 
 
             database: {
-
               phones:
                 phonesResult.count || 0,
 
               brands:
                 brandsResult.count || 0,
-
             },
 
 
             performance: {
-
               average_response_time_ms:
                 averageResponseTime,
-
             },
 
           },
@@ -406,112 +370,248 @@ async function adminRoutes(fastify) {
       } catch (error) {
 
         fastify.log.error(
+          "Admin overview error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to load admin overview",
-
           });
-
       }
-
     }
   );
 
 
-  /*
-  ========================================================
-  RECENT REQUESTS
-  GET /admin/recent-requests
-  ========================================================
-  */
+/*
+========================================================
+RECENT REQUESTS
+GET /admin/recent-requests
+========================================================
+*/
 
-  fastify.get(
-    "/admin/recent-requests",
-    async (request, reply) => {
+fastify.get(
+  "/admin/recent-requests",
+  async (request, reply) => {
 
-      if (!requireAdmin(request, reply)) {
-        return;
+    if (!requireAdmin(request, reply)) {
+      return;
+    }
+
+    try {
+
+      /*
+      ====================================================
+      LOAD RECENT REQUESTS
+      ====================================================
+      */
+
+      const {
+        data: requests,
+        error: requestsError,
+      } = await supabase
+        .from("api_requests")
+        .select(`
+          id,
+          api_key_id,
+          method,
+          endpoint,
+          status_code,
+          response_time_ms,
+          ip_address,
+          user_agent,
+          created_at
+        `)
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        )
+        .limit(20);
+
+
+      /*
+      ====================================================
+      CHECK REQUEST QUERY ERROR
+      ====================================================
+      */
+
+      if (requestsError) {
+
+        fastify.log.error(
+          "Recent requests Supabase error:",
+          requestsError
+        );
+
+        throw requestsError;
       }
 
-      try {
+
+      /*
+      ====================================================
+      GET API KEY IDS
+      ====================================================
+      */
+
+      const apiKeyIds = [
+        ...new Set(
+          (requests || [])
+            .map(
+              (request) =>
+                request.api_key_id
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+
+      /*
+      ====================================================
+      LOAD API KEY INFORMATION
+      ====================================================
+      */
+
+      let apiKeys = [];
+
+
+      if (apiKeyIds.length > 0) {
 
         const {
           data,
           error,
         } = await supabase
-
-          .from("api_requests")
-
-          .select(`
-            id,
-            api_key_id,
-            method,
-            endpoint,
-            status_code,
-            response_time_ms,
-            ip_address,
-            user_agent,
-            created_at,
-            api_keys (
-              name,
-              key_prefix
-            )
-          `)
-
-          .order(
-            "created_at",
-            {
-              ascending: false,
-            }
+          .from("api_keys")
+          .select(
+            "id,name,key_prefix"
           )
-
-          .limit(20);
+          .in(
+            "id",
+            apiKeyIds
+          );
 
 
         if (error) {
-          throw error;
+
+          fastify.log.error(
+            "API key lookup error:",
+            error
+          );
+
+          /*
+          Do not fail the request history
+          if API key metadata cannot be loaded.
+          */
+
+          apiKeys = [];
+
+        } else {
+
+          apiKeys = data || [];
+
         }
+      }
 
 
-        return {
+      /*
+      ====================================================
+      CREATE API KEY LOOKUP MAP
+      ====================================================
+      */
 
-          success: true,
+      const apiKeyMap = new Map();
 
-          data:
-            data || [],
 
-        };
+      for (const key of apiKeys) {
 
-      } catch (error) {
-
-        fastify.log.error(
-          error
+        apiKeyMap.set(
+          String(key.id),
+          key
         );
-
-        return reply
-          .code(500)
-          .send({
-
-            success: false,
-
-            error:
-              "Failed to load recent requests",
-
-          });
 
       }
 
-    }
-  );
 
+      /*
+      ====================================================
+      COMBINE REQUEST + API KEY DATA
+      ====================================================
+      */
+
+      const result =
+        (requests || []).map(
+          (request) => {
+
+            const apiKey =
+              apiKeyMap.get(
+                String(
+                  request.api_key_id
+                )
+              );
+
+
+            return {
+
+              ...request,
+
+              api_key:
+                apiKey
+                  ? {
+                      name:
+                        apiKey.name,
+
+                      key_prefix:
+                        apiKey.key_prefix,
+                    }
+                  : null,
+
+            };
+
+          }
+        );
+
+
+      /*
+      ====================================================
+      SUCCESS
+      ====================================================
+      */
+
+      return {
+
+        success: true,
+
+        data: result,
+
+      };
+
+
+    } catch (error) {
+
+      fastify.log.error(
+        "Failed to load recent requests:",
+        error
+      );
+
+
+      return reply
+        .code(500)
+        .send({
+
+          success: false,
+
+          error:
+            "Failed to load recent requests",
+
+        });
+
+    }
+
+  }
+);
 
   /*
   ========================================================
@@ -534,9 +634,7 @@ async function adminRoutes(fastify) {
           data,
           error,
         } = await supabase
-
           .from("api_keys")
-
           .select(`
             id,
             name,
@@ -547,7 +645,6 @@ async function adminRoutes(fastify) {
             created_at,
             last_used_at
           `)
-
           .order(
             "created_at",
             {
@@ -562,33 +659,25 @@ async function adminRoutes(fastify) {
 
 
         return {
-
           success: true,
-
-          data:
-            data || [],
-
+          data: data || [],
         };
 
       } catch (error) {
 
         fastify.log.error(
+          "Admin API keys error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to load API keys",
-
           });
-
       }
-
     }
   );
 
@@ -617,9 +706,7 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
-        VALIDATE CLIENT NAME
-        ====================================================
+        VALIDATE NAME
         */
 
         if (
@@ -630,50 +717,50 @@ async function adminRoutes(fastify) {
           return reply
             .code(400)
             .send({
-
               success: false,
-
               error:
                 "API key name is required",
-
             });
-
         }
 
 
         /*
-        ====================================================
         VALIDATE DAILY LIMIT
-        ====================================================
         */
 
         const limit =
-                daily_limit === null ||
-                daily_limit === undefined ||
-                daily_limit === ""
-                  ? null
-                  : Number(daily_limit);
+          daily_limit === null ||
+          daily_limit === undefined ||
+          daily_limit === ""
+            ? null
+            : Number(
+                daily_limit
+              );
 
-              if (
-                limit !== null &&
-                (
-                  !Number.isInteger(limit) ||
-                  limit < 1 ||
-                  limit > 1000000
-                )
-              ) {
-                return reply
-                  .code(400)
-                  .send({
-                    success: false,
-                    error:
-                      "Daily limit must be between 1 and 1,000,000, or null for unlimited",
-                  });
-              }
+
+        if (
+          limit !== null &&
+          (
+            !Number.isInteger(
+              limit
+            ) ||
+            limit < 1 ||
+            limit > 1000000
+          )
+        ) {
+
+          return reply
+            .code(400)
+            .send({
+              success: false,
+              error:
+                "Daily limit must be between 1 and 1,000,000, or null for unlimited",
+            });
+        }
+
+
         /*
-        ====================================================
-        GENERATE SECRET
-        ====================================================
+        GENERATE KEY
         */
 
         const apiKey =
@@ -681,9 +768,7 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
-        HASH SECRET
-        ====================================================
+        HASH KEY
         */
 
         const keyHash =
@@ -693,9 +778,7 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
-        CREATE DISPLAY PREFIX
-        ====================================================
+        PREFIX
         */
 
         const keyPrefix =
@@ -706,20 +789,15 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
-        SAVE TO SUPABASE
-        ====================================================
+        SAVE
         */
 
         const {
           data,
           error,
         } = await supabase
-
           .from("api_keys")
-
           .insert({
-
             name:
               String(name).trim(),
 
@@ -737,9 +815,7 @@ async function adminRoutes(fastify) {
 
             daily_limit:
               limit,
-
           })
-
           .select(`
             id,
             name,
@@ -750,7 +826,6 @@ async function adminRoutes(fastify) {
             created_at,
             last_used_at
           `)
-
           .single();
 
 
@@ -759,52 +834,38 @@ async function adminRoutes(fastify) {
         }
 
 
-        /*
-        ====================================================
-        RETURN SECRET ONLY ONCE
-        ====================================================
-        */
-
         return reply
           .code(201)
           .send({
-
             success: true,
 
             message:
               "API key created. Save this key now because it will not be shown again.",
 
             data: {
-
               api_key:
                 apiKey,
 
               key:
                 data,
-
             },
-
           });
 
       } catch (error) {
 
         fastify.log.error(
+          "Create API key error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to create API key",
-
           });
-
       }
-
     }
   );
 
@@ -813,13 +874,6 @@ async function adminRoutes(fastify) {
   ========================================================
   UPDATE API KEY
   PATCH /admin/api-keys/:id
-  ========================================================
-
-  Allows admin to change:
-
-  - Client name
-  - Daily limit
-  - Active / disabled status
   ========================================================
   */
 
@@ -833,27 +887,27 @@ async function adminRoutes(fastify) {
 
       try {
 
+        /*
+        Don't force the ID to Number.
+        Supabase may use UUID or integer.
+        */
+
         const id =
-          Number(
-            request.params.id
-          );
+          request.params.id;
 
 
         if (
-          !Number.isInteger(id)
+          !id ||
+          String(id).trim() === ""
         ) {
 
           return reply
             .code(400)
             .send({
-
               success: false,
-
               error:
                 "Invalid API key ID",
-
             });
-
         }
 
 
@@ -868,9 +922,7 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
         NAME
-        ====================================================
         */
 
         if (
@@ -886,27 +938,20 @@ async function adminRoutes(fastify) {
             return reply
               .code(400)
               .send({
-
                 success: false,
-
                 error:
                   "Name cannot be empty",
-
               });
-
           }
 
 
           updates.name =
             cleanName;
-
         }
 
 
         /*
-        ====================================================
         DAILY LIMIT
-        ====================================================
         */
 
         if (
@@ -914,43 +959,42 @@ async function adminRoutes(fastify) {
         ) {
 
           const limit =
-            Number(
-              daily_limit
-            );
+            daily_limit === null ||
+            daily_limit === ""
+              ? null
+              : Number(
+                  daily_limit
+                );
 
 
           if (
-            !Number.isInteger(
-              limit
-            ) ||
-            limit < 1 ||
-            limit > 1000000
+            limit !== null &&
+            (
+              !Number.isInteger(
+                limit
+              ) ||
+              limit < 1 ||
+              limit > 1000000
+            )
           ) {
 
             return reply
               .code(400)
               .send({
-
                 success: false,
-
                 error:
-                  "Daily limit must be between 1 and 1,000,000",
-
+                  "Daily limit must be between 1 and 1,000,000, or null",
               });
-
           }
 
 
           updates.daily_limit =
             limit;
-
         }
 
 
         /*
-        ====================================================
         ACTIVE / DISABLED
-        ====================================================
         */
 
         if (
@@ -965,27 +1009,20 @@ async function adminRoutes(fastify) {
             return reply
               .code(400)
               .send({
-
                 success: false,
-
                 error:
                   "is_active must be true or false",
-
               });
-
           }
 
 
           updates.is_active =
             is_active;
-
         }
 
 
         /*
-        ====================================================
-        CHECK WHETHER ANYTHING CHANGED
-        ====================================================
+        NO CHANGES
         */
 
         if (
@@ -997,39 +1034,27 @@ async function adminRoutes(fastify) {
           return reply
             .code(400)
             .send({
-
               success: false,
-
               error:
                 "No changes supplied",
-
             });
-
         }
 
 
         /*
-        ====================================================
-        UPDATE DATABASE
-        ====================================================
+        UPDATE
         */
 
         const {
           data,
           error,
         } = await supabase
-
           .from("api_keys")
-
-          .update(
-            updates
-          )
-
+          .update(updates)
           .eq(
             "id",
             id
           )
-
           .select(`
             id,
             name,
@@ -1040,7 +1065,6 @@ async function adminRoutes(fastify) {
             created_at,
             last_used_at
           `)
-
           .single();
 
 
@@ -1050,35 +1074,29 @@ async function adminRoutes(fastify) {
 
 
         return {
-
           success: true,
 
           message:
             "API key updated",
 
           data,
-
         };
 
       } catch (error) {
 
         fastify.log.error(
+          "Update API key error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to update API key",
-
           });
-
       }
-
     }
   );
 
@@ -1087,13 +1105,6 @@ async function adminRoutes(fastify) {
   ========================================================
   REVOKE API KEY
   DELETE /admin/api-keys/:id
-  ========================================================
-
-  We DO NOT delete the database row.
-
-  We simply disable it.
-
-  This preserves request history.
   ========================================================
   */
 
@@ -1108,26 +1119,21 @@ async function adminRoutes(fastify) {
       try {
 
         const id =
-          Number(
-            request.params.id
-          );
+          request.params.id;
 
 
         if (
-          !Number.isInteger(id)
+          !id ||
+          String(id).trim() === ""
         ) {
 
           return reply
             .code(400)
             .send({
-
               success: false,
-
               error:
                 "Invalid API key ID",
-
             });
-
         }
 
 
@@ -1135,21 +1141,15 @@ async function adminRoutes(fastify) {
           data,
           error,
         } = await supabase
-
           .from("api_keys")
-
           .update({
-
             is_active:
               false,
-
           })
-
           .eq(
             "id",
             id
           )
-
           .select(`
             id,
             name,
@@ -1160,7 +1160,6 @@ async function adminRoutes(fastify) {
             created_at,
             last_used_at
           `)
-
           .single();
 
 
@@ -1170,35 +1169,29 @@ async function adminRoutes(fastify) {
 
 
         return {
-
           success: true,
 
           message:
             "API key revoked",
 
           data,
-
         };
 
       } catch (error) {
 
         fastify.log.error(
+          "Revoke API key error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to revoke API key",
-
           });
-
       }
-
     }
   );
 
@@ -1242,25 +1235,20 @@ async function adminRoutes(fastify) {
           data,
           error,
         } = await supabase
-
           .from("api_requests")
-
           .select(
             "endpoint,status_code,created_at"
           )
-
           .gte(
             "created_at",
             since
           )
-
           .order(
             "created_at",
             {
               ascending: true,
             }
           )
-
           .limit(
             10000
           );
@@ -1282,9 +1270,7 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
-        CREATE DAY ENTRIES
-        ====================================================
+        CREATE DAYS
         */
 
         for (
@@ -1309,7 +1295,6 @@ async function adminRoutes(fastify) {
           dayMap.set(
             key,
             {
-
               date:
                 key,
 
@@ -1324,17 +1309,13 @@ async function adminRoutes(fastify) {
 
               requests:
                 0,
-
             }
           );
-
         }
 
 
         /*
-        ====================================================
         PROCESS REQUESTS
-        ====================================================
         */
 
         for (
@@ -1361,7 +1342,6 @@ async function adminRoutes(fastify) {
             dayMap.get(
               dateKey
             ).requests += 1;
-
           }
 
 
@@ -1382,7 +1362,8 @@ async function adminRoutes(fastify) {
 
           const status =
             String(
-              row.status_code || 0
+              row.status_code ||
+              0
             );
 
 
@@ -1394,40 +1375,31 @@ async function adminRoutes(fastify) {
               ) || 0
             ) + 1
           );
-
         }
 
 
         /*
-        ====================================================
         TOP ENDPOINTS
-        ====================================================
         */
 
         const endpoints =
           [
             ...endpointMap.entries()
           ]
-
             .map(
               ([
                 endpoint,
                 requests,
               ]) => ({
-
                 endpoint,
-
                 requests,
-
               })
             )
-
             .sort(
               (a, b) =>
                 b.requests -
                 a.requests
             )
-
             .slice(
               0,
               10
@@ -1435,29 +1407,22 @@ async function adminRoutes(fastify) {
 
 
         /*
-        ====================================================
         STATUS CODES
-        ====================================================
         */
 
         const statuses =
           [
             ...statusMap.entries()
           ]
-
             .map(
               ([
                 status,
                 requests,
               ]) => ({
-
                 status,
-
                 requests,
-
               })
             )
-
             .sort(
               (a, b) =>
                 Number(
@@ -1470,7 +1435,6 @@ async function adminRoutes(fastify) {
 
 
         return {
-
           success: true,
 
           data: {
@@ -1485,31 +1449,25 @@ async function adminRoutes(fastify) {
             statuses,
 
           },
-
         };
 
       } catch (error) {
 
         fastify.log.error(
+          "Analytics error:",
           error
         );
 
         return reply
           .code(500)
           .send({
-
             success: false,
-
             error:
               "Failed to load analytics",
-
           });
-
       }
-
     }
   );
-
 }
 
 

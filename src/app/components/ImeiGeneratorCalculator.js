@@ -1,141 +1,228 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-const MANUFACTURER_TACS = {
-  Apple: ["35328910", "35284910", "35325611"],
-  Samsung: ["35405211", "35479211", "35123411"],
-  Google: ["35896511", "35897211"],
-  Xiaomi: ["86234511", "86235911"],
-};
-
-function calculateLuhnCheckDigit(first14Digits) {
-  let sum = 0;
-  for (let i = 0; i < first14Digits.length; i++) {
-    let digit = parseInt(first14Digits[first14Digits.length - 1 - i], 10);
-    if (i % 2 === 0) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-    sum += digit;
-  }
-  return (10 - (sum % 10)) % 10;
-}
-
-function randomDigits(length) {
-  let result = "";
-  for (let i = 0; i < length; i++) result += Math.floor(Math.random() * 10);
-  return result;
-}
-
-function copyText(value) {
-  if (typeof navigator !== "undefined" && navigator.clipboard) navigator.clipboard.writeText(value);
-}
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8000/api/v1";
 
 export default function ImeiGeneratorCalculator() {
-  const [manufacturer, setManufacturer] = useState("Apple");
-  const [generatedImei, setGeneratedImei] = useState("");
-  const [copied, setCopied] = useState("");
-  const [calcInput, setCalcInput] = useState("");
-  const [calcResult, setCalcResult] = useState(null);
-  const [calcError, setCalcError] = useState("");
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const liveCheckDigit = useMemo(() => calcInput.length === 14 ? calculateLuhnCheckDigit(calcInput) : null, [calcInput]);
+  useEffect(() => {
+    async function loadBrands() {
+      try {
+        setLoading(true);
+        setError("");
 
-  const handleGenerate = () => {
-    const tacOptions = MANUFACTURER_TACS[manufacturer] || ["35000000"];
-    const tac = tacOptions[Math.floor(Math.random() * tacOptions.length)];
-    const first14 = tac + randomDigits(6);
-    setGeneratedImei(first14 + calculateLuhnCheckDigit(first14));
-    setCopied("");
-  };
+        const response = await fetch(
+          `${API_URL}/imei-generator/brands`
+        );
 
-  const handleCalculate = () => {
-    const digits = calcInput.trim();
-    if (!/^\d{14}$/.test(digits)) {
-      setCalcError("Enter exactly 14 digits to calculate the final check digit.");
-      setCalcResult(null);
-      return;
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.error || "Failed to load brands"
+          );
+        }
+
+        setBrands(result.data || []);
+      } catch (err) {
+        console.error(err);
+        setError(
+          err.message || "Failed to load brands"
+        );
+      } finally {
+        setLoading(false);
+      }
     }
-    setCalcError("");
-    setCalcResult(digits + calculateLuhnCheckDigit(digits));
-    setCopied("");
-  };
 
-  const luhnSteps = calcResult ? (() => {
-    const digits = calcResult.slice(0, 14);
-    const checkDigit = calcResult.slice(14);
-    const doubled = [];
-    for (let i = 0; i < digits.length; i++) {
-      let d = parseInt(digits[digits.length - 1 - i], 10);
-      if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
-      doubled.unshift(d);
-    }
-    const sum = doubled.reduce((a, b) => a + b, 0);
-    return { doubled, sum, checkDigit, first8: digits.slice(0, 8), next6: digits.slice(8) };
-  })() : null;
-
-  const handleCopy = (value, label) => {
-    copyText(value);
-    setCopied(label);
-    window.setTimeout(() => setCopied(""), 1300);
-  };
+    loadBrands();
+  }, []);
 
   return (
-    <div className="modern-page-shell imei-calculator-page">
-      <div className="modern-page-head">
-        <span className="section-eyebrow">IMEI TOOLKIT</span>
-        <h1>IMEI Calculator &amp; Generator</h1>
-        <p>Calculate the Luhn check digit, generate test values for development, and understand how a 15-digit IMEI is structured.</p>
-      </div>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "60px 5%",
+        background: "#f8fafc",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        {/* HEADER */}
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "50px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "#2563eb",
+              letterSpacing: "2px",
+            }}
+          >
+            FREE ONLINE TOOL
+          </span>
 
-      <div className="calculator-hero-grid">
-        <div className="tool-card calculator-primary-card">
-          <div className="tool-card-icon"><i className="fas fa-calculator" /></div>
-          <h2>Calculate a check digit</h2>
-          <p>Enter the first 14 digits. The calculator derives the final Luhn check digit and gives you the complete 15-digit value.</p>
-          <label className="tool-label">First 14 digits</label>
-          <div className="calculator-input-row">
-            <input className="tool-input" inputMode="numeric" maxLength={14} value={calcInput} onChange={(e) => { setCalcInput(e.target.value.replace(/\D/g, "").slice(0, 14)); setCalcError(""); }} placeholder="35145120840121" />
-            <span className="calculator-counter">{calcInput.length}/14</span>
+          <h1
+            style={{
+              fontSize: "42px",
+              margin: "12px 0",
+              color: "#111827",
+            }}
+          >
+            Random IMEI Generator
+          </h1>
+
+          <p
+            style={{
+              maxWidth: "650px",
+              margin: "0 auto",
+              color: "#6b7280",
+              fontSize: "16px",
+              lineHeight: 1.7,
+            }}
+          >
+            Select a phone brand, choose a model, and generate
+            valid test IMEI numbers for that device.
+          </p>
+        </div>
+
+        {/* ERROR */}
+        {error && (
+          <div
+            style={{
+              padding: "16px 20px",
+              marginBottom: "30px",
+              borderRadius: "10px",
+              background: "#fee2e2",
+              color: "#991b1b",
+              textAlign: "center",
+            }}
+          >
+            {error}
           </div>
-          <div className="calculator-live"><span>Live check digit</span><strong>{liveCheckDigit ?? "—"}</strong></div>
-          <button type="button" className="tool-button" onClick={handleCalculate}><i className="fas fa-wand-magic-sparkles" /> Calculate full IMEI</button>
-          {calcError && <div className="tool-error"><i className="fas fa-circle-exclamation" /> {calcError}</div>}
-          {calcResult && <div className="tool-result tool-result-large"><span>Complete IMEI</span><strong>{calcResult}</strong><button type="button" onClick={() => handleCopy(calcResult, "calc")}>{copied === "calc" ? "Copied" : "Copy"}</button></div>}
-        </div>
+        )}
 
-        <div className="tool-card generator-card">
-          <div className="tool-card-icon"><i className="fas fa-mobile-screen-button" /></div>
-          <h2>Generate a test IMEI</h2>
-          <p>Choose a manufacturer to create a syntactically valid test value using a sample TAC and a calculated check digit.</p>
-          <label className="tool-label">Manufacturer</label>
-          <select className="tool-select" value={manufacturer} onChange={(e) => setManufacturer(e.target.value)}>
-            {Object.keys(MANUFACTURER_TACS).map((brand) => <option key={brand}>{brand}</option>)}
-          </select>
-          <button type="button" className="tool-button" onClick={handleGenerate}><i className="fas fa-shuffle" /> Generate test IMEI</button>
-          {generatedImei && <div className="tool-result tool-result-large"><span>Generated value</span><strong>{generatedImei}</strong><button type="button" onClick={() => handleCopy(generatedImei, "generated")}>{copied === "generated" ? "Copied" : "Copy"}</button></div>}
-        </div>
+        {/* LOADING */}
+        {loading && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "60px",
+              color: "#6b7280",
+            }}
+          >
+            Loading phone brands...
+          </div>
+        )}
+
+        {/* BRANDS */}
+        {!loading && !error && (
+          <>
+            <h2
+              style={{
+                fontSize: "24px",
+                color: "#111827",
+                marginBottom: "25px",
+              }}
+            >
+              Select a brand
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "20px",
+              }}
+            >
+              {brands.map((brand) => {
+                const brandName =
+                  brand.name ||
+                  brand.brand_name ||
+                  brand.title ||
+                  "Unknown Brand";
+
+                // IMPORTANT:
+                // Backend expects numeric brand_id.
+                const brandId = brand.brand_id;
+
+                return (
+                  <Link
+                    key={brandId}
+                    href={`/imei-generator/${brandId}`}
+                    style={{
+                      textDecoration: "none",
+                      background: "#ffffff",
+                      borderRadius: "14px",
+                      padding: "28px 20px",
+                      minHeight: "130px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      boxShadow:
+                        "0 4px 18px rgba(15, 23, 42, 0.08)",
+                      border: "1px solid #e5e7eb",
+                      transition: "0.2s",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "55px",
+                        height: "55px",
+                        borderRadius: "50%",
+                        background: "#eff6ff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "15px",
+                        color: "#2563eb",
+                        fontSize: "22px",
+                      }}
+                    >
+                      <i className="fas fa-mobile-screen-button" />
+                    </div>
+
+                    <strong
+                      style={{
+                        color: "#111827",
+                        fontSize: "17px",
+                      }}
+                    >
+                      {brandName}
+                    </strong>
+
+                    <span
+                      style={{
+                        marginTop: "8px",
+                        color: "#2563eb",
+                        fontSize: "13px",
+                      }}
+                    >
+                      View models →
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
-
-      <div className="calculator-explain-grid">
-        <div><span>01</span><h3>TAC</h3><p>The first 8 digits identify the device type allocation.</p></div>
-        <div><span>02</span><h3>Serial number</h3><p>The following 6 digits identify the individual device sequence.</p></div>
-        <div><span>03</span><h3>Check digit</h3><p>The final digit is calculated with the Luhn algorithm.</p></div>
-      </div>
-
-      <section className="calculator-detail-panel">
-        <div><span className="section-eyebrow">HOW LUHN WORKS</span><h2>Validate the final digit in three steps</h2><p>Starting from the right, every second digit is doubled, digits are reduced when necessary, and the total is used to select a final digit that makes the sum divisible by 10.</p></div>
-        <div className="step-explainer">
-          <div className="step-explainer-card"><span>STEP 01</span><h3>Double alternating digits</h3><p>Work from the right side of the first 14 digits and double every second value.</p></div>
-          <div className="step-explainer-card"><span>STEP 02</span><h3>Sum the result</h3><p>Add the transformed values together and inspect the remainder modulo 10.</p></div>
-          <div className="step-explainer-card"><span>STEP 03</span><h3>Choose the check digit</h3><p>The final digit is the amount needed to reach the next multiple of ten.</p></div>
-        </div>
-      </section>
-
-      {luhnSteps ? <div className="imei-steps-summary"><p>Transformed values: <strong>{luhnSteps.doubled.join(", ")}</strong></p><p>Sum: <strong>{luhnSteps.sum}</strong></p><p>Check digit: <strong>{luhnSteps.checkDigit}</strong></p><p>IMEI: <strong>{luhnSteps.first8}-{luhnSteps.next6}-{luhnSteps.checkDigit}</strong></p></div> : <div className="imei-steps-summary imei-steps-placeholder">Calculate an IMEI above to see the worked Luhn result.</div>}
-
-      <div className="warning-modern"><i className="fas fa-triangle-exclamation" /> <span><strong>Educational / development use.</strong> Generated values are test data and are not intended to identify, unlock, clone or impersonate real devices.</span></div>
-    </div>
+    </main>
   );
 }

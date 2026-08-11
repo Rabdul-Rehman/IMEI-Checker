@@ -11,122 +11,310 @@ const EMPTY_ANALYTICS = {
 
 function formatDate(value) {
   if (!value) return "—";
-  return new Date(value).toLocaleString();
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleString();
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat().format(Number(value || 0));
+  return new Intl.NumberFormat().format(
+    Number(value || 0)
+  );
 }
 
 function statusClass(status) {
-  if (status >= 500) return "status danger";
-  if (status >= 400) return "status warning";
+  const code = Number(status || 0);
+
+  if (code >= 500) {
+    return "status danger";
+  }
+
+  if (code >= 400) {
+    return "status warning";
+  }
+
   return "status success";
+}
+
+async function readJsonResponse(response) {
+  let result = null;
+
+  try {
+    result = await response.json();
+  } catch {
+    result = null;
+  }
+
+  return {
+    response,
+    result,
+  };
 }
 
 export default function AdminDashboard() {
   const [overview, setOverview] = useState(null);
   const [requests, setRequests] = useState([]);
   const [apiKeys, setApiKeys] = useState([]);
-  const [analytics, setAnalytics] = useState(EMPTY_ANALYTICS);
+  const [analytics, setAnalytics] =
+    useState(EMPTY_ANALYTICS);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =====================================================
-  // CREATE CLIENT KEY STATE
-  // =====================================================
+  const [showCreateForm, setShowCreateForm] =
+    useState(false);
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [clientName, setClientName] =
+    useState("");
 
-  const [clientName, setClientName] = useState("");
-  const [dailyLimit, setDailyLimit] = useState("1000");
+  const [dailyLimit, setDailyLimit] =
+    useState("1000");
 
-  const [creatingKey, setCreatingKey] = useState(false);
-  const [createError, setCreateError] = useState("");
+  const [creatingKey, setCreatingKey] =
+    useState(false);
 
-  const [createdKey, setCreatedKey] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [createError, setCreateError] =
+    useState("");
 
-    // =====================================================
-  // MANAGE CLIENT STATE
-  // =====================================================
+  const [createdKey, setCreatedKey] =
+    useState(null);
 
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [copied, setCopied] =
+    useState(false);
 
-  const [editName, setEditName] = useState("");
-  const [editDailyLimit, setEditDailyLimit] = useState("");
-  const [editIsActive, setEditIsActive] = useState(true);
+  const [selectedClient, setSelectedClient] =
+    useState(null);
 
-  const [savingClient, setSavingClient] = useState(false);
-  const [manageError, setManageError] = useState("");
+  const [editName, setEditName] =
+    useState("");
 
-  // =====================================================
-  // LOAD ADMIN DATA
-  // =====================================================
+  const [editDailyLimit, setEditDailyLimit] =
+    useState("");
+
+  const [editIsActive, setEditIsActive] =
+    useState(true);
+
+  const [savingClient, setSavingClient] =
+    useState(false);
+
+  const [manageError, setManageError] =
+    useState("");
+
+  /*
+  =========================================================
+  LOAD ADMIN DATA
+  =========================================================
+  */
 
   async function fetchAdminData() {
     try {
       setLoading(true);
       setError("");
 
-      const [overviewRes, requestsRes, keysRes, analyticsRes] =
-        await Promise.all([
-          fetch("/api/admin/overview", {
-            cache: "no-store",
-          }),
-
-          fetch("/api/admin/recent-requests", {
-            cache: "no-store",
-          }),
-
-          fetch("/api/admin/api-keys", {
-            cache: "no-store",
-          }),
-
-          fetch("/api/admin/analytics?days=7", {
-            cache: "no-store",
-          }),
-        ]);
-
-      const responses = [
-        [overviewRes, "Failed to load admin overview"],
-        [requestsRes, "Failed to load requests"],
-        [keysRes, "Failed to load API keys"],
-        [analyticsRes, "Failed to load analytics"],
+      const endpoints = [
+        {
+          key: "overview",
+          url: "/api/admin/overview",
+        },
+        {
+          key: "requests",
+          url: "/api/admin/recent-requests",
+        },
+        {
+          key: "keys",
+          url: "/api/admin/api-keys",
+        },
+        {
+          key: "analytics",
+          url: "/api/admin/analytics?days=7",
+        },
       ];
 
-      for (const [response, message] of responses) {
-        if (!response.ok) {
-          throw new Error(message);
-        }
-      }
+      /*
+      -------------------------------------------------------
+      FETCH ALL ENDPOINTS
+      -------------------------------------------------------
+      */
 
-      const [
-        overviewJson,
-        requestsJson,
-        keysJson,
-        analyticsJson,
-      ] = await Promise.all([
-        overviewRes.json(),
-        requestsRes.json(),
-        keysRes.json(),
-        analyticsRes.json(),
-      ]);
+      const responses = await Promise.all(
+        endpoints.map(async (endpoint) => {
+          try {
+            const response = await fetch(
+              endpoint.url,
+              {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                  Accept: "application/json",
+                },
+              }
+            );
 
-      setOverview(overviewJson.data || null);
-      setRequests(requestsJson.data || []);
-      setApiKeys(keysJson.data || []);
-      setAnalytics(
-        analyticsJson.data || EMPTY_ANALYTICS
+            const { response: res, result } =
+              await readJsonResponse(
+                response
+              );
+
+            return {
+              key: endpoint.key,
+              ok:
+                res.ok &&
+                result?.success !== false,
+              status: res.status,
+              data: result?.data,
+              error:
+                result?.error ||
+                `Request failed with status ${res.status}`,
+            };
+          } catch (err) {
+            return {
+              key: endpoint.key,
+              ok: false,
+              status: 0,
+              data: null,
+              error:
+                err?.message ||
+                "Network request failed",
+            };
+          }
+        })
       );
 
+      /*
+      -------------------------------------------------------
+      FIND RESULTS
+      -------------------------------------------------------
+      */
+
+      const overviewResult =
+        responses.find(
+          (item) =>
+            item.key === "overview"
+        );
+
+      const requestsResult =
+        responses.find(
+          (item) =>
+            item.key === "requests"
+        );
+
+      const keysResult =
+        responses.find(
+          (item) =>
+            item.key === "keys"
+        );
+
+      const analyticsResult =
+        responses.find(
+          (item) =>
+            item.key === "analytics"
+        );
+
+      /*
+      -------------------------------------------------------
+      OVERVIEW
+      -------------------------------------------------------
+      */
+
+      if (overviewResult?.ok) {
+        setOverview(
+          overviewResult.data || null
+        );
+      } else {
+        setOverview(null);
+      }
+
+      /*
+      -------------------------------------------------------
+      REQUESTS
+      -------------------------------------------------------
+
+      IMPORTANT:
+
+      Requests are allowed to fail without
+      crashing the entire dashboard.
+
+      This is intentional because the backend
+      recent-requests endpoint can fail independently.
+      */
+
+      if (requestsResult?.ok) {
+        setRequests(
+          Array.isArray(
+            requestsResult.data
+          )
+            ? requestsResult.data
+            : []
+        );
+      } else {
+        console.error(
+          "Recent requests failed:",
+          requestsResult?.error
+        );
+
+        setRequests([]);
+      }
+
+      /*
+      -------------------------------------------------------
+      API KEYS
+      -------------------------------------------------------
+      */
+
+      if (keysResult?.ok) {
+        setApiKeys(
+          Array.isArray(keysResult.data)
+            ? keysResult.data
+            : []
+        );
+      } else {
+        setApiKeys([]);
+      }
+
+      /*
+      -------------------------------------------------------
+      ANALYTICS
+      -------------------------------------------------------
+      */
+
+      if (analyticsResult?.ok) {
+        setAnalytics(
+          analyticsResult.data ||
+            EMPTY_ANALYTICS
+        );
+      } else {
+        setAnalytics(
+          EMPTY_ANALYTICS
+        );
+      }
+
+      /*
+      -------------------------------------------------------
+      ONLY SHOW A PAGE ERROR IF THE CORE OVERVIEW FAILS
+      -------------------------------------------------------
+      */
+
+      if (!overviewResult?.ok) {
+        throw new Error(
+          overviewResult?.error ||
+            "Failed to load admin overview"
+        );
+      }
+
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Admin dashboard error:",
+        err
+      );
 
       setError(
-        err.message ||
-          "Something went wrong"
+        err?.message ||
+          "Something went wrong while loading the dashboard."
       );
 
     } finally {
@@ -138,9 +326,11 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, []);
 
-  // =====================================================
-  // CREATE CLIENT API KEY
-  // =====================================================
+  /*
+  =========================================================
+  CREATE CLIENT API KEY
+  =========================================================
+  */
 
   async function createClientApiKey(event) {
     event.preventDefault();
@@ -149,8 +339,11 @@ export default function AdminDashboard() {
     setCreatedKey(null);
     setCopied(false);
 
-    const name = clientName.trim();
-    const limit = Number(dailyLimit);
+    const name =
+      clientName.trim();
+
+    const limit =
+      Number(dailyLimit);
 
     if (!name) {
       setCreateError(
@@ -173,63 +366,74 @@ export default function AdminDashboard() {
     try {
       setCreatingKey(true);
 
-      const response = await fetch(
-        "/api/admin/api-keys",
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          "/api/admin/api-keys",
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
 
-          body: JSON.stringify({
-            name,
-            daily_limit: limit,
-          }),
+              Accept:
+                "application/json",
+            },
 
-          cache: "no-store",
-        }
-      );
+            body: JSON.stringify({
+              name,
+              daily_limit: limit,
+            }),
 
-      const result = await response.json();
+            cache: "no-store",
+          }
+        );
 
-      if (!response.ok || !result.success) {
+      const { result } =
+        await readJsonResponse(
+          response
+        );
+
+      if (
+        !response.ok ||
+        !result?.success
+      ) {
         throw new Error(
-          result.error ||
-            "Failed to create API key"
+          result?.error ||
+            `Failed to create API key (${response.status})`
         );
       }
 
-      /*
-       * IMPORTANT:
-       *
-       * result.data.api_key is the raw secret.
-       *
-       * It is returned only during creation.
-       */
+      if (
+        !result?.data?.api_key ||
+        !result?.data?.key
+      ) {
+        throw new Error(
+          "API key was created but the server returned an invalid response."
+        );
+      }
 
       setCreatedKey({
-        apiKey: result.data.api_key,
-        key: result.data.key,
+        apiKey:
+          result.data.api_key,
+
+        key:
+          result.data.key,
       });
 
       setClientName("");
       setDailyLimit("1000");
 
-      /*
-       * Reload dashboard data.
-       *
-       * This causes the new client to immediately
-       * appear in the API Keys table and Limits section.
-       */
-
       await fetchAdminData();
 
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Create API key error:",
+        err
+      );
 
       setCreateError(
-        err.message ||
+        err?.message ||
           "Failed to create API key"
       );
 
@@ -238,9 +442,11 @@ export default function AdminDashboard() {
     }
   }
 
-  // =====================================================
-  // COPY CREATED KEY
-  // =====================================================
+  /*
+  =========================================================
+  COPY CREATED KEY
+  =========================================================
+  */
 
   async function copyCreatedKey() {
     if (!createdKey?.apiKey) {
@@ -258,36 +464,40 @@ export default function AdminDashboard() {
         setCopied(false);
       }, 2000);
 
-    } catch (error) {
+    } catch (err) {
       console.error(
-        "Failed to copy API key",
-        error
+        "Failed to copy API key:",
+        err
       );
     }
   }
 
-    // =====================================================
-  // OPEN MANAGE CLIENT
-  // =====================================================
+  /*
+  =========================================================
+  MANAGE CLIENT
+  =========================================================
+  */
 
   function openManageClient(client) {
     setSelectedClient(client);
 
-    setEditName(client.name || "");
-    setEditDailyLimit(
-      String(client.daily_limit || 1000)
+    setEditName(
+      client?.name || ""
     );
+
+    setEditDailyLimit(
+      client?.daily_limit === null ||
+      client?.daily_limit === undefined
+        ? ""
+        : String(client.daily_limit)
+    );
+
     setEditIsActive(
-      Boolean(client.is_active)
+      Boolean(client?.is_active)
     );
 
     setManageError("");
   }
-
-
-  // =====================================================
-  // CLOSE MANAGE CLIENT
-  // =====================================================
 
   function closeManageClient() {
     if (savingClient) {
@@ -298,10 +508,11 @@ export default function AdminDashboard() {
     setManageError("");
   }
 
-
-  // =====================================================
-  // SAVE CLIENT CHANGES
-  // =====================================================
+  /*
+  =========================================================
+  SAVE CLIENT CHANGES
+  =========================================================
+  */
 
   async function saveClientChanges(event) {
     event.preventDefault();
@@ -312,8 +523,11 @@ export default function AdminDashboard() {
 
     setManageError("");
 
-    const name = editName.trim();
-    const limit = Number(editDailyLimit);
+    const name =
+      editName.trim();
+
+    const limit =
+      Number(editDailyLimit);
 
     if (!name) {
       setManageError(
@@ -336,43 +550,61 @@ export default function AdminDashboard() {
     try {
       setSavingClient(true);
 
-      const response = await fetch(
-        `/api/admin/api-keys/${selectedClient.id}`,
-        {
-          method: "PATCH",
+      const response =
+        await fetch(
+          `/api/admin/api-keys/${selectedClient.id}`,
+          {
+            method: "PATCH",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
 
-          body: JSON.stringify({
-            name,
-            daily_limit: limit,
-            is_active: editIsActive,
-          }),
+              Accept:
+                "application/json",
+            },
 
-          cache: "no-store",
-        }
-      );
+            body: JSON.stringify({
+              name,
+              daily_limit:
+                limit,
 
-      const result = await response.json();
+              is_active:
+                editIsActive,
+            }),
 
-      if (!response.ok || !result.success) {
+            cache: "no-store",
+          }
+        );
+
+      const { result } =
+        await readJsonResponse(
+          response
+        );
+
+      if (
+        !response.ok ||
+        !result?.success
+      ) {
         throw new Error(
-          result.error ||
-            "Failed to update client"
+          result?.error ||
+            `Failed to update client (${response.status})`
         );
       }
 
-      closeManageClient();
+      setSelectedClient(null);
+      setManageError("");
 
       await fetchAdminData();
 
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Update client error:",
+        err
+      );
 
       setManageError(
-        err.message ||
+        err?.message ||
           "Failed to update client"
       );
 
@@ -381,9 +613,11 @@ export default function AdminDashboard() {
     }
   }
 
-  // =====================================================
-  // CLOSE CREATE FORM
-  // =====================================================
+  /*
+  =========================================================
+  CLOSE CREATE FORM
+  =========================================================
+  */
 
   function closeCreateForm() {
     if (creatingKey) {
@@ -396,9 +630,11 @@ export default function AdminDashboard() {
     setCopied(false);
   }
 
-  // =====================================================
-  // DASHBOARD DATA
-  // =====================================================
+  /*
+  =========================================================
+  DASHBOARD DATA
+  =========================================================
+  */
 
   const requestsData =
     overview?.requests || {};
@@ -414,53 +650,73 @@ export default function AdminDashboard() {
 
   const successRequests =
     Math.max(
-      (requestsData.total || 0) -
-        (requestsData.errors || 0),
+      Number(
+        requestsData.total || 0
+      ) -
+        Number(
+          requestsData.errors || 0
+        ),
       0
     );
 
   const successRate =
-    requestsData.total > 0
+    Number(
+      requestsData.total || 0
+    ) > 0
       ? (
           (successRequests /
-            requestsData.total) *
+            Number(
+              requestsData.total
+            )) *
           100
         ).toFixed(1)
       : "0.0";
 
   const maxDailyRequests =
-    useMemo(
-      () =>
-        Math.max(
-          ...(analytics.days || []).map(
-            (item) =>
-              Number(
-                item.requests || 0
-              )
-          ),
-          1
-        ),
-      [analytics.days]
-    );
+    useMemo(() => {
+      const values =
+        Array.isArray(
+          analytics?.days
+        )
+          ? analytics.days.map(
+              (item) =>
+                Number(
+                  item?.requests || 0
+                )
+            )
+          : [];
+
+      return Math.max(
+        ...values,
+        1
+      );
+    }, [analytics]);
 
   const maxEndpointRequests =
-    useMemo(
-      () =>
-        Math.max(
-          ...(analytics.endpoints || []).map(
-            (item) =>
-              Number(
-                item.requests || 0
-              )
-          ),
-          1
-        ),
-      [analytics.endpoints]
-    );
+    useMemo(() => {
+      const values =
+        Array.isArray(
+          analytics?.endpoints
+        )
+          ? analytics.endpoints.map(
+              (item) =>
+                Number(
+                  item?.requests || 0
+                )
+            )
+          : [];
 
-  // =====================================================
-  // LOADING
-  // =====================================================
+      return Math.max(
+        ...values,
+        1
+      );
+    }, [analytics]);
+
+  /*
+  =========================================================
+  LOADING
+  =========================================================
+  */
 
   if (loading) {
     return (
@@ -472,40 +728,48 @@ export default function AdminDashboard() {
     );
   }
 
-  // =====================================================
-  // ERROR
-  // =====================================================
+  /*
+  =========================================================
+  ERROR
+  =========================================================
+  */
 
   if (error) {
     return (
       <main className="admin-shell">
         <div className="admin-error">
+
           <h2>
             Unable to load dashboard
           </h2>
 
-          <p>{error}</p>
+          <p>
+            {error}
+          </p>
 
           <button
-            onClick={fetchAdminData}
+            onClick={
+              fetchAdminData
+            }
           >
             Try again
           </button>
+
         </div>
       </main>
     );
   }
 
-  // =====================================================
-  // DASHBOARD
-  // =====================================================
+  /*
+  =========================================================
+  DASHBOARD
+  =========================================================
+  */
 
   return (
     <main className="admin-shell">
 
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
+      {/* SIDEBAR */}
 
       <aside className="admin-sidebar">
 
@@ -584,10 +848,7 @@ export default function AdminDashboard() {
 
       </aside>
 
-
-      {/* =================================================
-          MAIN
-      ================================================= */}
+      {/* MAIN */}
 
       <section className="admin-main">
 
@@ -614,17 +875,16 @@ export default function AdminDashboard() {
 
           <button
             className="refresh-button"
-            onClick={fetchAdminData}
+            onClick={
+              fetchAdminData
+            }
           >
             ↻ Refresh
           </button>
 
         </header>
 
-
-        {/* =================================================
-            OVERVIEW
-        ================================================= */}
+        {/* OVERVIEW */}
 
         <section
           id="overview"
@@ -693,10 +953,7 @@ export default function AdminDashboard() {
 
         </section>
 
-
-        {/* =================================================
-            PERFORMANCE
-        ================================================= */}
+        {/* PERFORMANCE */}
 
         <section className="section">
 
@@ -725,7 +982,9 @@ export default function AdminDashboard() {
               )}
               subtitle="Requests returning HTTP 400+"
               danger={
-                requestsData.errors > 0
+                Number(
+                  requestsData.errors || 0
+                ) > 0
               }
             />
 
@@ -741,10 +1000,7 @@ export default function AdminDashboard() {
 
         </section>
 
-
-        {/* =================================================
-            ANALYTICS
-        ================================================= */}
+        {/* ANALYTICS */}
 
         <section
           id="analytics"
@@ -771,8 +1027,9 @@ export default function AdminDashboard() {
 
           </div>
 
-
           <div className="analytics-grid">
+
+            {/* REQUESTS PER DAY */}
 
             <div className="panel">
 
@@ -782,46 +1039,65 @@ export default function AdminDashboard() {
 
               <div className="bar-chart">
 
-                {(analytics.days || []).map(
-                  (item) => (
+                {(analytics?.days || []).length ===
+                0 ? (
 
-                    <div
-                      className="bar-item"
-                      key={item.date}
-                    >
+                  <div className="empty">
+                    No analytics data yet.
+                  </div>
 
-                      <span className="bar-value">
-                        {item.requests}
-                      </span>
+                ) : (
 
-                      <div className="bar-track">
+                  analytics.days.map(
+                    (item) => (
 
-                        <div
-                          className="bar-fill"
-                          style={{
-                            height: `${
-                              (item.requests /
-                                maxDailyRequests) *
-                              100
-                            }%`,
-                          }}
-                        />
+                      <div
+                        className="bar-item"
+                        key={item.date}
+                      >
+
+                        <span className="bar-value">
+                          {formatNumber(
+                            item.requests
+                          )}
+                        </span>
+
+                        <div className="bar-track">
+
+                          <div
+                            className="bar-fill"
+                            style={{
+                              height: `${
+                                (
+                                  Number(
+                                    item.requests ||
+                                      0
+                                  ) /
+                                  maxDailyRequests
+                                ) *
+                                100
+                              }%`,
+                            }}
+                          />
+
+                        </div>
+
+                        <span className="bar-label">
+                          {item.label}
+                        </span>
 
                       </div>
 
-                      <span className="bar-label">
-                        {item.label}
-                      </span>
-
-                    </div>
-
+                    )
                   )
+
                 )}
 
               </div>
 
             </div>
 
+            {/* STATUS */}
 
             <div className="panel">
 
@@ -831,55 +1107,78 @@ export default function AdminDashboard() {
 
               <div className="status-list">
 
-                {(analytics.statuses || []).map(
-                  (item) => (
+                {(analytics?.statuses || []).length ===
+                0 ? (
 
-                    <div
-                      className="status-row"
-                      key={item.status}
-                    >
+                  <div className="empty">
+                    No status data yet.
+                  </div>
 
-                      <span
-                        className={statusClass(
-                          Number(item.status)
-                        )}
+                ) : (
+
+                  analytics.statuses.map(
+                    (item) => (
+
+                      <div
+                        className="status-row"
+                        key={item.status}
                       >
-                        {item.status}
-                      </span>
 
-                      <div className="mini-track">
+                        <span
+                          className={statusClass(
+                            Number(
+                              item.status
+                            )
+                          )}
+                        >
+                          {item.status}
+                        </span>
 
-                        <div
-                          className="mini-fill"
-                          style={{
-                            width: `${Math.min(
-                              (item.requests /
-                                Math.max(
-                                  requestsData.total ||
-                                    1,
-                                  1
-                                )) *
-                                100,
-                              100
-                            )}%`,
-                          }}
-                        />
+                        <div className="mini-track">
+
+                          <div
+                            className="mini-fill"
+                            style={{
+                              width: `${Math.min(
+                                (
+                                  Number(
+                                    item.requests ||
+                                      0
+                                  ) /
+                                  Math.max(
+                                    Number(
+                                      requestsData.total ||
+                                        1
+                                    ),
+                                    1
+                                  )
+                                ) *
+                                  100,
+                                100
+                              )}%`,
+                            }}
+                          />
+
+                        </div>
+
+                        <strong>
+                          {formatNumber(
+                            item.requests
+                          )}
+                        </strong>
 
                       </div>
 
-                      <strong>
-                        {item.requests}
-                      </strong>
-
-                    </div>
-
+                    )
                   )
+
                 )}
 
               </div>
 
             </div>
 
+            {/* ENDPOINTS */}
 
             <div className="panel endpoint-panel">
 
@@ -887,40 +1186,58 @@ export default function AdminDashboard() {
                 Most-used endpoints
               </h3>
 
-              {(analytics.endpoints || []).map(
-                (item) => (
+              {(analytics?.endpoints || []).length ===
+              0 ? (
 
-                  <div
-                    className="endpoint-row"
-                    key={item.endpoint}
-                  >
+                <div className="empty">
+                  No endpoint data yet.
+                </div>
 
-                    <div className="endpoint-name">
-                      {item.endpoint}
+              ) : (
+
+                analytics.endpoints.map(
+                  (item) => (
+
+                    <div
+                      className="endpoint-row"
+                      key={item.endpoint}
+                    >
+
+                      <div className="endpoint-name">
+                        {item.endpoint}
+                      </div>
+
+                      <div className="endpoint-track">
+
+                        <div
+                          className="endpoint-fill"
+                          style={{
+                            width: `${
+                              (
+                                Number(
+                                  item.requests ||
+                                    0
+                                ) /
+                                maxEndpointRequests
+                              ) *
+                              100
+                            }%`,
+                          }}
+                        />
+
+                      </div>
+
+                      <strong>
+                        {formatNumber(
+                          item.requests
+                        )}
+                      </strong>
+
                     </div>
 
-                    <div className="endpoint-track">
-
-                      <div
-                        className="endpoint-fill"
-                        style={{
-                          width: `${
-                            (item.requests /
-                              maxEndpointRequests) *
-                            100
-                          }%`,
-                        }}
-                      />
-
-                    </div>
-
-                    <strong>
-                      {item.requests}
-                    </strong>
-
-                  </div>
-
+                  )
                 )
+
               )}
 
             </div>
@@ -929,10 +1246,7 @@ export default function AdminDashboard() {
 
         </section>
 
-
-        {/* =================================================
-            API KEYS
-        ================================================= */}
+        {/* API KEYS */}
 
         <section
           id="api-keys"
@@ -964,10 +1278,7 @@ export default function AdminDashboard() {
 
           </div>
 
-
-          {/* =================================================
-              CREATE CLIENT FORM
-          ================================================= */}
+          {/* CREATE FORM */}
 
           {showCreateForm && (
 
@@ -998,14 +1309,15 @@ export default function AdminDashboard() {
 
                     <button
                       type="button"
-                      onClick={closeCreateForm}
+                      onClick={
+                        closeCreateForm
+                      }
                       className="close-button"
                     >
                       ×
                     </button>
 
                   </div>
-
 
                   <form
                     onSubmit={
@@ -1026,11 +1338,12 @@ export default function AdminDashboard() {
                             event.target.value
                           )
                         }
-                        disabled={creatingKey}
+                        disabled={
+                          creatingKey
+                        }
                       />
 
                     </label>
-
 
                     <label>
                       Daily request limit
@@ -1039,17 +1352,20 @@ export default function AdminDashboard() {
                         type="number"
                         min="1"
                         max="1000000"
-                        value={dailyLimit}
+                        value={
+                          dailyLimit
+                        }
                         onChange={(event) =>
                           setDailyLimit(
                             event.target.value
                           )
                         }
-                        disabled={creatingKey}
+                        disabled={
+                          creatingKey
+                        }
                       />
 
                     </label>
-
 
                     {createError && (
 
@@ -1059,7 +1375,6 @@ export default function AdminDashboard() {
 
                     )}
 
-
                     <div className="create-key-actions">
 
                       <button
@@ -1067,7 +1382,9 @@ export default function AdminDashboard() {
                         onClick={
                           closeCreateForm
                         }
-                        disabled={creatingKey}
+                        disabled={
+                          creatingKey
+                        }
                         className="secondary-button"
                       >
                         Cancel
@@ -1075,7 +1392,9 @@ export default function AdminDashboard() {
 
                       <button
                         type="submit"
-                        disabled={creatingKey}
+                        disabled={
+                          creatingKey
+                        }
                         className="create-button"
                       >
                         {creatingKey
@@ -1090,10 +1409,6 @@ export default function AdminDashboard() {
                 </>
 
               ) : (
-
-                /* =================================================
-                   CREATED KEY RESULT
-                ================================================= */
 
                 <div className="created-key-result">
 
@@ -1114,10 +1429,10 @@ export default function AdminDashboard() {
                     API key database.
                   </p>
 
-
                   <div className="created-client-info">
 
                     <div>
+
                       <span>
                         Client
                       </span>
@@ -1125,9 +1440,11 @@ export default function AdminDashboard() {
                       <strong>
                         {createdKey.key.name}
                       </strong>
+
                     </div>
 
                     <div>
+
                       <span>
                         Daily limit
                       </span>
@@ -1138,10 +1455,10 @@ export default function AdminDashboard() {
                             .daily_limit
                         )}
                       </strong>
+
                     </div>
 
                   </div>
-
 
                   <div className="raw-key-box">
 
@@ -1154,7 +1471,6 @@ export default function AdminDashboard() {
                     </code>
 
                   </div>
-
 
                   <div className="warning-box">
 
@@ -1169,12 +1485,13 @@ export default function AdminDashboard() {
 
                   </div>
 
-
                   <div className="create-key-actions">
 
                     <button
                       type="button"
-                      onClick={copyCreatedKey}
+                      onClick={
+                        copyCreatedKey
+                      }
                       className="create-button"
                     >
                       {copied
@@ -1184,7 +1501,9 @@ export default function AdminDashboard() {
 
                     <button
                       type="button"
-                      onClick={closeCreateForm}
+                      onClick={
+                        closeCreateForm
+                      }
                       className="secondary-button"
                     >
                       Done
@@ -1200,10 +1519,7 @@ export default function AdminDashboard() {
 
           )}
 
-
-          {/* =================================================
-              API KEYS TABLE
-          ================================================= */}
+          {/* API KEYS TABLE */}
 
           <div className="table-card">
 
@@ -1212,97 +1528,127 @@ export default function AdminDashboard() {
               <thead>
 
                 <tr>
-                  <th>Name</th>
-                  <th>Key</th>
-                  <th>Status</th>
-                  <th>Usage</th>
-                  <th>Limit</th>
-                  <th>Last used</th>
-                  <th>Actions</th>
+
+                  <th>
+                    Name
+                  </th>
+
+                  <th>
+                    Key
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Usage
+                  </th>
+
+                  <th>
+                    Limit
+                  </th>
+
+                  <th>
+                    Last used
+                  </th>
+
+                  <th>
+                    Actions
+                  </th>
+
                 </tr>
 
               </thead>
-
 
               <tbody>
 
                 {apiKeys.length === 0 ? (
 
                   <tr>
+
                     <td
-                      colSpan="6"
+                      colSpan="7"
                       className="empty"
                     >
                       No API keys found.
                     </td>
+
                   </tr>
 
                 ) : (
 
-                  apiKeys.map((key) => (
+                  apiKeys.map(
+                    (key) => (
 
-                    <tr key={key.id}>
+                      <tr key={key.id}>
 
-                      <td>
-                        <strong>
-                          {key.name}
-                        </strong>
-                      </td>
+                        <td>
+                          <strong>
+                            {key.name}
+                          </strong>
+                        </td>
 
-                      <td>
-                        <code>
-                          {key.key_prefix}...
-                        </code>
-                      </td>
+                        <td>
+                          <code>
+                            {key.key_prefix}...
+                          </code>
+                        </td>
 
-                      <td>
+                        <td>
 
-                        <span
-                          className={`badge ${
-                            key.is_active
-                              ? "active"
-                              : "inactive"
-                          }`}
-                        >
-                          {key.is_active
-                            ? "Active"
-                            : "Disabled"}
-                        </span>
+                          <span
+                            className={`badge ${
+                              key.is_active
+                                ? "active"
+                                : "inactive"
+                            }`}
+                          >
+                            {key.is_active
+                              ? "Active"
+                              : "Disabled"}
+                          </span>
 
-                      </td>
+                        </td>
 
-                      <td>
-                        {formatNumber(
-                          key.requests_count
-                        )}
-                      </td>
+                        <td>
+                          {formatNumber(
+                            key.requests_count
+                          )}
+                        </td>
 
-                      <td>
-                        {formatNumber(
-                          key.daily_limit
-                        )}
-                      </td>
+                        <td>
+                          {formatNumber(
+                            key.daily_limit
+                          )}
+                        </td>
 
-                      <td>
-                        {formatDate(
-                          key.last_used_at
-                        )}
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="manage-button"
-                          onClick={() =>
-                            openManageClient(key)
-                          }
-                        >
-                          Manage
-                        </button>
-                      </td>
+                        <td>
+                          {formatDate(
+                            key.last_used_at
+                          )}
+                        </td>
 
-                    </tr>
+                        <td>
 
-                  ))
+                          <button
+                            type="button"
+                            className="manage-button"
+                            onClick={() =>
+                              openManageClient(
+                                key
+                              )
+                            }
+                          >
+                            Manage
+                          </button>
+
+                        </td>
+
+                      </tr>
+
+                    )
+                  )
 
                 )}
 
@@ -1314,9 +1660,7 @@ export default function AdminDashboard() {
 
         </section>
 
-                {/* =================================================
-            MANAGE CLIENT MODAL
-        ================================================= */}
+        {/* MANAGE CLIENT MODAL */}
 
         {selectedClient && (
 
@@ -1346,18 +1690,23 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   className="close-button"
-                  onClick={closeManageClient}
-                  disabled={savingClient}
+                  onClick={
+                    closeManageClient
+                  }
+                  disabled={
+                    savingClient
+                  }
                 >
                   ×
                 </button>
 
               </div>
 
-
               <form
                 className="manage-form"
-                onSubmit={saveClientChanges}
+                onSubmit={
+                  saveClientChanges
+                }
               >
 
                 <div className="manage-client-preview">
@@ -1372,7 +1721,6 @@ export default function AdminDashboard() {
 
                 </div>
 
-
                 <label>
 
                   Client name
@@ -1385,11 +1733,12 @@ export default function AdminDashboard() {
                         event.target.value
                       )
                     }
-                    disabled={savingClient}
+                    disabled={
+                      savingClient
+                    }
                   />
 
                 </label>
-
 
                 <label>
 
@@ -1399,17 +1748,20 @@ export default function AdminDashboard() {
                     type="number"
                     min="1"
                     max="1000000"
-                    value={editDailyLimit}
+                    value={
+                      editDailyLimit
+                    }
                     onChange={(event) =>
                       setEditDailyLimit(
                         event.target.value
                       )
                     }
-                    disabled={savingClient}
+                    disabled={
+                      savingClient
+                    }
                   />
 
                 </label>
-
 
                 <label>
 
@@ -1427,7 +1779,9 @@ export default function AdminDashboard() {
                           "active"
                       )
                     }
-                    disabled={savingClient}
+                    disabled={
+                      savingClient
+                    }
                   >
 
                     <option value="active">
@@ -1442,7 +1796,6 @@ export default function AdminDashboard() {
 
                 </label>
 
-
                 {manageError && (
 
                   <div className="manage-error">
@@ -1451,14 +1804,17 @@ export default function AdminDashboard() {
 
                 )}
 
-
                 <div className="manage-modal-actions">
 
                   <button
                     type="button"
                     className="secondary-button"
-                    onClick={closeManageClient}
-                    disabled={savingClient}
+                    onClick={
+                      closeManageClient
+                    }
+                    disabled={
+                      savingClient
+                    }
                   >
                     Cancel
                   </button>
@@ -1466,7 +1822,9 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     className="create-button"
-                    disabled={savingClient}
+                    disabled={
+                      savingClient
+                    }
                   >
                     {savingClient
                       ? "Saving..."
@@ -1483,10 +1841,7 @@ export default function AdminDashboard() {
 
         )}
 
-
-        {/* =================================================
-            REQUESTS
-        ================================================= */}
+        {/* REQUESTS */}
 
         <section
           id="requests"
@@ -1513,7 +1868,6 @@ export default function AdminDashboard() {
 
           </div>
 
-
           <div className="table-card">
 
             <table>
@@ -1521,28 +1875,48 @@ export default function AdminDashboard() {
               <thead>
 
                 <tr>
-                  <th>Time</th>
-                  <th>API key</th>
-                  <th>Method</th>
-                  <th>Endpoint</th>
-                  <th>Status</th>
-                  <th>Response</th>
+
+                  <th>
+                    Time
+                  </th>
+
+                  <th>
+                    API key
+                  </th>
+
+                  <th>
+                    Method
+                  </th>
+
+                  <th>
+                    Endpoint
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Response
+                  </th>
+
                 </tr>
 
               </thead>
-
 
               <tbody>
 
                 {requests.length === 0 ? (
 
                   <tr>
+
                     <td
                       colSpan="6"
                       className="empty"
                     >
                       No requests recorded yet.
                     </td>
+
                   </tr>
 
                 ) : (
@@ -1550,7 +1924,11 @@ export default function AdminDashboard() {
                   requests.map(
                     (request) => (
 
-                      <tr key={request.id}>
+                      <tr
+                        key={
+                          request.id
+                        }
+                      >
 
                         <td>
                           {formatDate(
@@ -1559,20 +1937,32 @@ export default function AdminDashboard() {
                         </td>
 
                         <td>
-                          {request.api_keys?.name ||
-                            request.api_key_id}
+
+                          {request.api_key
+                            ?.name ||
+                            request.api_keys
+                              ?.name ||
+                            request.api_key_id ||
+                            "Unknown"}
+
                         </td>
 
                         <td>
+
                           <strong>
-                            {request.method}
+                            {request.method ||
+                              "—"}
                           </strong>
+
                         </td>
 
                         <td>
+
                           <code>
-                            {request.endpoint}
+                            {request.endpoint ||
+                              "—"}
                           </code>
+
                         </td>
 
                         <td>
@@ -1582,15 +1972,18 @@ export default function AdminDashboard() {
                               request.status_code
                             )}
                           >
-                            {request.status_code}
+                            {request.status_code ||
+                              "—"}
                           </span>
 
                         </td>
 
                         <td>
+
                           {request.response_time_ms ??
                             "—"}{" "}
                           ms
+
                         </td>
 
                       </tr>
@@ -1608,10 +2001,7 @@ export default function AdminDashboard() {
 
         </section>
 
-
-        {/* =================================================
-            LIMITS
-        ================================================= */}
+        {/* LIMITS */}
 
         <section
           id="limits"
@@ -1626,119 +2016,131 @@ export default function AdminDashboard() {
             API limits
           </h2>
 
-
           <div className="limit-grid">
 
-            {apiKeys.map((key) => {
+            {apiKeys.length === 0 ? (
 
-              const used =
-                Number(
-                  key.requests_count || 0
-                );
+              <div className="empty">
+                No API clients available.
+              </div>
 
-              const limit =
-                Number(
-                  key.daily_limit || 0
-                );
+            ) : (
 
-              const percentage =
-                limit > 0
-                  ? Math.min(
-                      (used / limit) * 100,
-                      100
-                    )
-                  : 0;
+              apiKeys.map(
+                (key) => {
 
+                  const used =
+                    Number(
+                      key.requests_count ||
+                        0
+                    );
 
-              return (
+                  const limit =
+                    Number(
+                      key.daily_limit ||
+                        0
+                    );
 
-                <div
-                  className="limit-card"
-                  key={key.id}
-                >
-
-                  <div className="limit-top">
-
-                    <strong>
-                      {key.name}
-                    </strong>
-
-                    <span
-                      className={`badge ${
-                        key.is_active
-                          ? "active"
-                          : "inactive"
-                      }`}
-                    >
-                      {key.is_active
-                        ? "Active"
-                        : "Disabled"}
-                    </span>
-
-                  </div>
-
-
-                  <code>
-                    {key.key_prefix}...
-                  </code>
-
-
-                  <div className="limit-numbers">
-
-                    <span>
-                      {formatNumber(
-                        used
-                      )}{" "}
-                      Used
-                    </span>
-
-                    <span>
-                      {formatNumber(
-                        Math.max(
-                          limit - used,
-                          0
+                  const percentage =
+                    limit > 0
+                      ? Math.min(
+                          (
+                            used /
+                            limit
+                          ) *
+                            100,
+                          100
                         )
-                      )}{" "}
-                      Remaining
-                    </span>
+                      : 0;
 
-                  </div>
-
-
-                  <span className="muted">
-                    {formatNumber(
-                      limit
-                    )}{" "}
-                    Daily limit
-                  </span>
-
-
-                  <div className="progress">
+                  return (
 
                     <div
-                      style={{
-                        width: `${percentage}%`,
-                      }}
-                    />
+                      className="limit-card"
+                      key={key.id}
+                    >
 
-                  </div>
+                      <div className="limit-top">
 
+                        <strong>
+                          {key.name}
+                        </strong>
 
-                  <strong>
-                    {percentage.toFixed(1)}%
-                    {" "}used
-                  </strong>
+                        <span
+                          className={`badge ${
+                            key.is_active
+                              ? "active"
+                              : "inactive"
+                          }`}
+                        >
+                          {key.is_active
+                            ? "Active"
+                            : "Disabled"}
+                        </span>
 
-                </div>
+                      </div>
 
-              );
+                      <code>
+                        {key.key_prefix}...
+                      </code>
 
-            })}
+                      <div className="limit-numbers">
+
+                        <span>
+                          {formatNumber(
+                            used
+                          )}{" "}
+                          Used
+                        </span>
+
+                        <span>
+                          {formatNumber(
+                            Math.max(
+                              limit -
+                                used,
+                              0
+                            )
+                          )}{" "}
+                          Remaining
+                        </span>
+
+                      </div>
+
+                      <span className="muted">
+                        {formatNumber(
+                          limit
+                        )}{" "}
+                        Daily limit
+                      </span>
+
+                      <div className="progress">
+
+                        <div
+                          style={{
+                            width: `${percentage}%`,
+                          }}
+                        />
+
+                      </div>
+
+                      <strong>
+                        {percentage.toFixed(
+                          1
+                        )}
+                        % used
+                      </strong>
+
+                    </div>
+
+                  );
+                }
+              )
+
+            )}
 
           </div>
 
         </section>
-
 
         {/* FOOTER */}
 
@@ -1761,18 +2163,18 @@ export default function AdminDashboard() {
 }
 
 
-/* =========================================================
-   SMALL COMPONENTS
-========================================================= */
+/*
+=========================================================
+METRIC
+=========================================================
+*/
 
 function Metric({
   title,
   value,
   subtitle,
 }) {
-
   return (
-
     <article className="metric-card">
 
       <span>
@@ -1788,10 +2190,15 @@ function Metric({
       </small>
 
     </article>
-
   );
 }
 
+
+/*
+=========================================================
+HEALTH CARD
+=========================================================
+*/
 
 function HealthCard({
   title,
@@ -1799,9 +2206,7 @@ function HealthCard({
   subtitle,
   danger,
 }) {
-
   return (
-
     <article
       className={`health-card ${
         danger
@@ -1823,7 +2228,5 @@ function HealthCard({
       </small>
 
     </article>
-
   );
-
 }
