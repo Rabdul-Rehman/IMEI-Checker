@@ -10,7 +10,13 @@ export function getUser() {
 
   if (!user) return null;
 
-  return JSON.parse(user);
+  try {
+    return JSON.parse(user);
+  } catch {
+    // Corrupted/invalid JSON in localStorage should not crash the app -
+    // treat it the same as "not logged in".
+    return null;
+  }
 }
 
 export function logout() {

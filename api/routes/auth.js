@@ -175,6 +175,30 @@ async function authRoutes(fastify) {
             "Failed to create user"
           );
 
+          /*
+          ================================================
+          DUPLICATE EMAIL (RACE CONDITION)
+          ================================================
+
+          Two simultaneous registrations with the same
+          email can both pass the "check existing user"
+          step above before either insert completes.
+          The database's unique constraint (Postgres code
+          23505) is the real guard - surface it as the
+          same "Email already exists" response instead of
+          a generic 500.
+          */
+
+          if (insertError.code === "23505") {
+            return reply
+              .code(400)
+              .send({
+                success: false,
+                error:
+                  "Email already exists",
+              });
+          }
+
           return reply
             .code(500)
             .send({

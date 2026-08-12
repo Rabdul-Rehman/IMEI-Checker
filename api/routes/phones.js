@@ -378,6 +378,8 @@ async function phoneRoutes(fastify) {
 
     fastify.get("/phones", async (request, reply) => {
 
+      try {
+
         const {
             search,
             brand,
@@ -455,6 +457,19 @@ async function phoneRoutes(fastify) {
             },
             data: data || [],
         };
+
+      } catch (error) {
+
+        request.log.error(
+            error,
+            "Phones list error"
+        );
+
+        return reply.code(500).send({
+            success: false,
+            error: "Failed to load phones",
+        });
+      }
     });
 
 
@@ -463,6 +478,8 @@ async function phoneRoutes(fastify) {
     // =====================================================
 
     fastify.get("/phones/:slug", async (request, reply) => {
+
+      try {
 
         const { slug } = request.params;
 
@@ -496,6 +513,19 @@ async function phoneRoutes(fastify) {
             success: true,
             data,
         };
+
+      } catch (error) {
+
+        request.log.error(
+            error,
+            "Phone lookup error"
+        );
+
+        return reply.code(500).send({
+            success: false,
+            error: "Failed to load phone",
+        });
+      }
     });
 
 
@@ -506,6 +536,8 @@ async function phoneRoutes(fastify) {
     fastify.get(
         "/phones/:slug/specs",
         async (request, reply) => {
+
+          try {
 
             const { slug } = request.params;
 
@@ -544,6 +576,19 @@ async function phoneRoutes(fastify) {
                     specs: data.specs_json || {},
                 },
             };
+
+          } catch (error) {
+
+            request.log.error(
+                error,
+                "Phone specs lookup error"
+            );
+
+            return reply.code(500).send({
+                success: false,
+                error: "Failed to load phone specs",
+            });
+          }
         }
     );
 

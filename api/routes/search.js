@@ -8,58 +8,73 @@ async function searchRoutes(fastify) {
 
   fastify.get("/search", async (request, reply) => {
 
-    const {
-      q,
-      limit = 20,
-    } = request.query;
+    try {
 
-    if (!q || !q.trim()) {
-      return reply.code(400).send({
-        success: false,
-        error: "Search query 'q' is required",
-      });
-    }
+      const {
+        q,
+        limit = 20,
+      } = request.query;
 
-    const parsedLimit = Math.min(
-      Math.max(Number(limit) || 20, 1),
-      100
-    );
+      if (!q || !q.trim()) {
+        return reply.code(400).send({
+          success: false,
+          error: "Search query 'q' is required",
+        });
+      }
 
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("phones")
-      .select(`
-        phone_id,
-        model_name,
-        slug,
-        brand_id,
-        brands (
+      const parsedLimit = Math.min(
+        Math.max(Number(limit) || 20, 1),
+        100
+      );
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("phones")
+        .select(`
+          phone_id,
+          model_name,
+          slug,
           brand_id,
-          name
+          brands (
+            brand_id,
+            name
+          )
+        `)
+        .ilike(
+          "model_name",
+          `%${q.trim()}%`
         )
-      `)
-      .ilike(
-        "model_name",
-        `%${q.trim()}%`
-      )
-      .order("model_name")
-      .limit(parsedLimit);
+        .order("model_name")
+        .limit(parsedLimit);
 
-    if (error) {
+      if (error) {
+        return reply.code(500).send({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return {
+        success: true,
+        query: q,
+        count: data?.length || 0,
+        data: data || [],
+      };
+
+    } catch (error) {
+
+      request.log.error(
+        error,
+        "Search error"
+      );
+
       return reply.code(500).send({
         success: false,
-        error: error.message,
+        error: "Search failed",
       });
     }
-
-    return {
-      success: true,
-      query: q,
-      count: data?.length || 0,
-      data: data || [],
-    };
   });
 }
 

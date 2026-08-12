@@ -1,5 +1,5 @@
 require("dotenv").config({
-  path: "../.env.local",
+  path: require("path").resolve(__dirname, "../.env.local"),
 });
 const crypto = require("crypto");
 

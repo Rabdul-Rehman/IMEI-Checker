@@ -8,25 +8,31 @@ async function statsRoutes(fastify) {
 
   fastify.get("/stats", async (request, reply) => {
 
-    const {
-      count: phoneCount,
-      error: phoneError,
-    } = await supabase
-      .from("phones")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
-
-    const {
-      count: brandCount,
-      error: brandError,
-    } = await supabase
-      .from("brands")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
+    // Both counts are independent - run them concurrently
+    // instead of waiting on one before starting the other.
+    const [
+      {
+        count: phoneCount,
+        error: phoneError,
+      },
+      {
+        count: brandCount,
+        error: brandError,
+      },
+    ] = await Promise.all([
+      supabase
+        .from("phones")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+      supabase
+        .from("brands")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+    ]);
 
     if (phoneError || brandError) {
       return reply.code(500).send({
