@@ -48,6 +48,9 @@ export default function RootLayout({ children }) {
                     <Link className="nav-link active" href="/calculator">IMEI Calculator</Link>
                   </li>
                   <li className="nav-item nav-option">
+                    <Link className="nav-link active" href="/imei-generator">IMEI Generator</Link>
+                  </li>
+                  <li className="nav-item nav-option">
                     <Link className="nav-link active" href="/carriers">Carriers Database</Link>
                   </li>
                   <li className="nav-item nav-option">
@@ -55,6 +58,12 @@ export default function RootLayout({ children }) {
                   </li>
                   <li className="nav-item nav-option">
                     <Link className="nav-link active" href="/news">News</Link>
+                  </li>
+                  <li className="nav-item nav-option">
+                    <Link className="nav-link active" href="/faq">FAQ</Link>
+                  </li>
+                  <li className="nav-item nav-option ms-lg-2">
+                    <Link className="nav-link active btn btn-primary px-3" href="/login">Login</Link>
                   </li>
                 </ul>
               </div>
@@ -72,6 +81,8 @@ export default function RootLayout({ children }) {
               <li><Link href="/">IMEI Check</Link></li>
               <li><Link href="/carriers">Carrier Lookup</Link></li>
               <li><Link href="/imei-generator">IMEI Generator</Link></li>
+              <li><Link href="/news">News</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
             </ul>
             <div className="footer-bottom-row">
               <span>© IMEI.INFO 2026</span>

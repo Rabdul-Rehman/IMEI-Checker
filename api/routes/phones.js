@@ -1,5 +1,375 @@
 const { supabase } = require("../lib/supabase");
 
+function normalize(value) {
+    return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function similarity(a, b) {
+    a = normalize(a);
+    b = normalize(b);
+
+    if (!a || !b) return 0;
+
+    if (a === b) return 1;
+
+    if (a.includes(b) || b.includes(a)) {
+        return 0.92;
+    }
+
+    const aTokens = new Set(a.split(" "));
+    const bTokens = new Set(b.split(" "));
+
+    const common = [...aTokens].filter(
+        token => bTokens.has(token)
+    ).length;
+
+    return common / Math.max(aTokens.size, bTokens.size);
+}
+
+function brandSimilarity(a, b) {
+    a = normalize(a);
+    b = normalize(b);
+
+    if (!a || !b) return 0;
+
+    if (a === b) return 1;
+
+    // Common brand variations
+    const aliases = {
+        samsung: ["samsung"],
+        oppo: ["oppo", "apopo", "apoo"],
+        xiaomi: ["xiaomi", "mi"],
+        redmi: ["redmi", "xiaomi"],
+        oneplus: ["oneplus", "one plus"],
+        vivo: ["vivo"],
+        iqoo: ["iqoo", "i qoo"],
+        realme: ["realme", "real me"],
+        tecno: ["tecno"],
+        infinix: ["infinix"],
+        itel: ["itel"],
+        huawei: ["huawei"],
+        honor: ["honor"],
+        nokia: ["nokia"],
+        lg: ["lg"],
+        alcatel: ["alcatel"],
+        tcl: ["tcl"],
+        motorola: ["motorola", "moto"],
+        google: ["google"],
+        apple: ["apple", "iphone"],
+    };
+
+    for (const values of Object.values(aliases)) {
+        const aMatch = values.some(v => normalize(v) === a);
+        const bMatch = values.some(v => normalize(v) === b);
+
+        if (aMatch && bMatch) {
+            return 1;
+        }
+    }
+
+    return similarity(a, b);
+}
+
+function modelScore(phone, tacData) {
+    const reportedModel = normalize(
+        tacData.reported_model_name
+    );
+
+    const reportedNumber = normalize(
+        tacData.reported_model_number
+    );
+
+    const phoneModel = normalize(
+        phone.model_name
+    );
+
+    if (!phoneModel) {
+        return 0;
+    }
+
+    const modelNameScore = similarity(
+        phoneModel,
+        reportedModel
+    );
+
+    const modelNumberScore = similarity(
+        phoneModel,
+        reportedNumber
+    );
+
+    return Math.max(
+        modelNameScore,
+        modelNumberScore
+    );
+}
+
+async function resolveImei(cleanImei, request) {
+
+    const tac = cleanImei.substring(0, 8);
+
+    /*
+     * -----------------------------------------------------
+     * STEP 1
+     * Find TAC information.
+     *
+     * We intentionally do NOT use maybeSingle() here because
+     * the underlying TAC data can contain multiple records.
+     * -----------------------------------------------------
+     */
+
+    const {
+        data: tacRows,
+        error: tacError,
+    } = await supabase
+        .from("v_tac_lookup")
+        .select("*")
+        .eq("tac", tac)
+        .order("match_confidence", {
+            ascending: false,
+            nullsFirst: false,
+        })
+        .limit(20);
+
+    if (tacError) {
+        request.log.error(
+            tacError,
+            "TAC lookup failed"
+        );
+
+        throw tacError;
+    }
+
+    if (!tacRows || tacRows.length === 0) {
+        return null;
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 2
+     * Prefer an already matched TAC.
+     * -----------------------------------------------------
+     */
+
+    const alreadyMatched = tacRows.find(row =>
+        row.phone_id &&
+        [
+            "auto_matched",
+            "manual_matched",
+            "code_matched",
+        ].includes(row.match_status)
+    );
+
+    if (alreadyMatched) {
+        return {
+            ...alreadyMatched,
+            imei: cleanImei,
+            tac,
+        };
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 3
+     * Pick the best TAC record containing actual
+     * reported device information.
+     * -----------------------------------------------------
+     */
+
+    const tacData =
+        tacRows.find(row =>
+            row.reported_brand ||
+            row.reported_model_name ||
+            row.reported_model_number
+        ) || tacRows[0];
+
+    const reportedBrand = normalize(
+        tacData.reported_brand
+    );
+
+    const reportedModel = normalize(
+        tacData.reported_model_name
+    );
+
+    const reportedNumber = normalize(
+        tacData.reported_model_number
+    );
+
+    /*
+     * If absolutely no device information exists,
+     * return the TAC information without inventing
+     * a phone match.
+     */
+
+    if (
+        !reportedBrand &&
+        !reportedModel &&
+        !reportedNumber
+    ) {
+        return {
+            ...tacData,
+            imei: cleanImei,
+            tac,
+        };
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 4
+     * Load phones + brands.
+     *
+     * This does NOT modify the database.
+     * -----------------------------------------------------
+     */
+
+    const {
+        data: phones,
+        error: phonesError,
+    } = await supabase
+        .from("phones")
+        .select(`
+            phone_id,
+            model_name,
+            slug,
+            specs_json,
+            images,
+            brand_id,
+            brands (
+                brand_id,
+                name
+            )
+        `);
+
+    if (phonesError) {
+        request.log.error(
+            phonesError,
+            "Phone matching failed"
+        );
+
+        throw phonesError;
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 5
+     * Score every phone.
+     * -----------------------------------------------------
+     */
+
+    let best = null;
+
+    for (const phone of phones || []) {
+
+        const phoneBrand = normalize(
+            phone.brands?.name
+        );
+
+        const brandScore = brandSimilarity(
+            phoneBrand,
+            reportedBrand
+        );
+
+        const modelSimilarity = modelScore(
+            phone,
+            tacData
+        );
+
+        /*
+         * Brand is important.
+         * Model is even more important.
+         */
+
+        let score =
+            (modelSimilarity * 0.75) +
+            (brandScore * 0.25);
+
+        /*
+         * If the reported brand is known and does not
+         * match the phone brand, strongly penalize it.
+         */
+
+        if (
+            reportedBrand &&
+            brandScore < 0.5
+        ) {
+            score *= 0.25;
+        }
+
+        if (
+            !best ||
+            score > best.score
+        ) {
+            best = {
+                phone,
+                score,
+                brandScore,
+                modelSimilarity,
+            };
+        }
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 6
+     * Do not make weak guesses.
+     * -----------------------------------------------------
+     */
+
+    if (
+        !best ||
+        best.score < 0.55 ||
+        best.modelSimilarity < 0.55
+    ) {
+        return {
+            ...tacData,
+            phone_id: null,
+            imei: cleanImei,
+            tac,
+            match_status: "ambiguous",
+            match_confidence: Number(
+                (best?.score || 0).toFixed(3)
+            ),
+        };
+    }
+
+    /*
+     * -----------------------------------------------------
+     * STEP 7
+     * Return the resolved phone.
+     *
+     * IMPORTANT:
+     * This only changes the API response.
+     * It does NOT update the database.
+     * -----------------------------------------------------
+     */
+
+    return {
+        ...tacData,
+
+        phone_id: best.phone.phone_id,
+        model_name: best.phone.model_name,
+        slug: best.phone.slug,
+        specs_json: best.phone.specs_json,
+        images: best.phone.images,
+        brand_id: best.phone.brand_id,
+        brand_name:
+            best.phone.brands?.name ||
+            tacData.reported_brand,
+
+        match_status: "code_matched",
+
+        match_confidence: Number(
+            best.score.toFixed(3)
+        ),
+
+        imei: cleanImei,
+        tac,
+    };
+}
+
 async function phoneRoutes(fastify) {
 
     // =====================================================
@@ -182,10 +552,6 @@ async function phoneRoutes(fastify) {
     // PUBLIC IMEI LOOKUP
     //
     // GET /api/v1/public/imei/:imei
-    //
-    // IMPORTANT:
-    // This route is intended for YOUR WEBSITE.
-    // It does NOT require an API key.
     // =====================================================
 
     fastify.get(
@@ -193,10 +559,6 @@ async function phoneRoutes(fastify) {
         async (request, reply) => {
 
             const { imei } = request.params;
-
-            // ---------------------------------------------
-            // Validate IMEI
-            // ---------------------------------------------
 
             if (!imei) {
                 return reply.code(400).send({
@@ -211,30 +573,32 @@ async function phoneRoutes(fastify) {
             if (cleanImei.length !== 15) {
                 return reply.code(400).send({
                     success: false,
-                    error: "Invalid IMEI. IMEI must contain exactly 15 digits.",
+                    error:
+                        "Invalid IMEI. IMEI must contain exactly 15 digits.",
                 });
             }
 
-            // ---------------------------------------------
-            // Extract TAC
-            // ---------------------------------------------
+            try {
 
-            const tac = cleanImei.substring(0, 8);
+                const data = await resolveImei(
+                    cleanImei,
+                    request
+                );
 
-            // ---------------------------------------------
-            // Lookup TAC
-            // ---------------------------------------------
+                if (!data) {
+                    return reply.code(404).send({
+                        success: false,
+                        error: "Device not found",
+                    });
+                }
 
-            const {
-                data,
-                error,
-            } = await supabase
-                .from("v_tac_lookup")
-                .select("*")
-                .eq("tac", tac)
-                .maybeSingle();
+                return {
+                    success: true,
+                    data,
+                };
 
-            if (error) {
+            } catch (error) {
+
                 request.log.error(
                     error,
                     "Public IMEI lookup failed"
@@ -245,26 +609,6 @@ async function phoneRoutes(fastify) {
                     error: "IMEI lookup failed",
                 });
             }
-
-            if (!data) {
-                return reply.code(404).send({
-                    success: false,
-                    error: "Device not found",
-                });
-            }
-
-            // ---------------------------------------------
-            // SUCCESS
-            // ---------------------------------------------
-
-            return {
-                success: true,
-                data: {
-                    ...data,
-                    imei: cleanImei,
-                    tac,
-                },
-            };
         }
     );
 
@@ -273,10 +617,6 @@ async function phoneRoutes(fastify) {
     // ORIGINAL IMEI LOOKUP
     //
     // GET /api/v1/phones/imei/:imei
-    //
-    // This remains available for external API users
-    // and is still protected by the global API-key
-    // authentication in server.js.
     // =====================================================
 
     fastify.get(
@@ -302,32 +642,37 @@ async function phoneRoutes(fastify) {
                 });
             }
 
-            const tac = cleanImei.substring(0, 8);
+            try {
 
-            const {
-                data,
-                error,
-            } = await supabase
-                .from("v_tac_lookup")
-                .select("*")
-                .eq("tac", tac)
-                .maybeSingle();
+                const data = await resolveImei(
+                    cleanImei,
+                    request
+                );
 
-            if (error || !data) {
-                return reply.code(404).send({
+                if (!data) {
+                    return reply.code(404).send({
+                        success: false,
+                        error: "Device not found",
+                    });
+                }
+
+                return {
+                    success: true,
+                    data,
+                };
+
+            } catch (error) {
+
+                request.log.error(
+                    error,
+                    "IMEI lookup failed"
+                );
+
+                return reply.code(500).send({
                     success: false,
-                    error: "Device not found",
+                    error: "IMEI lookup failed",
                 });
             }
-
-            return {
-                success: true,
-                data: {
-                    ...data,
-                    imei: cleanImei,
-                    tac,
-                },
-            };
         }
     );
 }

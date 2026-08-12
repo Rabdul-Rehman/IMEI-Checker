@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { popularDevices } from "./data/devices";
 import DevicePhoto from "./components/DevicePhoto";
+import { lookupPublicImei } from "./lib/api";
 
 const services = [
   { icon: "fa-shield-halved", title: "Blacklist check", text: "Check whether a device may be reported lost, stolen or blocked.", href: "#imei-check" },
@@ -12,9 +13,9 @@ const services = [
 ];
 
 const news = [
-  { icon: "fa-fingerprint", title: "What is an IMEI number?", text: "Learn what the 15-digit International Mobile Equipment Identity means and how it identifies a mobile device." },
-  { icon: "fa-cart-shopping", title: "Check IMEI before buying a used phone", text: "A quick IMEI check can help you make a more informed decision before purchasing a second-hand device." },
-  { icon: "fa-sim-card", title: "eSIM, EID and IMEI explained", text: "Understand the identifiers used by modern phones and how they relate to mobile connectivity." },
+  { icon: "fa-fingerprint", title: "What is an IMEI number?", text: "Learn what the 15-digit International Mobile Equipment Identity means and how it identifies a mobile device.", href: "/news/what-is-an-imei-number" },
+  { icon: "fa-cart-shopping", title: "Check IMEI before buying a used phone", text: "A quick IMEI check can help you make a more informed decision before purchasing a second-hand device.", href: "/news/check-imei-before-buying-used-phone" },
+  { icon: "fa-sim-card", title: "eSIM, EID and IMEI explained", text: "Understand the identifiers used by modern phones and how they relate to mobile connectivity.", href: "/news/esim-eid-and-imei-explained" },
 ];
 
 function Count({ value }) {
@@ -41,24 +42,18 @@ export default function Home() {
     setResult(null);
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/v1/phones/imei/${value}`,
-        { 
-          headers: {
-            Authorization:  `Bearer ${process.env.NEXT_PUBLIC_IMEI_API_KEY}`,
-          },
-        
-        }
-      );
+      const data = await lookupPublicImei(value);
 
-
-      const data = await response.json();
-
-      if (!data.success) {
-        setError(data.error);
+      if (!data?.success) {
+        setError(data?.error || "IMEI lookup failed.");
         return;
       }
-      window.location.href = `/phones/${data.data.slug}`;
+
+      if (data.data?.slug) {
+        window.location.href = `/phones/${data.data.slug}`;
+      } else {
+        window.location.href = `/results/${value}`;
+      }
 
     } catch (err) {
       console.error(err);
@@ -252,11 +247,11 @@ export default function Home() {
         </div>
         <div className="news-grid-modern">
           {news.map((item) => (
-            <article className="news-modern-card" key={item.title}>
+            <Link href={item.href} className="news-modern-card" key={item.title}>
               <div className="news-icon"><i className={`fas ${item.icon}`} /></div>
               <h3>{item.title}</h3><p>{item.text}</p>
               <span>Read guide <i className="fas fa-arrow-right" /></span>
-            </article>
+            </Link>
           ))}
         </div>
       </section>

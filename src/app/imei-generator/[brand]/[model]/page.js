@@ -20,6 +20,8 @@ export default function DeviceImeiGeneratorPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
+  const [copiedImei, setCopiedImei] = useState("");
+  const [copiedAll, setCopiedAll] = useState(false);
 
   useEffect(() => {
     async function loadDevice() {
@@ -31,17 +33,11 @@ export default function DeviceImeiGeneratorPage() {
           throw new Error("Invalid phone ID");
         }
 
-        /*
-         * IMPORTANT:
-         *
-         * Backend route:
-         *
-         * GET /imei-generator/phones/:phoneId
-         *
-         * Therefore we send phoneId here.
-         */
         const response = await fetch(
-          `${API_URL}/imei-generator/phones/${phoneId}`
+          `${API_URL}/imei-generator/phones/${phoneId}`,
+          {
+            cache: "no-store",
+          }
         );
 
         const result = await response.json();
@@ -53,9 +49,9 @@ export default function DeviceImeiGeneratorPage() {
         }
 
         setDevice(result.data);
-
       } catch (err) {
         console.error(err);
+
         setError(
           err.message || "Failed to load device"
         );
@@ -73,10 +69,19 @@ export default function DeviceImeiGeneratorPage() {
       return;
     }
 
+    if (!device?.can_generate) {
+      setError(
+        "IMEI generation is not available for this model because no TAC is mapped to it."
+      );
+      return;
+    }
+
     try {
       setGenerating(true);
       setError("");
       setImeis([]);
+      setCopiedImei("");
+      setCopiedAll(false);
 
       const response = await fetch(
         `${API_URL}/imei-generator/generate`,
@@ -103,79 +108,46 @@ export default function DeviceImeiGeneratorPage() {
         );
       }
 
-      /*
-       * Backend returns:
-       *
-       * {
-       *   success: true,
-       *   data: {
-       *      phone_id,
-       *      brand,
-       *      model_name,
-       *      tac,
-       *      count,
-       *      imeis
-       *   }
-       * }
-       */
-
       setImeis(result.data?.imeis || []);
-
     } catch (err) {
       console.error(err);
 
       setError(
         err.message || "Failed to generate IMEIs"
       );
-
     } finally {
       setGenerating(false);
     }
   }
 
-  function copyImei(imei) {
-    navigator.clipboard.writeText(imei);
+  async function copyImei(imei) {
+    try {
+      await navigator.clipboard.writeText(imei);
+
+      setCopiedImei(imei);
+
+      setTimeout(() => {
+        setCopiedImei("");
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to copy IMEI.");
+    }
   }
 
-  if (loading) {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "80px 5%",
-          textAlign: "center",
-          background: "#f8fafc",
-        }}
-      >
-        Loading device...
-      </main>
-    );
-  }
+  async function copyAllImeis() {
+    try {
+      await navigator.clipboard.writeText(imeis.join("\n"));
 
-  if (error && !device) {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "80px 5%",
-          background: "#f8fafc",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "700px",
-            margin: "0 auto",
-            padding: "20px",
-            background: "#fee2e2",
-            color: "#991b1b",
-            borderRadius: "10px",
-            textAlign: "center",
-          }}
-        >
-          {error}
-        </div>
-      </main>
-    );
+      setCopiedAll(true);
+
+      setTimeout(() => {
+        setCopiedAll(false);
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to copy IMEIs.");
+    }
   }
 
   const modelName =
@@ -186,255 +158,111 @@ export default function DeviceImeiGeneratorPage() {
     device?.brand_name ||
     "Brand";
 
+  const canGenerate = Boolean(device?.can_generate);
+
+  if (loading) {
+    return (
+      <div className="modern-page-shell" style={{ textAlign: "center" }}>
+        <span className="section-eyebrow" style={{ justifyContent: "center" }}>
+          IMEI GENERATOR
+        </span>
+        <p style={{ marginTop: "14px", color: "#7f8997" }}>Loading device…</p>
+      </div>
+    );
+  }
+
+  if (error && !device) {
+    return (
+      <div className="modern-page-shell">
+        <div className="database-empty">
+          <i className="fas fa-triangle-exclamation" />
+          <strong>{error}</strong>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "50px 5%",
-        background: "#f8fafc",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
-        <Link
-          href={`/imei-generator/${brandId}`}
-          style={{
-            color: "#2563eb",
-            textDecoration: "none",
-            fontSize: "14px",
-          }}
-        >
-          ← Back to {brandName} models
-        </Link>
+    <div className="modern-page-shell">
+      <Link href={`/imei-generator/${brandId}`} className="generator-crumb">
+        <i className="fas fa-arrow-left" /> Back to {brandName} models
+      </Link>
 
-        <section
-          style={{
-            marginTop: "30px",
-            background: "#fff",
-            borderRadius: "18px",
-            padding: "40px",
-            boxShadow:
-              "0 8px 30px rgba(15,23,42,.08)",
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: "35px",
-            }}
-          >
-            <span
-              style={{
-                color: "#2563eb",
-                fontSize: "13px",
-                fontWeight: 700,
-                letterSpacing: "2px",
-              }}
+      <div className="generator-tool-card">
+        <div className="generator-tool-head">
+          <span className="section-eyebrow" style={{ justifyContent: "center" }}>
+            IMEI GENERATOR
+          </span>
+          <h1>{modelName}</h1>
+          <p>Generate valid IMEI numbers for this device model.</p>
+        </div>
+
+        {error && <div className="auth-error" style={{ marginBottom: "20px" }}>{error}</div>}
+
+        {!canGenerate && (
+          <div className="warning-modern" style={{ marginBottom: "22px", textAlign: "center" }}>
+            <strong>IMEI generation is not available for this model.</strong>
+            <div style={{ marginTop: "5px" }}>
+              No TAC is currently mapped to this device in the database.
+            </div>
+          </div>
+        )}
+
+        <div className="generator-controls">
+          <div>
+            <label className="tool-label">Number of IMEIs</label>
+            <select
+              className="tool-select"
+              value={count}
+              onChange={(e) => setCount(Number(e.target.value))}
+              style={{ minWidth: "170px" }}
             >
-              RANDOM IMEI GENERATOR
-            </span>
-
-            <h1
-              style={{
-                fontSize: "36px",
-                color: "#111827",
-                margin: "10px 0",
-              }}
-            >
-              {modelName}
-            </h1>
-
-            <p style={{ color: "#6b7280" }}>
-              Generate test IMEI numbers specifically for this
-              device.
-            </p>
+              {Array.from({ length: 10 }, (_, index) => index + 1).map((number) => (
+                <option key={number} value={number}>
+                  {number} IMEI{number > 1 ? "s" : ""}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {error && (
-            <div
-              style={{
-                padding: "14px",
-                marginBottom: "20px",
-                background: "#fee2e2",
-                color: "#991b1b",
-                borderRadius: "8px",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "end",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
+          <button
+            type="button"
+            className="tool-button"
+            onClick={generateImeis}
+            disabled={generating || !canGenerate}
+            style={{ width: "auto", padding: "0 26px", height: "46px" }}
           >
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: 600,
-                  color: "#374151",
-                }}
-              >
-                Number of IMEIs
-              </label>
+            <i className="fas fa-arrows-rotate" /> {generating ? "Generating…" : "Generate IMEI"}
+          </button>
+        </div>
 
-              <select
-                value={count}
-                onChange={(e) =>
-                  setCount(Number(e.target.value))
-                }
-                style={{
-                  height: "46px",
-                  minWidth: "150px",
-                  padding: "0 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  background: "#fff",
-                }}
-              >
-                {Array.from(
-                  { length: 10 },
-                  (_, index) => index + 1
-                ).map((number) => (
-                  <option
-                    key={number}
-                    value={number}
-                  >
-                    {number} IMEI
-                    {number > 1 ? "s" : ""}
-                  </option>
-                ))}
-              </select>
+        {imeis.length > 0 && (
+          <div className="imei-result-list">
+            <div className="imei-result-note">
+              <i className="fas fa-circle-check" />
+              These IMEIs were generated using the real database TAC mapped to this device.
             </div>
 
-            <button
-              type="button"
-              onClick={generateImeis}
-              disabled={generating}
-              style={{
-                height: "46px",
-                padding: "0 24px",
-                border: "none",
-                borderRadius: "8px",
-                background: "#2563eb",
-                color: "#fff",
-                fontWeight: 700,
-                cursor: generating
-                  ? "not-allowed"
-                  : "pointer",
-                opacity: generating ? 0.7 : 1,
-              }}
-            >
-              {generating
-                ? "Generating..."
-                : "Generate IMEI"}
+            {imeis.map((imei, index) => (
+              <div className="imei-result-row" key={`${imei}-${index}`}>
+                <span className="imei-result-index">#{index + 1}</span>
+                <span className="imei-result-value">{imei}</span>
+                <button
+                  type="button"
+                  className={`imei-result-copy${copiedImei === imei ? " copied" : ""}`}
+                  onClick={() => copyImei(imei)}
+                >
+                  {copiedImei === imei ? "Copied" : "Copy"}
+                </button>
+              </div>
+            ))}
+
+            <button type="button" className="tool-button generator-copy-all" onClick={copyAllImeis}>
+              <i className="fas fa-copy" /> {copiedAll ? "Copied all IMEIs" : "Copy all IMEIs"}
             </button>
           </div>
-
-          {!device?.can_generate && (
-            <div
-              style={{
-                marginTop: "25px",
-                padding: "15px",
-                background: "#fff7ed",
-                color: "#9a3412",
-                borderRadius: "8px",
-                textAlign: "center",
-              }}
-            >
-              IMEI generation is not available for this
-              model yet because no TAC is mapped to it.
-            </div>
-          )}
-
-          {imeis.length > 0 && (
-            <div style={{ marginTop: "35px" }}>
-              <h2
-                style={{
-                  fontSize: "20px",
-                  color: "#111827",
-                  marginBottom: "15px",
-                }}
-              >
-                Generated IMEIs
-              </h2>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {imeis.map((imei, index) => (
-                  <div
-                    key={`${imei}-${index}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "15px",
-                      padding: "15px 18px",
-                      background: "#f8fafc",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "9px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#6b7280",
-                        fontSize: "13px",
-                      }}
-                    >
-                      #{index + 1}
-                    </span>
-
-                    <strong
-                      style={{
-                        flex: 1,
-                        color: "#111827",
-                        fontSize: "16px",
-                        letterSpacing: "1px",
-                      }}
-                    >
-                      {imei}
-                    </strong>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        copyImei(imei)
-                      }
-                      style={{
-                        border: "none",
-                        background: "#e0ecff",
-                        color: "#2563eb",
-                        padding: "8px 12px",
-                        borderRadius: "7px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Copy
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
