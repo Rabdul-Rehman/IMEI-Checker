@@ -1,8 +1,9 @@
 const crypto = require("crypto");
 const { supabase } = require("../lib/supabase");
+const { getOrCreateLocalTac } = require("../lib/localDeviceTacRegistry");
 
 // =====================================================
-// HELPERS
+// TEXT HELPERS
 // =====================================================
 
 function normalize(value) {
@@ -17,9 +18,13 @@ function similarity(a, b) {
     a = normalize(a);
     b = normalize(b);
 
-    if (!a || !b) return 0;
+    if (!a || !b) {
+        return 0;
+    }
 
-    if (a === b) return 1;
+    if (a === b) {
+        return 1;
+    }
 
     if (a.includes(b) || b.includes(a)) {
         return 0.92;
@@ -29,7 +34,7 @@ function similarity(a, b) {
     const bTokens = new Set(b.split(" "));
 
     const common = [...aTokens].filter(
-        token => bTokens.has(token)
+        (token) => bTokens.has(token)
     ).length;
 
     return common / Math.max(
@@ -59,7 +64,6 @@ function calculateLuhnCheckDigit(number14) {
     for (let i = 0; i < 14; i++) {
         let digit = Number(number14[i]);
 
-        // Double every second digit from the left
         if (i % 2 === 1) {
             digit *= 2;
 
@@ -77,7 +81,7 @@ function calculateLuhnCheckDigit(number14) {
 }
 
 // =====================================================
-// GENERATE ONE IMEI FROM A REAL TAC
+// GENERATE ONE IMEI
 // =====================================================
 
 function generateImeiFromTac(tac) {
@@ -92,7 +96,8 @@ function generateImeiFromTac(tac) {
         .toString()
         .padStart(6, "0");
 
-    const first14 = `${clean}${serialNumber}`;
+    const first14 =
+        `${clean}${serialNumber}`;
 
     const checkDigit =
         calculateLuhnCheckDigit(first14);
@@ -101,23 +106,139 @@ function generateImeiFromTac(tac) {
 }
 
 // =====================================================
-// FIND TAC FOR PHONE
-//
-// Priority:
-// 1. Exact phone_id mapping
-// 2. Exact brand + strong model match
-// 3. Exact brand + model number match
-// 4. v_tac_lookup fallback
-//
-// IMPORTANT:
-// No fake/test/hardcoded TAC is generated.
-// Database remains read-only.
+// EXACT TAC FROM tac_allocations
 // =====================================================
 
+async function getTacFromTacAllocations(phoneId) {
+    const {
+        data,
+        error,
+    } = await supabase
+        .from("tac_allocations")
+        .select(`
+            tac_id,
+            tac,
+            phone_id,
+            match_status,
+            match_confidence
+        `)
+        .eq(
+            "phone_id",
+            phoneId
+        )
+        .not(
+            "tac",
+            "is",
+            null
+        )
+        .order(
+            "match_confidence",
+            {
+                ascending: false,
+                nullsFirst: false,
+            }
+        )
+        .limit(100);
+
+    if (error) {
+        throw error;
+    }
+
+    const preferred = [];
+    const fallback = [];
+
+    for (const row of data || []) {
+        const tac = cleanTac(row.tac);
+
+        if (!tac) {
+            continue;
+        }
+
+        const status =
+            String(
+                row.match_status || ""
+            ).toLowerCase();
+
+        if (
+            status === "auto_matched" ||
+            status === "manual_matched"
+        ) {
+            preferred.push(tac);
+        } else {
+            fallback.push(tac);
+        }
+    }
+
+    return (
+        preferred[0] ||
+        fallback[0] ||
+        null
+    );
+}
+
+// =====================================================
+// EXACT TAC FROM v_tac_lookup
+// =====================================================
+
+// =====================================================
+// EXACT TAC FROM LEGACY imei_lookups
+// =====================================================
+
+async function getTacFromLegacyLookups(phoneId) {
+    const {
+        data,
+        error,
+    } = await supabase
+        .from("imei_lookups")
+        .select("tac")
+        .eq(
+            "phone_id",
+            phoneId
+        )
+        .not(
+            "tac",
+            "is",
+            null
+        )
+        .limit(100);
+
+    if (error) {
+        /*
+         * This table is legacy support.
+         * If the table/query is unavailable, do not
+         * break the entire generator.
+         */
+        return null;
+    }
+
+    for (const row of data || []) {
+        const tac = cleanTac(row.tac);
+
+        if (tac) {
+            return tac;
+        }
+    }
+
+    return null;
+}
+
+// =====================================================
+// GET TAC FOR PHONE
+//
+// Priority:
+// 1. Exact real TAC mapping for this phone_id.
+// 2. Legacy exact TAC mapping for this phone_id.
+// 3. Persistent local TAC for devices without an exact
+//    real TAC mapping.
+//
+// IMPORTANT:
+// We never borrow a TAC from another phone based on
+// brand/model similarity.
+// =====================================================
 async function getTacForPhone(phoneId, phone) {
 
     // -------------------------------------------------
-    // 1. EXACT phone_id MATCH
+    // 1. EXACT tac_allocations.phone_id mapping
     // -------------------------------------------------
 
     const {
@@ -129,254 +250,110 @@ async function getTacForPhone(phoneId, phone) {
             tac_id,
             tac,
             phone_id,
-            brand_id,
-            reported_brand,
-            reported_model_name,
-            reported_model_number,
             match_status,
             match_confidence
         `)
         .eq("phone_id", phoneId)
         .not("tac", "is", null)
-        .limit(20);
+        .order("match_confidence", {
+            ascending: false,
+            nullsFirst: false,
+        })
+        .limit(100);
 
     if (directError) {
         throw directError;
     }
 
-    const directTac =
+    const exactCandidates =
         (directRows || [])
-            .map(row => cleanTac(row.tac))
-            .find(Boolean);
-
-    if (directTac) {
-        return directTac;
-    }
-
-    // -------------------------------------------------
-    // Prepare selected phone information
-    // -------------------------------------------------
-
-    const selectedBrand =
-        normalize(phone?.brands?.name);
-
-    const selectedModel =
-        normalize(phone?.model_name);
-
-    if (!selectedModel) {
-        return null;
-    }
-
-    // -------------------------------------------------
-    // 2. FIND TACs BY BRAND
-    //
-    // This catches TAC records where phone_id is NULL
-    // but the original imported device information exists.
-    // -------------------------------------------------
-
-    let candidateRows = [];
-
-    if (selectedBrand) {
-
-        const {
-            data: brandRows,
-            error: brandError,
-        } = await supabase
-            .from("tac_allocations")
-            .select(`
-                tac_id,
-                tac,
-                phone_id,
-                brand_id,
-                reported_brand,
-                reported_model_name,
-                reported_model_number,
-                match_status,
-                match_confidence
-            `)
-            .ilike(
-                "reported_brand",
-                selectedBrand
-            )
-            .not("tac", "is", null)
-            .limit(5000);
-
-        if (brandError) {
-            throw brandError;
-        }
-
-        candidateRows = brandRows || [];
-    }
-
-    // -------------------------------------------------
-    // 3. SCORE MODEL MATCHES
-    // -------------------------------------------------
-
-    let best = null;
-
-    for (const row of candidateRows) {
-
-        const tac = cleanTac(row.tac);
-
-        if (!tac) {
-            continue;
-        }
-
-        const reportedBrand =
-            normalize(row.reported_brand);
-
-        const reportedModel =
-            normalize(row.reported_model_name);
-
-        const reportedNumber =
-            normalize(row.reported_model_number);
-
-        // Brand must match when we have brand data
-        if (
-            selectedBrand &&
-            reportedBrand &&
-            reportedBrand !== selectedBrand
-        ) {
-            continue;
-        }
-
-        const modelScore =
-            similarity(
-                selectedModel,
-                reportedModel
-            );
-
-        const modelNumberScore =
-            similarity(
-                selectedModel,
-                reportedNumber
-            );
-
-        const score = Math.max(
-            modelScore,
-            modelNumberScore
-        );
-
-        if (!best || score > best.score) {
-            best = {
-                tac,
-                score,
+            .map((row) => ({
                 row,
-            };
-        }
-    }
+                tac: cleanTac(row.tac),
+            }))
+            .filter((item) => item.tac);
 
-    // -------------------------------------------------
-    // Require a strong model match.
-    //
-    // This prevents a TAC belonging to a completely
-    // different phone from being used.
-    // -------------------------------------------------
-
-    if (
-        best &&
-        best.score >= 0.80
-    ) {
-        return best.tac;
-    }
-
-    // -------------------------------------------------
-    // 4. FALLBACK: v_tac_lookup
-    //
-    // Some TAC information may already be exposed
-    // through the lookup view.
-    // -------------------------------------------------
-
-    const {
-        data: lookupRows,
-        error: lookupError,
-    } = await supabase
-        .from("v_tac_lookup")
-        .select(`
-            tac,
-            phone_id,
-            reported_brand,
-            reported_model_name,
-            reported_model_number
-        `)
-        .not("tac", "is", null)
-        .limit(5000);
-
-    if (lookupError) {
-        throw lookupError;
-    }
-
-    let bestLookup = null;
-
-    for (const row of lookupRows || []) {
-
-        const tac = cleanTac(row.tac);
-
-        if (!tac) {
-            continue;
-        }
-
-        // Exact phone mapping wins immediately
-        if (
-            row.phone_id &&
-            Number(row.phone_id) === Number(phoneId)
-        ) {
-            return tac;
-        }
-
-        const reportedBrand =
-            normalize(row.reported_brand);
-
-        const reportedModel =
-            normalize(row.reported_model_name);
-
-        const reportedNumber =
-            normalize(row.reported_model_number);
-
-        if (
-            selectedBrand &&
-            reportedBrand &&
-            reportedBrand !== selectedBrand
-        ) {
-            continue;
-        }
-
-        const modelScore =
-            similarity(
-                selectedModel,
-                reportedModel
-            );
-
-        const modelNumberScore =
-            similarity(
-                selectedModel,
-                reportedNumber
-            );
-
-        const score = Math.max(
-            modelScore,
-            modelNumberScore
+    if (exactCandidates.length > 0) {
+        const preferred = exactCandidates.find((item) =>
+            [
+                "auto_matched",
+                "manual_matched",
+            ].includes(
+                String(item.row.match_status || "").toLowerCase()
+            )
         );
 
-        if (
-            !bestLookup ||
-            score > bestLookup.score
-        ) {
-            bestLookup = {
-                tac,
-                score,
-            };
+        return {
+            tac: preferred?.tac || exactCandidates[0].tac,
+            local: false,
+        };
+    }
+
+    // -------------------------------------------------
+    // 2. LEGACY exact phone_id mapping
+    // -------------------------------------------------
+
+    try {
+        const {
+            data: legacyRows,
+            error: legacyError,
+        } = await supabase
+            .from("imei_lookups")
+            .select("tac")
+            .eq("phone_id", phoneId)
+            .not("tac", "is", null)
+            .limit(100);
+
+        if (!legacyError) {
+            for (const row of legacyRows || []) {
+                const tac = cleanTac(row.tac);
+
+                if (tac) {
+                    return {
+                        tac,
+                        local: false,
+                    };
+                }
+            }
         }
+    } catch {
+        // Legacy lookup is optional.
     }
 
-    if (
-        bestLookup &&
-        bestLookup.score >= 0.80
-    ) {
-        return bestLookup.tac;
-    }
+    // -------------------------------------------------
+    // 3. LOCAL TAC FOR THIS EXACT PHONE
+    // -------------------------------------------------
 
-    return null;
+    const localEntry =
+        await getOrCreateLocalTac({
+            phoneId,
+            brandName: phone?.brands?.name || null,
+            modelName: phone?.model_name || null,
+            modelNumber:
+                phone?.specs_json?.General?.model_number ||
+                phone?.specs_json?.general?.model_number ||
+                null,
+            isTacTaken: async (candidate) => {
+                const {
+                    data,
+                    error,
+                } = await supabase
+                    .from("tac_allocations")
+                    .select("tac_id")
+                    .eq("tac", candidate)
+                    .limit(1);
+
+                return Boolean(
+                    !error &&
+                    data?.length
+                );
+            },
+        });
+
+    return {
+        tac: localEntry.tac,
+        local: true,
+    };
 }
 
 // =====================================================
@@ -415,7 +392,9 @@ async function imeiGeneratorRoutes(fastify) {
 
                     return reply.code(500).send({
                         success: false,
-                        error: "Failed to load brands",
+                        error:
+                            error.message ||
+                            "Failed to load brands",
                     });
                 }
 
@@ -433,7 +412,9 @@ async function imeiGeneratorRoutes(fastify) {
 
                 return reply.code(500).send({
                     success: false,
-                    error: "Failed to load brands",
+                    error:
+                        error.message ||
+                        "Failed to load brands",
                 });
             }
         }
@@ -450,13 +431,20 @@ async function imeiGeneratorRoutes(fastify) {
             try {
 
                 const brandId =
-                    Number(request.params.brandId);
+                    Number(
+                        request.params.brandId
+                    );
 
-                if (!Number.isInteger(brandId)) {
+                if (
+                    !Number.isInteger(
+                        brandId
+                    )
+                ) {
 
                     return reply.code(400).send({
                         success: false,
-                        error: "Invalid brand ID",
+                        error:
+                            "Invalid brand ID",
                     });
                 }
 
@@ -475,7 +463,9 @@ async function imeiGeneratorRoutes(fastify) {
                         "brand_id",
                         brandId
                     )
-                    .order("model_name");
+                    .order(
+                        "model_name"
+                    );
 
                 if (error) {
 
@@ -486,7 +476,8 @@ async function imeiGeneratorRoutes(fastify) {
 
                     return reply.code(500).send({
                         success: false,
-                        error: "Failed to load models",
+                        error:
+                            "Failed to load models",
                     });
                 }
 
@@ -504,7 +495,8 @@ async function imeiGeneratorRoutes(fastify) {
 
                 return reply.code(500).send({
                     success: false,
-                    error: "Failed to load models",
+                    error:
+                        "Failed to load models",
                 });
             }
         }
@@ -521,19 +513,22 @@ async function imeiGeneratorRoutes(fastify) {
             try {
 
                 const phoneId =
-                    Number(request.params.phoneId);
+                    Number(
+                        request.params.phoneId
+                    );
 
-                if (!Number.isInteger(phoneId)) {
+                if (
+                    !Number.isInteger(
+                        phoneId
+                    )
+                ) {
 
                     return reply.code(400).send({
                         success: false,
-                        error: "Invalid phone ID",
+                        error:
+                            "Invalid phone ID",
                     });
                 }
-
-                // -------------------------------------
-                // Load phone
-                // -------------------------------------
 
                 const {
                     data: phone,
@@ -563,45 +558,39 @@ async function imeiGeneratorRoutes(fastify) {
 
                     return reply.code(404).send({
                         success: false,
-                        error: "Phone not found",
+                        error:
+                            "Phone not found",
                     });
                 }
 
-                // -------------------------------------
-                // Find real TAC
-                // -------------------------------------
-
-                let tac = null;
-
-                try {
-
-                    tac = await getTacForPhone(
+                const tacResult =
+                    await getTacForPhone(
                         phoneId,
                         phone
                     );
 
-                } catch (error) {
-
-                    request.log.error(
-                        error,
-                        `Failed to load TAC for phone ${phoneId}`
-                    );
-
-                    return reply.code(500).send({
-                        success: false,
-                        error: "Failed to load TAC information",
-                    });
-                }
-
                 return {
                     success: true,
                     data: {
-                        phone_id: phone.phone_id,
-                        model_name: phone.model_name,
-                        slug: phone.slug,
-                        brand: phone.brands,
-                        tac,
-                        can_generate: Boolean(tac),
+                        phone_id:
+                            phone.phone_id,
+
+                        model_name:
+                            phone.model_name,
+
+                        slug:
+                            phone.slug,
+
+                        brand:
+                            phone.brands,
+
+                        tac: tacResult.tac,
+
+                        local_tac:
+                            tacResult.local,
+
+                        can_generate:
+                            Boolean(tacResult.tac),
                     },
                 };
 
@@ -614,7 +603,9 @@ async function imeiGeneratorRoutes(fastify) {
 
                 return reply.code(500).send({
                     success: false,
-                    error: "Failed to load device",
+                    error:
+                        error.message ||
+                        "Failed to load device",
                 });
             }
         }
@@ -647,23 +638,18 @@ async function imeiGeneratorRoutes(fastify) {
                         10
                     );
 
-                // -------------------------------------
-                // Validate phone ID
-                // -------------------------------------
-
                 if (
-                    !Number.isInteger(phoneId)
+                    !Number.isInteger(
+                        phoneId
+                    )
                 ) {
 
                     return reply.code(400).send({
                         success: false,
-                        error: "phone_id is required",
+                        error:
+                            "phone_id is required",
                     });
                 }
-
-                // -------------------------------------
-                // Load phone
-                // -------------------------------------
 
                 const {
                     data: phone,
@@ -693,36 +679,25 @@ async function imeiGeneratorRoutes(fastify) {
 
                     return reply.code(404).send({
                         success: false,
-                        error: "Phone not found",
+                        error:
+                            "Phone not found",
                     });
                 }
 
-                // -------------------------------------
-                // Get real TAC
-                // -------------------------------------
-
-                const tac =
+                const tacResult =
                     await getTacForPhone(
                         phoneId,
                         phone
                     );
 
-                // -------------------------------------
-                // No real TAC found
-                // -------------------------------------
-
-                if (!tac) {
+                if (!tacResult.tac) {
 
                     return reply.code(404).send({
                         success: false,
                         error:
-                            "IMEI generation is not available for this model because no matching TAC was found in the database.",
+                            "IMEI generation is not available for this model because no suitable TAC was found in the database.",
                     });
                 }
-
-                // -------------------------------------
-                // Generate unique IMEIs
-                // -------------------------------------
 
                 const imeis =
                     new Set();
@@ -734,17 +709,14 @@ async function imeiGeneratorRoutes(fastify) {
 
                     imeis.add(
                         generateImeiFromTac(
-                            tac
+                            tacResult.tac
                         )
                     );
                 }
 
-                // -------------------------------------
-                // Response
-                // -------------------------------------
-
                 return {
                     success: true,
+
                     data: {
                         phone_id:
                             phone.phone_id,
@@ -756,13 +728,18 @@ async function imeiGeneratorRoutes(fastify) {
                         model_name:
                             phone.model_name,
 
-                        tac,
+                        tac: tacResult.tac,
+
+                        local_tac:
+                            tacResult.local,
 
                         count:
                             imeis.size,
 
                         imeis:
-                            Array.from(imeis),
+                            Array.from(
+                                imeis
+                            ),
                     },
                 };
 
@@ -784,4 +761,5 @@ async function imeiGeneratorRoutes(fastify) {
     );
 }
 
-module.exports = imeiGeneratorRoutes;
+module.exports =
+    imeiGeneratorRoutes;

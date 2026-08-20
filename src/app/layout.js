@@ -51,16 +51,7 @@ export default function RootLayout({ children }) {
                     <Link className="nav-link active" href="/imei-generator">IMEI Generator</Link>
                   </li>
                   <li className="nav-item nav-option">
-                    <Link className="nav-link active" href="/carriers">Carriers Database</Link>
-                  </li>
-                  <li className="nav-item nav-option">
                     <Link className="nav-link active" href="/phones">Phone Database</Link>
-                  </li>
-                  <li className="nav-item nav-option">
-                    <Link className="nav-link active" href="/news">News</Link>
-                  </li>
-                  <li className="nav-item nav-option">
-                    <Link className="nav-link active" href="/faq">FAQ</Link>
                   </li>
                   <li className="nav-item nav-option ms-lg-2">
                     <Link className="nav-link active btn btn-primary px-3" href="/login">Login</Link>

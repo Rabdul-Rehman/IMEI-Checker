@@ -107,6 +107,52 @@ export default function AdminDashboard() {
 
   /*
   =========================================================
+  DEVICES
+  =========================================================
+  */
+
+  const [devices, setDevices] = useState([]);
+  const [deviceBrands, setDeviceBrands] = useState([]);
+
+  const [devicesTotal, setDevicesTotal] = useState(0);
+  const [devicesOffset, setDevicesOffset] = useState(0);
+  const DEVICES_PAGE_SIZE = 15;
+
+  const [devicesLoading, setDevicesLoading] =
+    useState(true);
+
+  const [devicesError, setDevicesError] =
+    useState("");
+
+  const [showDeviceForm, setShowDeviceForm] =
+    useState(false);
+
+  const [deviceBrandId, setDeviceBrandId] =
+    useState("");
+
+  const [deviceModelName, setDeviceModelName] =
+    useState("");
+
+  const [deviceSlug, setDeviceSlug] =
+    useState("");
+
+  const [deviceSpecsJson, setDeviceSpecsJson] =
+    useState("");
+
+  const [deviceImageFiles, setDeviceImageFiles] =
+    useState([]);
+
+  const [savingDevice, setSavingDevice] =
+    useState(false);
+
+  const [deviceFormError, setDeviceFormError] =
+    useState("");
+
+  const [editingDevice, setEditingDevice] =
+    useState(null);
+
+  /*
+  =========================================================
   LOAD ADMIN DATA
   =========================================================
   */
@@ -615,6 +661,381 @@ export default function AdminDashboard() {
 
   /*
   =========================================================
+  DEVICES - LOAD
+  =========================================================
+  */
+
+  async function fetchDeviceBrands() {
+    try {
+      const response = await fetch(
+        "/api/admin/devices/brands",
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        }
+      );
+
+      const { result } = await readJsonResponse(response);
+
+      if (response.ok && result?.success) {
+        setDeviceBrands(
+          Array.isArray(result.data) ? result.data : []
+        );
+      }
+    } catch (err) {
+      console.error("Failed to load brands:", err);
+    }
+  }
+
+  async function fetchDevices(offset = 0, search = "") {
+    try {
+      setDevicesLoading(true);
+      setDevicesError("");
+
+      const params = new URLSearchParams({
+        limit: String(DEVICES_PAGE_SIZE),
+        offset: String(offset),
+      });
+
+      if (search.trim()) {
+        params.set("search", search.trim());
+      }
+
+      const response = await fetch(
+        `/api/admin/devices?${params.toString()}`,
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        }
+      );
+
+      const { result } = await readJsonResponse(response);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.error || "Failed to load devices"
+        );
+      }
+
+      setDevices(
+        Array.isArray(result.data) ? result.data : []
+      );
+
+      setDevicesTotal(result.pagination?.total || 0);
+      setDevicesOffset(offset);
+
+    } catch (err) {
+      console.error("Devices load error:", err);
+      setDevicesError(
+        err?.message || "Failed to load devices"
+      );
+    } finally {
+      setDevicesLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchDeviceBrands();
+    fetchDevices(0);
+  }, []);
+
+  /*
+  =========================================================
+  DEVICES - IMAGE FILES -> NAMES
+
+  No Storage bucket exists yet, so nothing is actually
+  uploaded - the phones table's `images` column just holds
+  a list of names as text. This takes whatever files were
+  picked and keeps their file names.
+  =========================================================
+  */
+
+  async function filesToPayload(files) {
+  return Promise.all(
+    Array.from(files || []).map(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            resolve({
+              name: file.name,
+              type: file.type,
+              data: reader.result,
+            });
+          };
+
+          reader.onerror = () => {
+            reject(
+              new Error(
+                `Failed to read image: ${file.name}`
+              )
+            );
+          };
+
+          reader.readAsDataURL(file);
+        })
+    )
+  );
+}
+
+  /*
+  =========================================================
+  DEVICES - RESET / OPEN / CLOSE FORM
+  =========================================================
+  */
+
+  function resetDeviceForm() {
+    setDeviceBrandId("");
+    setDeviceModelName("");
+    setDeviceSlug("");
+    setDeviceSpecsJson("");
+    setDeviceImageFiles([]);
+    setDeviceFormError("");
+  }
+
+  function closeDeviceForm() {
+    if (savingDevice) {
+      return;
+    }
+
+    setShowDeviceForm(false);
+    resetDeviceForm();
+  }
+
+  /*
+  =========================================================
+  DEVICES - CREATE
+  =========================================================
+  */
+
+  async function createDevice(event) {
+    event.preventDefault();
+
+    setDeviceFormError("");
+
+    if (!deviceBrandId) {
+      setDeviceFormError("Please select a brand.");
+      return;
+    }
+
+    if (!deviceModelName.trim()) {
+      setDeviceFormError("Model name is required.");
+      return;
+    }
+
+    if (!deviceSlug.trim()) {
+      setDeviceFormError("Slug is required.");
+      return;
+    }
+
+    if (deviceSpecsJson.trim()) {
+      try {
+        JSON.parse(deviceSpecsJson);
+      } catch {
+        setDeviceFormError(
+          "Specs JSON is not valid JSON."
+        );
+        return;
+      }
+    }
+
+    try {
+      setSavingDevice(true);
+
+      const images = await filesToPayload(deviceImageFiles);
+
+      const response = await fetch(
+        "/api/admin/devices",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            brand_id: deviceBrandId,
+            model_name: deviceModelName,
+            slug: deviceSlug,
+            specs_json: deviceSpecsJson,
+            images,
+          }),
+          cache: "no-store",
+        }
+      );
+
+      const { result } = await readJsonResponse(response);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.error || "Failed to create device"
+        );
+      }
+
+      setShowDeviceForm(false);
+      resetDeviceForm();
+
+      await fetchDevices(0);
+
+    } catch (err) {
+      console.error("Create device error:", err);
+      setDeviceFormError(
+        err?.message || "Failed to create device"
+      );
+    } finally {
+      setSavingDevice(false);
+    }
+  }
+
+  /*
+  =========================================================
+  DEVICES - EDIT
+  =========================================================
+  */
+
+  function openEditDevice(device) {
+    setEditingDevice(device);
+    setDeviceBrandId(device?.brand_id || "");
+    setDeviceModelName(device?.model_name || "");
+    setDeviceSlug(device?.slug || "");
+    setDeviceSpecsJson("");
+    setDeviceImageFiles([]);
+    setDeviceFormError("");
+  }
+
+  function closeEditDevice() {
+    if (savingDevice) {
+      return;
+    }
+
+    setEditingDevice(null);
+    resetDeviceForm();
+  }
+
+  async function saveEditedDevice(event) {
+    event.preventDefault();
+
+    if (!editingDevice) {
+      return;
+    }
+
+    setDeviceFormError("");
+
+    if (!deviceModelName.trim()) {
+      setDeviceFormError("Model name is required.");
+      return;
+    }
+
+    if (!deviceSlug.trim()) {
+      setDeviceFormError("Slug is required.");
+      return;
+    }
+
+    if (deviceSpecsJson.trim()) {
+      try {
+        JSON.parse(deviceSpecsJson);
+      } catch {
+        setDeviceFormError(
+          "Specs JSON is not valid JSON."
+        );
+        return;
+      }
+    }
+
+    try {
+      setSavingDevice(true);
+
+      const images = await filesToPayload(deviceImageFiles);
+
+      const response = await fetch(
+        `/api/admin/devices/${editingDevice.phone_id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            brand_id: deviceBrandId,
+            model_name: deviceModelName,
+            slug: deviceSlug,
+            specs_json: deviceSpecsJson,
+            images,
+          }),
+          cache: "no-store",
+        }
+      );
+
+      const { result } = await readJsonResponse(response);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.error || "Failed to update device"
+        );
+      }
+
+      setEditingDevice(null);
+      resetDeviceForm();
+
+      await fetchDevices(devicesOffset);
+
+    } catch (err) {
+      console.error("Update device error:", err);
+      setDeviceFormError(
+        err?.message || "Failed to update device"
+      );
+    } finally {
+      setSavingDevice(false);
+    }
+  }
+
+  /*
+  =========================================================
+  DEVICES - DELETE
+  =========================================================
+  */
+
+  async function deleteDevice(device) {
+    const confirmed = window.confirm(
+      `Delete "${device.model_name}"? This can't be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/admin/devices/${device.phone_id}`,
+        {
+          method: "DELETE",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        }
+      );
+
+      const { result } = await readJsonResponse(response);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.error || "Failed to delete device"
+        );
+      }
+
+      await fetchDevices(devicesOffset);
+
+    } catch (err) {
+      console.error("Delete device error:", err);
+      alert(
+        err?.message || "Failed to delete device"
+      );
+    }
+  }
+
+  /*
+  =========================================================
   CLOSE CREATE FORM
   =========================================================
   */
@@ -812,6 +1233,13 @@ export default function AdminDashboard() {
             href="#api-keys"
           >
             API Keys
+          </a>
+
+          <a
+            className="nav-link"
+            href="#devices"
+          >
+            Devices
           </a>
 
           <a
@@ -1659,6 +2087,578 @@ export default function AdminDashboard() {
           </div>
 
         </section>
+
+        {/* DEVICES */}
+
+        <section
+          id="devices"
+          className="section"
+        >
+
+          <div className="section-heading">
+
+            <div>
+
+              <p className="eyebrow">
+                CATALOG
+              </p>
+
+              <h2>
+                Devices
+              </h2>
+
+            </div>
+
+            <button
+              className="refresh-button"
+              onClick={() =>
+                setShowDeviceForm((value) => !value)
+              }
+            >
+              {showDeviceForm
+                ? "Close"
+                : "+ Add Device"}
+            </button>
+
+          </div>
+
+          {/* ADD DEVICE FORM */}
+
+          {showDeviceForm && (
+
+            <div className="create-key-card">
+
+              <div className="create-key-header">
+
+                <div>
+
+                  <p className="eyebrow">
+                    NEW DEVICE
+                  </p>
+
+                  <h3>
+                    Add a device
+                  </h3>
+
+                  <p className="muted">
+                    Add a new phone model to the
+                    catalog used across the site.
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeDeviceForm}
+                  disabled={savingDevice}
+                  className="close-button"
+                >
+                  ×
+                </button>
+
+              </div>
+
+              <form
+                onSubmit={createDevice}
+                className="create-key-form"
+              >
+
+                <label>
+                  Brand
+
+                  <select
+                    value={deviceBrandId}
+                    onChange={(event) =>
+                      setDeviceBrandId(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  >
+                    <option value="">
+                      Select brand
+                    </option>
+
+                    {deviceBrands.map((brand) => (
+                      <option
+                        key={brand.brand_id}
+                        value={brand.brand_id}
+                      >
+                        {brand.name}
+                      </option>
+                    ))}
+                  </select>
+
+                </label>
+
+                <label>
+                  Model Name
+
+                  <input
+                    type="text"
+                    placeholder="e.g. Galaxy S24"
+                    value={deviceModelName}
+                    onChange={(event) =>
+                      setDeviceModelName(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Slug
+
+                  <input
+                    type="text"
+                    placeholder="e.g. galaxy-s24"
+                    value={deviceSlug}
+                    onChange={(event) =>
+                      setDeviceSlug(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Specs JSON
+
+                  <textarea
+                    rows={5}
+                    placeholder='{"display":"6.1\\"","ram":"8GB"}'
+                    value={deviceSpecsJson}
+                    onChange={(event) =>
+                      setDeviceSpecsJson(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Upload Images
+
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    multiple
+                    onChange={(event) =>
+                      setDeviceImageFiles(
+                        Array.from(
+                          event.target.files || []
+                        )
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                {deviceFormError && (
+
+                  <div className="create-key-error">
+                    {deviceFormError}
+                  </div>
+
+                )}
+
+                <div className="create-key-actions">
+
+                  <button
+                    type="submit"
+                    disabled={savingDevice}
+                    className="create-button"
+                    style={{ width: "100%" }}
+                  >
+                    {savingDevice
+                      ? "Adding Device..."
+                      : "Add Device"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
+
+          )}
+
+          {/* DEVICES TABLE */}
+
+          <div className="table-card">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Model
+                  </th>
+
+                  <th>
+                    Brand
+                  </th>
+
+                  <th>
+                    Created
+                  </th>
+
+                  <th>
+                    Actions
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {devicesError ? (
+
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="empty"
+                    >
+                      {devicesError}
+                    </td>
+                  </tr>
+
+                ) : devicesLoading ? (
+
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="empty"
+                    >
+                      Loading devices...
+                    </td>
+                  </tr>
+
+                ) : devices.length === 0 ? (
+
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="empty"
+                    >
+                      No devices found.
+                    </td>
+                  </tr>
+
+                ) : (
+
+                  devices.map((device) => (
+
+                    <tr key={device.phone_id}>
+
+                      <td>
+                        <strong>
+                          {device.model_name}
+                        </strong>
+                      </td>
+
+                      <td>
+                        {device.brands?.name || "—"}
+                      </td>
+
+                      <td>
+                        {formatDate(
+                          device.created_at
+                        )}
+                      </td>
+
+                      <td>
+
+                        <button
+                          type="button"
+                          className="manage-button"
+                          onClick={() =>
+                            openEditDevice(device)
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        {" "}
+
+                        <button
+                          type="button"
+                          className="manage-button danger"
+                          onClick={() =>
+                            deleteDevice(device)
+                          }
+                        >
+                          Delete
+                        </button>
+
+                      </td>
+
+                    </tr>
+
+                  ))
+
+                )}
+
+              </tbody>
+
+            </table>
+
+            {!devicesLoading &&
+              !devicesError &&
+              devicesTotal > 0 && (
+
+              <div className="table-pagination">
+
+                <span>
+                  Showing{" "}
+                  {Math.min(
+                    devicesOffset + DEVICES_PAGE_SIZE,
+                    devicesTotal
+                  )}{" "}
+                  of {devicesTotal}
+                </span>
+
+                <div className="table-pagination-buttons">
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={devicesOffset === 0}
+                    onClick={() =>
+                      fetchDevices(
+                        Math.max(
+                          devicesOffset -
+                            DEVICES_PAGE_SIZE,
+                          0
+                        )
+                      )
+                    }
+                  >
+                    Prev
+                  </button>
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      devicesOffset +
+                        DEVICES_PAGE_SIZE >=
+                      devicesTotal
+                    }
+                    onClick={() =>
+                      fetchDevices(
+                        devicesOffset +
+                          DEVICES_PAGE_SIZE
+                      )
+                    }
+                  >
+                    Next
+                  </button>
+
+                </div>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </section>
+
+        {/* EDIT DEVICE MODAL */}
+
+        {editingDevice && (
+
+          <div className="manage-modal-backdrop">
+
+            <div className="manage-modal">
+
+              <div className="manage-modal-header">
+
+                <div>
+
+                  <p className="eyebrow">
+                    DEVICE MANAGEMENT
+                  </p>
+
+                  <h3>
+                    Edit Device
+                  </h3>
+
+                  <p className="muted">
+                    Update this device's details. Only
+                    choose new images if you want to
+                    replace the existing ones.
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  className="close-button"
+                  onClick={closeEditDevice}
+                  disabled={savingDevice}
+                >
+                  ×
+                </button>
+
+              </div>
+
+              <form
+                className="manage-form"
+                onSubmit={saveEditedDevice}
+              >
+
+                <label>
+                  Brand
+
+                  <select
+                    value={deviceBrandId}
+                    onChange={(event) =>
+                      setDeviceBrandId(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  >
+                    <option value="">
+                      Select brand
+                    </option>
+
+                    {deviceBrands.map((brand) => (
+                      <option
+                        key={brand.brand_id}
+                        value={brand.brand_id}
+                      >
+                        {brand.name}
+                      </option>
+                    ))}
+                  </select>
+
+                </label>
+
+                <label>
+                  Model Name
+
+                  <input
+                    type="text"
+                    value={deviceModelName}
+                    onChange={(event) =>
+                      setDeviceModelName(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Slug
+
+                  <input
+                    type="text"
+                    value={deviceSlug}
+                    onChange={(event) =>
+                      setDeviceSlug(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Specs JSON
+                  <span className="muted">
+                    {" "}(leave blank to keep existing)
+                  </span>
+
+                  <textarea
+                    rows={5}
+                    placeholder='{"display":"6.1\\"","ram":"8GB"}'
+                    value={deviceSpecsJson}
+                    onChange={(event) =>
+                      setDeviceSpecsJson(
+                        event.target.value
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                <label>
+                  Replace Images
+                  <span className="muted">
+                    {" "}(optional)
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    multiple
+                    onChange={(event) =>
+                      setDeviceImageFiles(
+                        Array.from(
+                          event.target.files || []
+                        )
+                      )
+                    }
+                    disabled={savingDevice}
+                  />
+
+                </label>
+
+                {deviceFormError && (
+
+                  <div className="manage-error">
+                    {deviceFormError}
+                  </div>
+
+                )}
+
+                <div className="manage-modal-actions">
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={closeEditDevice}
+                    disabled={savingDevice}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="create-button"
+                    disabled={savingDevice}
+                  >
+                    {savingDevice
+                      ? "Saving..."
+                      : "Save Changes"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
+
+        )}
 
         {/* MANAGE CLIENT MODAL */}
 

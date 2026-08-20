@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import DevicePhoto from "../../components/DevicePhoto";
 import PhoneSpecsTabs from "../../components/PhoneSpecsTabs";
-import { resolvePhoneImage } from "../../lib/resolvePhoneImage";
+
 
 export default async function PhoneDetailPage({ params }) {
   const { slug } = await params;
@@ -51,12 +51,17 @@ export default async function PhoneDetailPage({ params }) {
   const sensors = specs["Sensors & Features"] || {};
   const miscellaneous = specs.Miscellaneous || {};
 
-  const image = await resolvePhoneImage(
-    brand,
-    phone.model_name,
-    phone.images, // JSON array of filename refs — no Storage bucket exists yet, so this is currently a no-op until one is set up
-    phone.slug
-  );
+  let image = null;
+
+  if (Array.isArray(phone.images) && phone.images.length > 0) {
+  const firstImage = phone.images[0];
+
+  if (typeof firstImage === "string" && firstImage.trim()) {
+    image = firstImage.startsWith("http")
+      ? firstImage
+      : `/phone-images/${encodeURIComponent(firstImage)}`;
+  }
+ }
 
   return (
     <div className="detail-modern">
@@ -112,7 +117,7 @@ export default async function PhoneDetailPage({ params }) {
             />
 
             <span className="detail-image-badge">
-              Device profile
+              {brand}
             </span>
 
           </div>

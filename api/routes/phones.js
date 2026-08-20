@@ -1,4 +1,5 @@
 const { supabase } = require("../lib/supabase");
+const { getByTac } = require("../lib/localDeviceTacRegistry");
 
 function normalize(value) {
     return String(value || "")
@@ -110,6 +111,74 @@ function modelScore(phone, tacData) {
 async function resolveImei(cleanImei, request) {
 
     const tac = cleanImei.substring(0, 8);
+
+    // =====================================================
+    // LOCAL DEVICE TAC REGISTRY
+    //
+    // Newly-added devices that do not have a real TAC
+    // mapping receive a persistent local TAC. Check it
+    // before the real TAC lookup so the generated IMEI
+    // always resolves back to the same device.
+    // =====================================================
+
+    const localEntry = getByTac(tac);
+
+    if (localEntry) {
+        const {
+            data: localPhone,
+            error: localPhoneError,
+        } = await supabase
+            .from("phones")
+            .select(`
+                phone_id,
+                model_name,
+                slug,
+                specs_json,
+                images,
+                brand_id,
+                brands (
+                    brand_id,
+                    name
+                )
+            `)
+            .eq("phone_id", localEntry.phoneId)
+            .single();
+
+        if (!localPhoneError && localPhone) {
+            return {
+                tac_id: null,
+                tac,
+                phone_id: localPhone.phone_id,
+                brand_id: localPhone.brand_id,
+                reported_brand:
+                    localPhone.brands?.name ||
+                    localEntry.brandName ||
+                    null,
+                reported_model_name:
+                    localPhone.model_name ||
+                    localEntry.modelName ||
+                    null,
+                reported_model_number:
+                    localEntry.modelNumber ||
+                    null,
+                reported_region: null,
+                reported_year: null,
+                device_type: null,
+                match_status: "local_tac_match",
+                match_confidence: 1,
+                source: "local_device_tac_registry",
+                model_name: localPhone.model_name,
+                slug: localPhone.slug,
+                specs_json: localPhone.specs_json,
+                images: localPhone.images,
+                brand_name:
+                    localPhone.brands?.name ||
+                    localEntry.brandName ||
+                    null,
+                imei: cleanImei,
+            };
+        }
+    }
 
     /*
      * -----------------------------------------------------

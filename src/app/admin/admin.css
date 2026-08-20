@@ -2100,3 +2100,40 @@ code {
   }
 
 }
+/* =========================================================
+   DEVICES - DELETE BUTTON + TABLE PAGINATION
+========================================================= */
+
+.manage-button.danger {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--admin-red);
+}
+
+.manage-button.danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: var(--admin-red);
+}
+
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid var(--admin-border);
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
+.table-pagination-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.table-pagination-buttons .secondary-button {
+  padding: 7px 16px;
+}
+
+.table-pagination-buttons .secondary-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

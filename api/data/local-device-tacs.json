@@ -1,0 +1,82 @@
+{
+  "567": {
+    "phoneId": 567,
+    "tac": "99381978",
+    "brandName": "Infinix",
+    "modelName": "GT 20 Pro",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-13T12:14:31.286Z",
+    "updatedAt": "2026-08-13T12:14:31.286Z"
+  },
+  "594": {
+    "phoneId": 594,
+    "tac": "99178374",
+    "brandName": "Infinix",
+    "modelName": "Zero Flip",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-18T09:15:02.417Z",
+    "updatedAt": "2026-08-18T09:15:02.417Z"
+  },
+  "622": {
+    "phoneId": 622,
+    "tac": "99733784",
+    "brandName": "Infinix",
+    "modelName": "GT 30",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-18T10:42:24.864Z",
+    "updatedAt": "2026-08-18T10:42:24.864Z"
+  },
+  "1207": {
+    "phoneId": 1207,
+    "tac": "99702048",
+    "brandName": "Samsung",
+    "modelName": "Galaxy S6",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-13T12:14:41.209Z",
+    "updatedAt": "2026-08-13T12:14:41.209Z"
+  },
+  "1208": {
+    "phoneId": 1208,
+    "tac": "99776333",
+    "brandName": "Samsung",
+    "modelName": "Galaxy A9",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-13T12:21:29.651Z",
+    "updatedAt": "2026-08-13T12:21:29.651Z"
+  },
+  "1209": {
+    "phoneId": 1209,
+    "tac": "99633953",
+    "brandName": "Oneplus",
+    "modelName": "OnePlus 15",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-18T07:21:16.980Z",
+    "updatedAt": "2026-08-18T07:21:16.980Z"
+  },
+  "1212": {
+    "phoneId": 1212,
+    "tac": "99964812",
+    "brandName": "Samsung",
+    "modelName": "Galaxy A56",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-18T10:08:34.493Z",
+    "updatedAt": "2026-08-18T10:08:34.493Z"
+  },
+  "1215": {
+    "phoneId": 1215,
+    "tac": "99212741",
+    "brandName": "Samsung",
+    "modelName": "Samsung galaxy s26 ultra",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-18T10:25:57.690Z",
+    "updatedAt": "2026-08-18T10:25:57.690Z"
+  }
+}

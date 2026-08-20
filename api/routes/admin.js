@@ -1,4 +1,7 @@
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
 const { supabase } = require("../lib/supabase");
 
 /*
@@ -94,6 +97,156 @@ function hashApiKey(apiKey) {
     .digest("hex");
 }
 
+
+/*
+=========================================================
+DEVICE IMAGE NAMES
+
+No Supabase Storage bucket exists yet - the phones table
+just has a plain `images` column to hold a list of image
+names/references as text. Nothing is actually uploaded or
+stored as a file; this simply sanitizes whatever names the
+admin panel sends (from the picked files' names) into a
+clean array of non-empty strings.
+=========================================================
+*/
+
+/*
+=========================================================
+DEVICE IMAGE STORAGE
+=========================================================
+*/
+
+const PHONE_IMAGE_DIR =
+  process.env.PHONE_IMAGE_DIR ||
+  path.resolve(
+    process.cwd(),
+    "public",
+    "phone-images"
+  );
+
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+function sanitizeImageFilename(name) {
+  return String(name || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+async function saveDeviceImages(images, slug) {
+  if (!Array.isArray(images) || images.length === 0) {
+    return [];
+  }
+
+  await fs.promises.mkdir(
+    PHONE_IMAGE_DIR,
+    {
+      recursive: true,
+    }
+  );
+
+  const savedFilenames = [];
+
+  for (const image of images) {
+    if (
+      !image ||
+      typeof image !== "object" ||
+      !image.name ||
+      !image.data
+    ) {
+      continue;
+    }
+
+    if (
+      image.type &&
+      !ALLOWED_IMAGE_TYPES.has(image.type)
+    ) {
+      throw new Error(
+        `Unsupported image type: ${image.type}`
+      );
+    }
+
+    const match = String(
+      image.data
+    ).match(
+      /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/
+    );
+
+    if (!match) {
+      throw new Error(
+        `Invalid image data for ${image.name}`
+      );
+    }
+
+    const mimeType = match[1];
+    const base64Data = match[2];
+
+    const originalName =
+      sanitizeImageFilename(image.name);
+
+    const originalExtension =
+      path.extname(originalName);
+
+    const originalBaseName =
+      path.basename(
+        originalName,
+        originalExtension
+      ) || "image";
+
+    const extensionMap = {
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "image/webp": ".webp",
+    };
+
+    const extension =
+      extensionMap[mimeType] ||
+      originalExtension ||
+      ".jpg";
+
+    const safeSlug =
+      sanitizeImageFilename(slug)
+        .replace(
+          /[^a-zA-Z0-9_-]/g,
+          "_"
+        ) || "device";
+
+    const uniqueSuffix =
+      `${Date.now()}-${crypto
+        .randomBytes(4)
+        .toString("hex")}`;
+
+    const finalFilename =
+      `${safeSlug}-${uniqueSuffix}-${originalBaseName}${extension}`;
+
+    const filePath =
+      path.join(
+        PHONE_IMAGE_DIR,
+        finalFilename
+      );
+
+    const buffer =
+      Buffer.from(
+        base64Data,
+        "base64"
+      );
+
+    await fs.promises.writeFile(
+      filePath,
+      buffer
+    );
+
+    savedFilenames.push(
+      finalFilename
+    );
+  }
+
+  return savedFilenames;
+}
 
 /*
 =========================================================
@@ -1465,6 +1618,497 @@ fastify.get(
             error:
               "Failed to load analytics",
           });
+      }
+    }
+  );
+
+
+  /*
+  ========================================================
+  DEVICE BRANDS (for the "Add Device" brand dropdown)
+  GET /admin/devices/brands
+  ========================================================
+  */
+
+  fastify.get(
+    "/admin/devices/brands",
+    async (request, reply) => {
+
+      if (!requireAdmin(request, reply)) {
+        return;
+      }
+
+      try {
+
+        const { data, error } = await supabase
+          .from("brands")
+          .select("brand_id, name")
+          .order("name");
+
+        if (error) {
+          return reply.code(500).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
+        return {
+          success: true,
+          data: data || [],
+        };
+
+      } catch (error) {
+
+        fastify.log.error(
+          "Device brands error:",
+          error
+        );
+
+        return reply.code(500).send({
+          success: false,
+          error: "Failed to load brands",
+        });
+      }
+    }
+  );
+
+
+  /*
+  ========================================================
+  LIST DEVICES
+  GET /admin/devices
+  ========================================================
+  */
+
+  fastify.get(
+    "/admin/devices",
+    async (request, reply) => {
+
+      if (!requireAdmin(request, reply)) {
+        return;
+      }
+
+      try {
+
+        const {
+          search,
+          limit = 15,
+          offset = 0,
+        } = request.query;
+
+        const parsedLimit = Math.min(
+          Math.max(Number(limit) || 15, 1),
+          100
+        );
+
+        const parsedOffset = Math.max(
+          Number(offset) || 0,
+          0
+        );
+
+        let query = supabase
+          .from("phones")
+          .select(
+            `
+            phone_id,
+            model_name,
+            slug,
+            brand_id,
+            created_at,
+            brands (
+              brand_id,
+              name
+            )
+            `,
+            { count: "exact" }
+          );
+
+        if (search) {
+          query = query.ilike(
+            "model_name",
+            `%${search}%`
+          );
+        }
+
+        query = query
+          .order("created_at", { ascending: false })
+          .range(
+            parsedOffset,
+            parsedOffset + parsedLimit - 1
+          );
+
+        const { data, error, count } = await query;
+
+        if (error) {
+          return reply.code(500).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
+        return {
+          success: true,
+          pagination: {
+            total: count || 0,
+            limit: parsedLimit,
+            offset: parsedOffset,
+          },
+          data: data || [],
+        };
+
+      } catch (error) {
+
+        fastify.log.error(
+          "Devices list error:",
+          error
+        );
+
+        return reply.code(500).send({
+          success: false,
+          error: "Failed to load devices",
+        });
+      }
+    }
+  );
+
+
+  /*
+  ========================================================
+  CREATE DEVICE
+  POST /admin/devices
+  ========================================================
+  */
+
+  fastify.post(
+    "/admin/devices",
+    async (request, reply) => {
+
+      if (!requireAdmin(request, reply)) {
+        return;
+      }
+
+      try {
+
+        const {
+          brand_id,
+          model_name,
+          slug,
+          specs_json,
+          images,
+        } = request.body || {};
+
+        if (!brand_id) {
+          return reply.code(400).send({
+            success: false,
+            error: "Brand is required",
+          });
+        }
+
+        if (!model_name || !model_name.trim()) {
+          return reply.code(400).send({
+            success: false,
+            error: "Model name is required",
+          });
+        }
+
+        if (!slug || !slug.trim()) {
+          return reply.code(400).send({
+            success: false,
+            error: "Slug is required",
+          });
+        }
+
+        // specs_json arrives as a string from the textarea -
+        // it must be valid JSON (or empty).
+        let parsedSpecs = {};
+
+        if (specs_json && specs_json.trim()) {
+          try {
+            parsedSpecs = JSON.parse(specs_json);
+          } catch {
+            return reply.code(400).send({
+              success: false,
+              error: "Specs JSON is not valid JSON",
+            });
+          }
+        }
+
+        const savedImages =
+         await saveDeviceImages(
+          images,
+          slug.trim()
+         );
+
+        const { data, error } = await supabase
+    .from("phones")
+    .insert({
+      brand_id,
+      model_name: model_name.trim(),
+      slug: slug.trim(),
+      specs_json: parsedSpecs,
+      images: savedImages,
+           })
+          .select(`
+            phone_id,
+            model_name,
+            slug,
+            brand_id,
+            created_at,
+            brands (
+              brand_id,
+              name
+            )
+          `)
+          .single();
+
+        if (error) {
+          // Duplicate slug (unique constraint)
+          if (error.code === "23505") {
+            return reply.code(400).send({
+              success: false,
+              error: "A device with this slug already exists",
+            });
+          }
+
+          return reply.code(500).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
+        return reply.code(201).send({
+          success: true,
+          message: "Device created",
+          data,
+        });
+
+      } catch (error) {
+
+        fastify.log.error(
+          "Create device error:",
+          error
+        );
+
+        return reply.code(500).send({
+          success: false,
+          error: "Failed to create device",
+        });
+      }
+    }
+  );
+
+
+  /*
+  ========================================================
+  UPDATE DEVICE
+  PATCH /admin/devices/:id
+  ========================================================
+  */
+
+  fastify.patch(
+    "/admin/devices/:id",
+    async (request, reply) => {
+
+      if (!requireAdmin(request, reply)) {
+        return;
+      }
+
+      try {
+
+        const { id } = request.params;
+
+        const {
+          brand_id,
+          model_name,
+          slug,
+          specs_json,
+          images,
+        } = request.body || {};
+
+        const updates = {};
+
+        if (brand_id !== undefined) {
+          updates.brand_id = brand_id;
+        }
+
+        if (model_name !== undefined) {
+          if (!model_name.trim()) {
+            return reply.code(400).send({
+              success: false,
+              error: "Model name cannot be empty",
+            });
+          }
+
+          updates.model_name = model_name.trim();
+        }
+
+        if (slug !== undefined) {
+          if (!slug.trim()) {
+            return reply.code(400).send({
+              success: false,
+              error: "Slug cannot be empty",
+            });
+          }
+
+          updates.slug = slug.trim();
+        }
+
+        if (specs_json !== undefined) {
+          if (specs_json && specs_json.trim()) {
+            try {
+              updates.specs_json = JSON.parse(specs_json);
+            } catch {
+              return reply.code(400).send({
+                success: false,
+                error: "Specs JSON is not valid JSON",
+              });
+            }
+          } else {
+            updates.specs_json = {};
+          }
+        }
+
+        // Only touch images if new file names were actually
+        // provided - otherwise leave the existing ones alone.
+        if (
+              Array.isArray(images) &&
+              images.length > 0
+            ) {
+              updates.images =
+                await saveDeviceImages(
+                  images,
+                  slug !== undefined
+                    ? slug.trim()
+                    : "device"
+                );
+            }
+          
+        
+
+        if (Object.keys(updates).length === 0) {
+          return reply.code(400).send({
+            success: false,
+            error: "No changes provided",
+          });
+        }
+
+        const { data, error } = await supabase
+          .from("phones")
+          .update(updates)
+          .eq("phone_id", id)
+          .select(`
+            phone_id,
+            model_name,
+            slug,
+            brand_id,
+            created_at,
+            brands (
+              brand_id,
+              name
+            )
+          `)
+          .single();
+
+        if (error) {
+          if (error.code === "23505") {
+            return reply.code(400).send({
+              success: false,
+              error: "A device with this slug already exists",
+            });
+          }
+
+          return reply.code(500).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
+        if (!data) {
+          return reply.code(404).send({
+            success: false,
+            error: "Device not found",
+          });
+        }
+
+        return {
+          success: true,
+          message: "Device updated",
+          data,
+        };
+
+      } catch (error) {
+
+        fastify.log.error(
+          "Update device error:",
+          error
+        );
+
+        return reply.code(500).send({
+          success: false,
+          error: "Failed to update device",
+        });
+      }
+    }
+  );
+
+
+  /*
+  ========================================================
+  DELETE DEVICE
+  DELETE /admin/devices/:id
+  ========================================================
+  */
+
+  fastify.delete(
+    "/admin/devices/:id",
+    async (request, reply) => {
+
+      if (!requireAdmin(request, reply)) {
+        return;
+      }
+
+      try {
+
+        const { id } = request.params;
+
+        const { error } = await supabase
+          .from("phones")
+          .delete()
+          .eq("phone_id", id);
+
+        if (error) {
+          // Foreign key violation - other tables
+          // (e.g. tac_allocations) still reference this phone.
+          if (error.code === "23503") {
+            return reply.code(409).send({
+              success: false,
+              error:
+                "This device has related data (such as a TAC allocation) and can't be deleted until that's removed first.",
+            });
+          }
+
+          return reply.code(500).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
+        return {
+          success: true,
+          message: "Device deleted",
+        };
+
+      } catch (error) {
+
+        fastify.log.error(
+          "Delete device error:",
+          error
+        );
+
+        return reply.code(500).send({
+          success: false,
+          error: "Failed to delete device",
+        });
       }
     }
   );

@@ -1,0 +1,21 @@
+for cloudflare run these commands in powershell
+cd E:\Downloads\Chaanged
+use this one for browser
+>> .\cloudflared-windows-amd64.exe tunnel --url http://localhost:3000
+
+and in another powershell run this command 
+
+.\cloudflared-windows-amd64.exe tunnel --url http://localhost:8000
+
+and make sure the api and dev is running as well 
+
+    await fastify.register(cors, {
+  origin: [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+
+    // Cloudflare frontend
+    "https://hist-bugs-dna-america.trycloudflare.com",
+  ],
+ 
+ and change the cloudflare url everytime u get a new one 
