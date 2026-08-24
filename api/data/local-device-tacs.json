@@ -1,4 +1,14 @@
 {
+  "31": {
+    "phoneId": 31,
+    "tac": "99358997",
+    "brandName": "Infinix",
+    "modelName": "Hot 10 Lite",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-20T09:06:45.084Z",
+    "updatedAt": "2026-08-20T09:06:45.084Z"
+  },
   "567": {
     "phoneId": 567,
     "tac": "99381978",
