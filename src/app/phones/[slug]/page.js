@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { supabase } from "../../lib/supabase";
@@ -34,10 +34,14 @@ export default async function PhoneDetailPage({ params }) {
      BASIC DATA
   ========================================================= */
 
-  const brand = phone.brands?.name || "Unknown";
   const specs = phone.specs_json || {};
-
   const general = specs.General || {};
+
+  const brand =
+    phone.brands?.name ||
+    general.brand ||
+    "Unknown";
+
   const display = specs.Display || {};
   const platform = specs.Platform || {};
   const memory = specs.Memory || {};
@@ -904,3 +908,6 @@ function formatPrice(value) {
 
   return String(value);
 }
+
+
+

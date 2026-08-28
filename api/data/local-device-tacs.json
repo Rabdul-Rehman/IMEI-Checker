@@ -88,5 +88,15 @@
     "local": true,
     "createdAt": "2026-08-18T10:25:57.690Z",
     "updatedAt": "2026-08-18T10:25:57.690Z"
+  },
+  "1380": {
+    "phoneId": 1380,
+    "tac": "99505267",
+    "brandName": "Apple",
+    "modelName": "Apple iPhone 13",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-28T09:00:37.639Z",
+    "updatedAt": "2026-08-28T09:00:37.639Z"
   }
 }

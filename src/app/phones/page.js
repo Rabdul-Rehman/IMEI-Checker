@@ -1,80 +1,296 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../lib/supabase";
 import DevicePhoto from "../components/DevicePhoto";
 
+const PAGE_SIZE = 100;
+
+const PHONE_SELECT = `
+  phone_id,
+  model_name,
+  slug,
+  specs_json,
+  brand_id
+`;
+
+function formatPhone(phone) {
+  return {
+    ...phone,
+
+    brand:
+      phone.specs_json?.General?.brand?.trim() ||
+      "Unknown",
+
+    image: getPhoneImage(phone),
+  };
+}
+
+function getBrandList(phones) {
+  return [
+    "All",
+    ...Array.from(
+      new Set(
+        phones
+          .map((phone) => phone.brand)
+          .filter(
+            (brand) =>
+              brand &&
+              brand.trim() &&
+              brand.toLowerCase() !== "unknown"
+          )
+      )
+    ).sort((a, b) => a.localeCompare(b)),
+  ];
+}
+
 export default function PhoneDatabasePage() {
   const [phones, setPhones] = useState([]);
   const [brands, setBrands] = useState(["All"]);
+
   const [query, setQuery] = useState("");
   const [activeBrand, setActiveBrand] = useState("All");
   const [sort, setSort] = useState("name");
+
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searching, setSearching] = useState(false);
+
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function loadPhones() {
-      setLoading(true);
-      setError("");
+  const [totalDevices, setTotalDevices] = useState(0);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [searchTotal, setSearchTotal] = useState(null);
 
-      const { data, error } = await supabase
+  const firstSearchPass = useRef(true);
+  const searchRequestId = useRef(0);
+
+  async function loadInitialPhones() {
+    setLoading(true);
+    setError("");
+
+    const [
+      { count, error: countError },
+      { data, error: phonesError },
+    ] = await Promise.all([
+      supabase
         .from("phones")
-        .select(`
-          phone_id,
-          model_name,
-          slug,
-          specs_json,
-          brand_id,
-          brands (
-            brand_id,
-            name
-          )
-        `)
-        .order("model_name", { ascending: true });
+        .select("phone_id", {
+          count: "exact",
+          head: true,
+        }),
 
-      if (error) {
-        console.error("Supabase phones error:", error);
-        setError("Unable to load phone database.");
-        setLoading(false);
+      supabase
+        .from("phones")
+        .select(PHONE_SELECT)
+        .order("model_name", {
+          ascending: true,
+        })
+        .range(0, PAGE_SIZE - 1),
+    ]);
+
+    if (countError) {
+      console.error(
+        "Supabase phones count error:",
+        countError
+      );
+    } else {
+      setTotalDevices(count || 0);
+    }
+
+    if (phonesError) {
+      console.error(
+        "Supabase phones error:",
+        phonesError
+      );
+
+      setError("Unable to load phone database.");
+      setLoading(false);
+      return;
+    }
+
+    const formatted = (data || []).map(formatPhone);
+
+    setPhones(formatted);
+    setLoadedCount(formatted.length);
+    setBrands(getBrandList(formatted));
+
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadInitialPhones();
+  }, []);
+
+  useEffect(() => {
+    const term = query.trim();
+
+    /*
+     * Ignore the empty-query search effect that fires
+     * during the initial page render.
+     */
+    if (!term && firstSearchPass.current) {
+      firstSearchPass.current = false;
+      return;
+    }
+
+    /*
+     * Clearing the search restores the normal first page.
+     */
+    if (!term) {
+      searchRequestId.current += 1;
+
+      setSearching(false);
+      setSearchTotal(null);
+      setActiveBrand("All");
+
+      loadInitialPhones();
+      return;
+    }
+
+    /*
+     * Every new search invalidates older searches.
+     */
+    const requestId = ++searchRequestId.current;
+
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      setError("");
+      setActiveBrand("All");
+
+      /*
+       * Remove characters that can interfere with
+       * PostgREST OR filter syntax.
+       */
+      const safeTerm = term
+        .replace(/[,%()]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!safeTerm) {
+        setSearching(false);
         return;
       }
 
-      const formatted = (data || []).map((phone) => ({
-        ...phone,
-        brand: phone.brands?.name || "Unknown",
-        image: getPhoneImage(phone),
-      }));
+      const {
+        data,
+        error: searchError,
+        count,
+      } = await supabase
+        .from("phones")
+        .select(PHONE_SELECT, {
+          count: "exact",
+        })
+        .or(
+          `model_name.ilike.%${safeTerm}%,slug.ilike.%${safeTerm}%,specs_json->General->>brand.ilike.%${safeTerm}%`
+        )
+        .order("model_name", {
+          ascending: true,
+        })
+        .range(0, PAGE_SIZE - 1);
+
+      /*
+       * Ignore an old search response if the user
+       * has already typed another query.
+       */
+      if (requestId !== searchRequestId.current) {
+        return;
+      }
+
+      if (searchError) {
+        console.error(
+          "Supabase phone search error:",
+          searchError
+        );
+
+        setError("Unable to search phone database.");
+        setSearching(false);
+        return;
+      }
+
+      const formatted = (data || []).map(formatPhone);
 
       setPhones(formatted);
+      setLoadedCount(formatted.length);
+      setSearchTotal(count || 0);
+      setBrands(getBrandList(formatted));
 
-      const uniqueBrands = [
-        "All",
-        ...Array.from(new Set(formatted.map((p) => p.brand))).sort(),
-      ];
+      setSearching(false);
+    }, 400);
 
-      setBrands(uniqueBrands);
-      setLoading(false);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  async function loadMorePhones() {
+    if (
+      loadingMore ||
+      query.trim() ||
+      loadedCount >= totalDevices
+    ) {
+      return;
     }
 
-    loadPhones();
-  }, []);
+    setLoadingMore(true);
+
+    const { data, error: loadMoreError } =
+      await supabase
+        .from("phones")
+        .select(PHONE_SELECT)
+        .order("model_name", {
+          ascending: true,
+        })
+        .range(
+          loadedCount,
+          loadedCount + PAGE_SIZE - 1
+        );
+
+    if (loadMoreError) {
+      console.error(
+        "Supabase load more error:",
+        loadMoreError
+      );
+
+      setLoadingMore(false);
+      return;
+    }
+
+    const formatted = (data || []).map(formatPhone);
+
+    /*
+     * Protect against duplicate records if data changes
+     * while the user is paging.
+     */
+    setPhones((current) => {
+      const map = new Map();
+
+      [...current, ...formatted].forEach((phone) => {
+        map.set(phone.phone_id, phone);
+      });
+
+      const merged = Array.from(map.values());
+
+      setBrands(getBrandList(merged));
+
+      return merged;
+    });
+
+    setLoadedCount(
+      (current) => current + formatted.length
+    );
+
+    setLoadingMore(false);
+  }
 
   const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-
     const result = phones.filter((phone) => {
-      const brandMatch =
-        activeBrand === "All" || phone.brand === activeBrand;
+      if (activeBrand === "All") {
+        return true;
+      }
 
-      const queryMatch =
-        !normalized ||
-        phone.model_name?.toLowerCase().includes(normalized) ||
-        phone.brand?.toLowerCase().includes(normalized) ||
-        phone.slug?.toLowerCase().includes(normalized);
-
-      return brandMatch && queryMatch;
+      return phone.brand === activeBrand;
     });
 
     return [...result].sort((a, b) => {
@@ -85,26 +301,38 @@ export default function PhoneDatabasePage() {
         );
       }
 
-      return a.model_name.localeCompare(b.model_name);
+      return a.model_name.localeCompare(
+        b.model_name
+      );
     });
-  }, [phones, query, activeBrand, sort]);
+  }, [phones, activeBrand, sort]);
+
+  const displayedResultCount =
+    query.trim() && searchTotal !== null
+      ? searchTotal
+      : filtered.length;
 
   return (
     <div className="modern-page-shell">
       <div className="modern-page-head database-head-row">
         <div>
-          <span className="section-eyebrow">DEVICE DIRECTORY</span>
+          <span className="section-eyebrow">
+            DEVICE DIRECTORY
+          </span>
 
           <h1>Phone Database</h1>
 
           <p>
-            Explore phones, compare specifications and open a dedicated
-            device profile.
+            Explore phones, compare specifications and open
+            a dedicated device profile.
           </p>
         </div>
 
         <div className="database-head-stat">
-          <strong>{phones.length.toLocaleString()}</strong>
+          <strong>
+            {totalDevices.toLocaleString()}
+          </strong>
+
           <span>Devices available</span>
         </div>
       </div>
@@ -115,7 +343,9 @@ export default function PhoneDatabasePage() {
 
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) =>
+              setQuery(event.target.value)
+            }
             placeholder="Search phone, brand or model..."
             aria-label="Search phones"
           />
@@ -134,21 +364,34 @@ export default function PhoneDatabasePage() {
         <select
           className="database-sort"
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(event) =>
+            setSort(event.target.value)
+          }
           aria-label="Sort phones"
         >
-          <option value="name">Name A-Z</option>
-          <option value="brand">Brand A-Z</option>
+          <option value="name">
+            Name A-Z
+          </option>
+
+          <option value="brand">
+            Brand A-Z
+          </option>
         </select>
       </div>
 
       <div className="filter-pills">
-        {brands.slice(0, 20).map((brand) => (
+        {brands.map((brand) => (
           <button
             key={brand}
             type="button"
-            className={activeBrand === brand ? "active" : ""}
-            onClick={() => setActiveBrand(brand)}
+            className={
+              activeBrand === brand
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setActiveBrand(brand)
+            }
           >
             {brand}
           </button>
@@ -157,11 +400,21 @@ export default function PhoneDatabasePage() {
 
       <div className="database-result-line">
         <span>
-          {loading
+          {loading || searching
             ? "Loading devices..."
-            : `${filtered.length.toLocaleString()} model${
-                filtered.length === 1 ? "" : "s"
-              } found`}
+            : query.trim()
+            ? `${displayedResultCount.toLocaleString()} model${
+                displayedResultCount === 1
+                  ? ""
+                  : "s"
+              } found`
+            : activeBrand !== "All"
+            ? `${filtered.length.toLocaleString()} loaded ${activeBrand} model${
+                filtered.length === 1
+                  ? ""
+                  : "s"
+              }`
+            : `${phones.length.toLocaleString()} loaded of ${totalDevices.toLocaleString()} devices`}
         </span>
 
         {(query || activeBrand !== "All") && (
@@ -180,20 +433,27 @@ export default function PhoneDatabasePage() {
       {error && (
         <div className="database-empty">
           <i className="fas fa-triangle-exclamation" />
+
           <strong>{error}</strong>
+
           <span>
-            Check your Supabase connection and table permissions.
+            Check your Supabase connection and table
+            permissions.
           </span>
         </div>
       )}
 
       {loading && !error && (
         <div className="database-grid">
-          {Array.from({ length: 8 }).map((_, index) => (
+          {Array.from({
+            length: 8,
+          }).map((_, index) => (
             <div
               key={index}
               className="database-card database-card-enhanced"
-              style={{ minHeight: "280px" }}
+              style={{
+                minHeight: "280px",
+              }}
             >
               <div
                 style={{
@@ -227,47 +487,93 @@ export default function PhoneDatabasePage() {
         </div>
       )}
 
-      {!loading && !error && filtered.length > 0 && (
-        <div className="database-grid">
-          {filtered.map((phone) => (
-            <Link
-              href={`/phones/${phone.slug}`}
-              key={phone.phone_id}
-              className="database-card database-card-enhanced"
+      {!loading &&
+        !searching &&
+        !error &&
+        filtered.length > 0 && (
+          <div className="database-grid">
+            {filtered.map((phone) => (
+              <Link
+                href={`/phones/${phone.slug}`}
+                key={phone.phone_id}
+                className="database-card database-card-enhanced"
+              >
+                <div className="database-card-icon">
+                  <DevicePhoto
+                    src={phone.image}
+                    alt={phone.model_name}
+                  />
+                </div>
+
+                <span className="brand">
+                  {phone.brand}
+                </span>
+
+                <h3>
+                  {phone.model_name}
+                </h3>
+
+                <p>
+                  {getShortSpecs(
+                    phone.specs_json
+                  )}
+                </p>
+
+                <span className="database-card-link">
+                  View full specs{" "}
+                  <i className="fas fa-arrow-right" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+      {!loading &&
+        !searching &&
+        !error &&
+        !query.trim() &&
+        loadedCount < totalDevices && (
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "28px",
+            }}
+          >
+            <button
+              type="button"
+              className="database-sort"
+              onClick={loadMorePhones}
+              disabled={loadingMore}
+              style={{
+                cursor: loadingMore
+                  ? "wait"
+                  : "pointer",
+                padding: "12px 22px",
+              }}
             >
-              <div className="database-card-icon">
-                <DevicePhoto
-                  src={phone.image}
-                  alt={phone.model_name}
-                />
-              </div>
+              {loadingMore
+                ? "Loading..."
+                : `Load more devices (${loadedCount.toLocaleString()} of ${totalDevices.toLocaleString()})`}
+            </button>
+          </div>
+        )}
 
-              <span className="brand">{phone.brand}</span>
+      {!loading &&
+        !searching &&
+        !error &&
+        filtered.length === 0 && (
+          <div className="database-empty">
+            <i className="fas fa-mobile-screen-button" />
 
-              <h3>{phone.model_name}</h3>
+            <strong>
+              No devices found
+            </strong>
 
-              <p>
-                {getShortSpecs(phone.specs_json)}
-              </p>
-
-              <span className="database-card-link">
-                View full specs{" "}
-                <i className="fas fa-arrow-right" />
-              </span>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {!loading && !error && filtered.length === 0 && (
-        <div className="database-empty">
-          <i className="fas fa-mobile-screen-button" />
-          <strong>No devices found</strong>
-          <span>
-            Try another phone model or brand.
-          </span>
-        </div>
-      )}
+            <span>
+              Try another phone model or brand.
+            </span>
+          </div>
+        )}
     </div>
   );
 }
@@ -276,17 +582,29 @@ function getPhoneImage(phone) {
   const slug = phone.slug || "";
 
   const knownImages = {
-    "iphone-17-pro": "/images/devices/iphone-17-pro.png",
-    "galaxy-s25-ultra": "/images/devices/galaxy-s25-ultra.png",
-    "pixel-10-pro": "/images/devices/pixel-10-pro.png",
-    "xiaomi-15-ultra": "/images/devices/xiaomi-15-ultra.png",
+    "iphone-17-pro":
+      "/images/devices/iphone-17-pro.png",
+
+    "galaxy-s25-ultra":
+      "/images/devices/galaxy-s25-ultra.png",
+
+    "pixel-10-pro":
+      "/images/devices/pixel-10-pro.png",
+
+    "xiaomi-15-ultra":
+      "/images/devices/xiaomi-15-ultra.png",
   };
 
-  return knownImages[slug] || "/images/devices/phone-placeholder.png";
+  return (
+    knownImages[slug] ||
+    "/images/devices/phone-placeholder.png"
+  );
 }
 
 function getShortSpecs(specs) {
-  if (!specs) return "Specifications available";
+  if (!specs) {
+    return "Specifications available";
+  }
 
   const display = specs.Display;
   const platform = specs.Platform;
@@ -295,7 +613,9 @@ function getShortSpecs(specs) {
   const parts = [];
 
   if (display?.display_size_inches) {
-    parts.push(`${display.display_size_inches}" display`);
+    parts.push(
+      `${display.display_size_inches}" display`
+    );
   }
 
   if (platform?.chipset) {
@@ -303,10 +623,13 @@ function getShortSpecs(specs) {
   }
 
   if (camera?.rear_camera_count) {
-    parts.push(`${camera.rear_camera_count} cameras`);
+    parts.push(
+      `${camera.rear_camera_count} cameras`
+    );
   }
 
   return parts.length
     ? parts.join(" • ")
     : "Specifications available";
 }
+
