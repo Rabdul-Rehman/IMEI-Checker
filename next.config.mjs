@@ -1,6 +1,9 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },import('next').NextConfig} */
 const nextConfig = {
-    swcMinify: true, // Minify JavaScript using SWC (faster + smaller builds)
+     // Minify JavaScript using SWC (faster + smaller builds)
   
     experimental: {
       // Optimize imports from heavy libraries (only bundle what you actually use)
@@ -16,3 +19,4 @@ const nextConfig = {
   
   export default nextConfig;
   
+

@@ -1,4 +1,4 @@
-html, body {
+﻿html, body {
   font-family: 'Oxanium', sans-serif !important; 
   font-size: 20px;
   font-weight: 300;
@@ -29,7 +29,7 @@ html, body {
 .section-1 {
   position: relative;
   /* height: 420px;  <-- remove this line */
-  overflow: hidden; /* optional — remove if it's hiding content */
+  overflow: hidden; /* optional â€” remove if it's hiding content */
   margin-top: 30px;
   margin-bottom: 110px;
 }
@@ -1588,7 +1588,7 @@ html, body {
 }
 
 /* =========================================================
-   IMEI.INFO MODERN UI — PHASE 1 + PHASE 2
+   IMEI.INFO MODERN UI â€” PHASE 1 + PHASE 2
    ========================================================= */
 :root {
   --bg: #090b10;
@@ -1858,7 +1858,7 @@ a { color: inherit; }
 
 
 /* =========================================================
-   PHONE DETAIL PAGE — CLEAN FINAL LAYOUT
+   PHONE DETAIL PAGE â€” CLEAN FINAL LAYOUT
    Current page.js structure:
    LEFT  = phone image
    RIGHT = device profile + tabs/specifications
@@ -2290,7 +2290,7 @@ a { color: inherit; }
 }
 
 /* =========================================================
-   PHONE DETAIL PAGE — real two-column layout
+   PHONE DETAIL PAGE â€” real two-column layout
    Matches the ACTUAL current page.js structure:
    .phone-detail-main > .phone-detail-left + .phone-detail-right
    ========================================================= */
@@ -2750,3 +2750,556 @@ a { color: inherit; }
     padding-right: 20px;
   }
 }
+
+/* Transparent output canvases are deliberately larger than their centered
+   device. These scoped transforms compensate visually without modifying the
+   source files; existing panel/card overflow clips transparent margins. */
+.detail-image > img {
+  width: 82%;
+  height: 82%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(4);
+  transform-origin: center;
+}
+
+.database-card-icon > img {
+  width: 86%;
+  height: 86%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+  transform-origin: center;
+}
+
+/* Catalogue-only image treatment: verified transparent canvases are scaled
+   until the centred handset fills the card, while unavailable images remain a
+   quiet in-card state instead of showing the bright fallback asset. */
+.database-card-icon {
+  overflow: hidden;
+}
+
+
+.database-card-icon--unavailable {
+  flex-direction: column;
+  gap: 4px;
+  background: linear-gradient(145deg, #121923, #0b0f15);
+  color: #637488;
+  font-size: 10px;
+}
+
+/* Verified photos: a slightly brighter blue-gray backdrop reveals dark edges. */
+.database-card-icon:not(.database-card-icon--unavailable) {
+  background: radial-gradient(ellipse at center, #2b3747 0%, #1b2532 70%, #17202c 100%);
+}
+
+.database-card-icon--unavailable > i {
+  color: #4f6d89;
+  font-size: 28px;
+}
+
+.database-card-icon--unavailable > span {
+  color: #8c9aab;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.database-card-icon--unavailable > small {
+  color: #5f6c7b;
+  font-size: 8px;
+}
+
+
+/* Catalogue verified images are fitted by their measured alpha-content box.
+   The canvas can be much larger than the handset, so no global scale is used. */
+.database-card-icon > .adaptive-device-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.adaptive-device-photo > img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+.adaptive-device-photo > .device-icon-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f6d89;
+  font-size: 28px;
+}
+
+/* ==========================================================
+   FINAL ORIGINAL PHONE IMAGE PRESENTATION
+   Verified originals are now used instead of damaged
+   background-removed assets.
+   Only the image area is white; the rest of the card stays dark.
+   ========================================================== */
+
+/* -------------------------------
+   PHONE DATABASE IMAGE BOX
+   ------------------------------- */
+
+.database-card-icon:not(.database-card-icon--unavailable) {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px;
+}
+
+/* Disable the old alpha-canvas positioning visually.
+   Originals should simply fit cleanly inside the white box. */
+.database-card-icon > .adaptive-device-photo {
+  position: relative !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  overflow: hidden !important;
+}
+
+/* Full original image:
+   complete phone visible,
+   centred,
+   never stretched,
+   never cropped. */
+.database-card-icon
+  > .adaptive-device-photo
+  > img {
+
+  position: relative !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  left: auto !important;
+  top: auto !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  transform: none !important;
+
+  padding: 0 !important;
+
+  display: block !important;
+}
+
+
+/* -------------------------------
+   DETAIL PAGE IMAGE BOX
+   ------------------------------- */
+
+/* Same clean product-image treatment on the individual device page. */
+.detail-image {
+  background: #ffffff !important;
+  border-radius: 14px;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 14px;
+}
+
+/* Remove the old scale(4) transparent-canvas compensation. */
+.detail-image > img {
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  transform: none !important;
+
+  padding: 0 !important;
+}
+
+
+/* -------------------------------
+   UNAVAILABLE IMAGE STATE
+   ------------------------------- */
+
+/* Missing images remain dark.
+   Do NOT turn placeholders white. */
+.database-card-icon--unavailable {
+
+  background:
+    linear-gradient(
+      145deg,
+      #121923,
+      #0b0f15
+    ) !important;
+
+  border: 1px solid rgba(255,255,255,.035);
+
+  color: #637488;
+}
+
+
+/* -------------------------------
+   MOBILE
+   ------------------------------- */
+
+@media (max-width: 700px) {
+
+  .database-card-icon:not(.database-card-icon--unavailable) {
+    padding: 6px;
+  }
+
+  .detail-image {
+    padding: 10px;
+  }
+}
+
+
+/* ============================================================
+   FINAL PHONE DATABASE ORIGINAL-IMAGE PRESENTATION
+   ============================================================ */
+
+/* IMAGE AREA ONLY â€” FULL WHITE PANEL */
+.database-card-icon:not(.database-card-icon--unavailable) {
+    width: 100% !important;
+    height: 130px !important;
+
+    background: #ffffff !important;
+    background-image: none !important;
+
+    border-radius: 12px !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 8px !important;
+    box-sizing: border-box !important;
+}
+
+
+/* Adaptive wrapper must ALSO be white.
+   This removes the remaining dark inner box. */
+.database-card-icon:not(.database-card-icon--unavailable)
+.adaptive-device-photo {
+
+    position: relative !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #ffffff !important;
+    background-image: none !important;
+
+    overflow: hidden !important;
+}
+
+
+/* ORIGINAL PHONE IMAGE
+   Do NOT use alpha bounds positioning anymore. */
+.database-card-icon:not(.database-card-icon--unavailable)
+.adaptive-device-photo > img {
+
+    position: static !important;
+
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    object-fit: contain !important;
+    object-position: center center !important;
+
+    transform: none !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    display: block !important;
+
+    background: #ffffff !important;
+}
+
+
+/* Catch any normal IMG that is not inside adaptive wrapper */
+.database-card-icon:not(.database-card-icon--unavailable) > img {
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    object-fit: contain !important;
+    object-position: center center !important;
+
+    transform: none !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    display: block !important;
+
+    background: #ffffff !important;
+}
+
+
+/* KEEP MISSING IMAGE CARDS DARK */
+.database-card-icon--unavailable {
+
+    background:
+        linear-gradient(
+            145deg,
+            #121923,
+            #0b0f15
+        ) !important;
+
+    background-color: #0b0f15 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 12px !important;
+}
+
+
+/* DETAIL PAGE â€” SAME ORIGINAL IMAGE STRATEGY */
+.detail-image {
+
+    background: #ffffff !important;
+    background-image: none !important;
+
+    overflow: hidden !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 14px !important;
+    box-sizing: border-box !important;
+}
+
+
+.detail-image > img {
+
+    position: static !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    object-fit: contain !important;
+    object-position: center center !important;
+
+    transform: none !important;
+
+    margin: auto !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+}
+
+
+/* MOBILE */
+@media (max-width: 700px) {
+
+    .database-card-icon:not(.database-card-icon--unavailable) {
+        height: 120px !important;
+        padding: 6px !important;
+    }
+
+}
+
+
+/* ============================================================
+   FINAL PHONE DATABASE IMAGE PRESENTATION
+   Original verified images, no adaptive alpha fitting
+   ============================================================ */
+
+/* Verified image area only */
+.database-card-icon:not(.database-card-icon--unavailable) {
+  height: 130px !important;
+  width: 100% !important;
+
+  background: #ffffff !important;
+  background-image: none !important;
+
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Normal original image */
+.database-card-icon:not(.database-card-icon--unavailable) > img {
+  position: static !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  transform: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: block !important;
+
+  background: #ffffff !important;
+}
+
+/* Missing-image cards remain dark */
+.database-card-icon--unavailable {
+  background: linear-gradient(145deg,#121923,#0b0f15) !important;
+  background-color: #0b0f15 !important;
+}
+
+/* Remove old transparent-canvas zoom from detail page */
+.detail-image > img {
+  position: static !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  transform: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Keep detail image panel clean for original images */
+.detail-image {
+  background: #ffffff !important;
+  background-image: none !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: hidden !important;
+}
+
+/* Mobile consistency */
+@media (max-width: 700px) {
+  .database-card-icon:not(.database-card-icon--unavailable) {
+    height: 120px !important;
+    padding: 6px !important;
+  }
+}
+
+/* ===== PHONE DATABASE WHITE IMAGE AREA START ===== */
+
+/* Keep the card dark, but give every verified phone photo
+   a clean white presentation area. */
+.database-card .database-card-icon:not(.database-card-icon--unavailable),
+.database-card-enhanced .database-card-icon:not(.database-card-icon--unavailable) {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  min-height: 150px !important;
+  padding: 10px !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Make actual phone images sit cleanly inside white box */
+.database-card .database-card-icon:not(.database-card-icon--unavailable) img,
+.database-card-enhanced .database-card-icon:not(.database-card-icon--unavailable) img {
+  width: 100% !important;
+  height: 135px !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  background: #ffffff !important;
+  border-radius: 9px !important;
+
+  display: block !important;
+}
+
+/* Do NOT make unavailable placeholders white */
+.database-card-icon--unavailable {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+/* Slight visual polish */
+.database-card-enhanced {
+  overflow: hidden;
+}
+
+.database-card-enhanced:hover
+.database-card-icon:not(.database-card-icon--unavailable) img {
+  transform: scale(1.035);
+}
+
+.database-card-icon img {
+  transition: transform 0.22s ease;
+}
+
+/* ===== PHONE DATABASE WHITE IMAGE AREA END ===== */

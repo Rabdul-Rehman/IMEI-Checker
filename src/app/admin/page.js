@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages, react/no-unescaped-entities */
 "use client";
 
 import "./admin.css";

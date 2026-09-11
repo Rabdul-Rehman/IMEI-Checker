@@ -1,11 +1,16 @@
 ﻿"use client";
 
+import {
+  getMappedPhoneImage,
+  PHONE_IMAGE_FALLBACK,
+} from "../lib/phoneImageMap";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../lib/supabase";
 import DevicePhoto from "../components/DevicePhoto";
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 40;
 
 const PHONE_SELECT = `
   phone_id,
@@ -23,8 +28,32 @@ function formatPhone(phone) {
       phone.specs_json?.General?.brand?.trim() ||
       "Unknown",
 
-    image: getPhoneImage(phone),
+    image: getMappedPhoneImage(phone.phone_id),
   };
+}
+
+async function fetchLocalPhones({
+  search = "",
+  offset = 0,
+  limit = PAGE_SIZE,
+} = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (search) {
+    params.set("search", search);
+  }
+
+  const response = await fetch(`/api/local-phones?${params}`);
+  const result = await response.json();
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.error || "Local phone catalogue unavailable");
+  }
+
+  return result;
 }
 
 function getBrandList(phones) {
@@ -100,14 +129,23 @@ export default function PhoneDatabasePage() {
     }
 
     if (phonesError) {
-      console.error(
-        "Supabase phones error:",
-        phonesError
-      );
+      console.error("Supabase phones error; using local catalogue:", phonesError);
 
-      setError("Unable to load phone database.");
-      setLoading(false);
-      return;
+      try {
+        const local = await fetchLocalPhones();
+        const formatted = (local.data || []).map(formatPhone);
+        setTotalDevices(local.pagination.total || 0);
+        setPhones(formatted);
+        setLoadedCount(formatted.length);
+        setBrands(getBrandList(formatted));
+        setLoading(false);
+        return;
+      } catch (localError) {
+        console.error("Local phone catalogue error:", localError);
+        setError("Unable to load phone database.");
+        setLoading(false);
+        return;
+      }
     }
 
     const formatted = (data || []).map(formatPhone);
@@ -199,14 +237,23 @@ export default function PhoneDatabasePage() {
       }
 
       if (searchError) {
-        console.error(
-          "Supabase phone search error:",
-          searchError
-        );
+        console.error("Supabase search error; using local catalogue:", searchError);
 
-        setError("Unable to search phone database.");
-        setSearching(false);
-        return;
+        try {
+          const local = await fetchLocalPhones({ search: safeTerm });
+          const formatted = (local.data || []).map(formatPhone);
+          setPhones(formatted);
+          setLoadedCount(formatted.length);
+          setSearchTotal(local.pagination.total || 0);
+          setBrands(getBrandList(formatted));
+          setSearching(false);
+          return;
+        } catch (localError) {
+          console.error("Local phone search error:", localError);
+          setError("Unable to search phone database.");
+          setSearching(false);
+          return;
+        }
       }
 
       const formatted = (data || []).map(formatPhone);
@@ -248,13 +295,26 @@ export default function PhoneDatabasePage() {
         );
 
     if (loadMoreError) {
-      console.error(
-        "Supabase load more error:",
-        loadMoreError
-      );
+      console.error("Supabase load-more error; using local catalogue:", loadMoreError);
 
-      setLoadingMore(false);
-      return;
+      try {
+        const local = await fetchLocalPhones({ offset: loadedCount });
+        const formatted = (local.data || []).map(formatPhone);
+        setPhones((current) => {
+          const map = new Map(current.map((phone) => [phone.phone_id, phone]));
+          formatted.forEach((phone) => map.set(phone.phone_id, phone));
+          const merged = Array.from(map.values());
+          setBrands(getBrandList(merged));
+          return merged;
+        });
+        setLoadedCount((current) => current + formatted.length);
+        setLoadingMore(false);
+        return;
+      } catch (localError) {
+        console.error("Local phone load-more error:", localError);
+        setLoadingMore(false);
+        return;
+      }
     }
 
     const formatted = (data || []).map(formatPhone);
@@ -356,7 +416,7 @@ export default function PhoneDatabasePage() {
               onClick={() => setQuery("")}
               aria-label="Clear search"
             >
-              ×
+              Ã—
             </button>
           )}
         </div>
@@ -498,11 +558,25 @@ export default function PhoneDatabasePage() {
                 key={phone.phone_id}
                 className="database-card database-card-enhanced"
               >
-                <div className="database-card-icon">
-                  <DevicePhoto
-                    src={phone.image}
-                    alt={phone.model_name}
-                  />
+                <div
+                  className={`database-card-icon ${
+                    phone.image === PHONE_IMAGE_FALLBACK
+                      ? "database-card-icon--unavailable"
+                      : ""
+                  }`}
+                >
+                  {phone.image === PHONE_IMAGE_FALLBACK ? (
+                    <>
+                      <i className="fas fa-mobile-screen-button" aria-hidden="true" />
+                      <span>Image unavailable</span>
+                      <small>Device photo not yet verified</small>
+                    </>
+                  ) : (
+                    <DevicePhoto
+                      src={phone.image}
+                      alt={phone.model_name}
+                    />
+                  )}
                 </div>
 
                 <span className="brand">
@@ -578,28 +652,6 @@ export default function PhoneDatabasePage() {
   );
 }
 
-function getPhoneImage(phone) {
-  const slug = phone.slug || "";
-
-  const knownImages = {
-    "iphone-17-pro":
-      "/images/devices/iphone-17-pro.png",
-
-    "galaxy-s25-ultra":
-      "/images/devices/galaxy-s25-ultra.png",
-
-    "pixel-10-pro":
-      "/images/devices/pixel-10-pro.png",
-
-    "xiaomi-15-ultra":
-      "/images/devices/xiaomi-15-ultra.png",
-  };
-
-  return (
-    knownImages[slug] ||
-    "/images/devices/phone-placeholder.png"
-  );
-}
 
 function getShortSpecs(specs) {
   if (!specs) {
@@ -629,7 +681,9 @@ function getShortSpecs(specs) {
   }
 
   return parts.length
-    ? parts.join(" • ")
+    ? parts.join(" â€¢ ")
     : "Specifications available";
 }
+
+
 

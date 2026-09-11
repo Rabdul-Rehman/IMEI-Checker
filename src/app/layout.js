@@ -17,9 +17,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link
+                <link
+          rel="preload"
+          href="/vendor/fontawesome/webfonts/fa-solid-900.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+<link
           rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          href="/vendor/fontawesome/css/all.min.css"
         />
       </head>
       <body className={oxanium.className} suppressHydrationWarning>

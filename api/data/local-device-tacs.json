@@ -89,6 +89,16 @@
     "createdAt": "2026-08-18T10:25:57.690Z",
     "updatedAt": "2026-08-18T10:25:57.690Z"
   },
+  "1336": {
+    "phoneId": 1336,
+    "tac": "99376242",
+    "brandName": "Allview",
+    "modelName": "Allwatch Hybrid T",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-09-10T09:26:18.431Z",
+    "updatedAt": "2026-09-10T09:26:18.431Z"
+  },
   "1380": {
     "phoneId": 1380,
     "tac": "99505267",
@@ -98,5 +108,25 @@
     "local": true,
     "createdAt": "2026-08-28T09:00:37.639Z",
     "updatedAt": "2026-08-28T09:00:37.639Z"
+  },
+  "1381": {
+    "phoneId": 1381,
+    "tac": "99739881",
+    "brandName": "Apple",
+    "modelName": "Apple iPhone 14",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-09-10T09:25:38.666Z",
+    "updatedAt": "2026-09-10T09:25:38.666Z"
+  },
+  "2984": {
+    "phoneId": 2984,
+    "tac": "99144967",
+    "brandName": "Google",
+    "modelName": "Google Pixel 10 5G (128GB)",
+    "modelNumber": null,
+    "local": true,
+    "createdAt": "2026-08-31T10:32:29.054Z",
+    "updatedAt": "2026-08-31T10:32:29.054Z"
   }
 }

@@ -1,4 +1,6 @@
-﻿import Link from "next/link";
+﻿import { getMappedPhoneImage } from "../../lib/phoneImageMap";
+import { getLocalPhoneBySlug } from "../../lib/localPhoneCatalog";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { supabase } from "../../lib/supabase";
@@ -9,7 +11,7 @@ import PhoneSpecsTabs from "../../components/PhoneSpecsTabs";
 export default async function PhoneDetailPage({ params }) {
   const { slug } = await params;
 
-  const { data: phone, error } = await supabase
+  let { data: phone, error } = await supabase
     .from("phones")
     .select(`
       phone_id,
@@ -27,6 +29,10 @@ export default async function PhoneDetailPage({ params }) {
     .single();
 
   if (error || !phone) {
+    phone = getLocalPhoneBySlug(slug);
+  }
+
+  if (!phone) {
     notFound();
   }
 
@@ -55,17 +61,7 @@ export default async function PhoneDetailPage({ params }) {
   const sensors = specs["Sensors & Features"] || {};
   const miscellaneous = specs.Miscellaneous || {};
 
-  let image = null;
-
-  if (Array.isArray(phone.images) && phone.images.length > 0) {
-  const firstImage = phone.images[0];
-
-  if (typeof firstImage === "string" && firstImage.trim()) {
-    image = firstImage.startsWith("http")
-      ? firstImage
-      : `/phone-images/${encodeURIComponent(firstImage)}`;
-  }
- }
+  const image = getMappedPhoneImage(phone.phone_id);
 
   return (
     <div className="detail-modern">
