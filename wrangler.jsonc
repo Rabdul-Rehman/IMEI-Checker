@@ -1,4 +1,4 @@
-// Deployment trigger: FORCE Cloudflare redeploy 2026-09-14 16:35 PKT.
+// Deployment trigger: merge verified storage variants 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
