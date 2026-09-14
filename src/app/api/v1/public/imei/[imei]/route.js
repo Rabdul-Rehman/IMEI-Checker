@@ -76,110 +76,28 @@ function brandScore(a, b) {
   return textSimilarity(aa, bb);
 }
 
-async function findBestPhoneForTacRow(supabase, tacRow) {
-  const reportedBrand =
-    tacRow?.reported_brand ||
-    tacRow?.brand_name ||
-    "";
+async function findBestPhoneForTacRow() {
+  // Disabled for public IMEI lookups: fuzzy matching can confuse
+  // closely related models (for example Pro vs Pro Max).
+  return null;
+}
 
-  const reportedModel =
-    tacRow?.reported_model_name ||
-    tacRow?.model_name ||
-    "";
+function modelsAgree(reportedModel, phoneModel, reportedNumber = "") {
+  const reported = normalizeText(reportedModel);
+  const phone = normalizeText(phoneModel);
+  const number = normalizeText(reportedNumber);
 
-  const reportedNumber =
-    tacRow?.reported_model_number ||
-    tacRow?.model_number ||
-    "";
+  if (!reported && !number) return true;
+  if (!phone) return false;
 
-  const searchTerms = [];
-
-  for (const raw of [reportedModel, reportedNumber]) {
-    const clean = String(raw || "").trim();
-    if (clean.length >= 3) searchTerms.push(clean);
+  if (reported && reported === phone) return true;
+  if (number && (phone === number || phone.includes(number) || number.includes(phone))) {
+    return true;
   }
 
-  const normalizedModel = normalizeText(reportedModel);
-  const significantTokens = normalizedModel
-    .split(" ")
-    .filter((token) => token.length >= 3 && !["lte","dual","sim","global"].includes(token));
-
-  for (const token of significantTokens.slice(0, 3)) {
-    searchTerms.push(token);
-  }
-
-  const candidateMap = new Map();
-
-  for (const term of [...new Set(searchTerms)].slice(0, 6)) {
-    const { data, error } = await supabase
-      .from("phones")
-      .select("phone_id,model_name,slug,specs_json,images,brand_id,brands(brand_id,name)")
-      .ilike("model_name", `%${term}%`)
-      .limit(120);
-
-    if (!error) {
-      for (const phone of data || []) {
-        candidateMap.set(String(phone.phone_id), phone);
-      }
-    }
-  }
-
-  // Last-resort brand-constrained candidate pool.
-  if (candidateMap.size === 0 && reportedBrand) {
-    const { data, error } = await supabase
-      .from("phones")
-      .select("phone_id,model_name,slug,specs_json,images,brand_id,brands!inner(brand_id,name)")
-      .ilike("brands.name", `%${String(reportedBrand).trim()}%`)
-      .limit(300);
-
-    if (!error) {
-      for (const phone of data || []) {
-        candidateMap.set(String(phone.phone_id), phone);
-      }
-    }
-  }
-
-  let best = null;
-
-  for (const phone of candidateMap.values()) {
-    const bScore = brandScore(
-      phone.brands?.name,
-      reportedBrand
-    );
-
-    const modelNameScore = textSimilarity(
-      phone.model_name,
-      reportedModel
-    );
-
-    const modelNumberScore = textSimilarity(
-      phone.model_name,
-      reportedNumber
-    );
-
-    const mScore = Math.max(
-      modelNameScore,
-      modelNumberScore
-    );
-
-    let score = (mScore * 0.78) + (bScore * 0.22);
-
-    if (reportedBrand && bScore < 0.35) {
-      score *= 0.35;
-    }
-
-    if (!best || score > best.score) {
-      best = { phone, score, modelScore: mScore, brandScore: bScore };
-    }
-  }
-
-  if (!best) return null;
-
-  const strongEnough =
-    best.score >= 0.58 &&
-    best.modelScore >= 0.52;
-
-  return strongEnough ? best.phone : null;
+  // Never accept substring-only matches between sibling models such as
+  // "iphone 12 pro" and "iphone 12 pro max".
+  return false;
 }
 
 
@@ -324,24 +242,69 @@ export async function GET(request, { params }) {
         );
 
         if (phone) {
+          // Cross-check against TAC-reported identity before attaching
+          // our internal phone record/image/specs.
+          const { data: verifyRows } = await supabase
+            .from("v_tac_lookup")
+            .select("reported_brand,reported_model_name,reported_model_number")
+            .eq("tac", tac)
+            .order("match_confidence", { ascending: false, nullsFirst: false })
+            .limit(5);
+
+          const verify = (verifyRows || []).find(
+            (row) => row.reported_model_name || row.reported_model_number
+          );
+
+          if (
+            !verify ||
+            modelsAgree(
+              verify.reported_model_name,
+              phone.model_name,
+              verify.reported_model_number
+            )
+          ) {
+            return json({
+              success: true,
+              data: buildPhoneResponse(
+                phone,
+                imei,
+                tac,
+                {
+                  ...mapped,
+                  ...(verify || {}),
+                  match_status:
+                    mapped.match_status ||
+                    "matched",
+                  match_confidence:
+                    mapped.match_confidence ??
+                    1,
+                  source:
+                    "tac_allocations",
+                  image_match_verified: true,
+                }
+              ),
+            });
+          }
+
+          // TAC metadata disagrees with the internal phone mapping.
+          // Return the TAC-reported identity without a potentially wrong image.
           return json({
             success: true,
-            data: buildPhoneResponse(
-              phone,
-              imei,
+            data: {
+              ...mapped,
+              ...verify,
               tac,
-              {
-                ...mapped,
-                match_status:
-                  mapped.match_status ||
-                  "matched",
-                match_confidence:
-                  mapped.match_confidence ??
-                  1,
-                source:
-                  "tac_allocations",
-              }
-            ),
+              imei,
+              phone_id: null,
+              model_name: null,
+              brand_name: verify?.reported_brand || null,
+              specs_json: null,
+              images: [],
+              match_status: "mapping_conflict",
+              match_confidence: 0,
+              source: "tac_mapping_conflict",
+              image_match_verified: false,
+            },
           });
         }
       }
@@ -439,14 +402,43 @@ export async function GET(request, { params }) {
           );
 
         if (phone) {
+          if (
+            modelsAgree(
+              best.reported_model_name,
+              phone.model_name,
+              best.reported_model_number
+            )
+          ) {
+            return json({
+              success: true,
+              data: buildPhoneResponse(
+                phone,
+                imei,
+                tac,
+                {
+                  ...best,
+                  image_match_verified: true,
+                }
+              ),
+            });
+          }
+
           return json({
             success: true,
-            data: buildPhoneResponse(
-              phone,
-              imei,
+            data: {
+              ...best,
               tac,
-              best
-            ),
+              imei,
+              phone_id: null,
+              model_name: null,
+              brand_name: best.reported_brand || null,
+              specs_json: null,
+              images: [],
+              match_status: "mapping_conflict",
+              match_confidence: 0,
+              source: "v_tac_lookup_conflict",
+              image_match_verified: false,
+            },
           });
         }
       }
