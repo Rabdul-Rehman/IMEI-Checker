@@ -1,4 +1,4 @@
-// Deployment trigger: refresh Cloudflare build after IMEI image-matching update.
+// Deployment trigger: retry Cloudflare after external IMEI accuracy fix.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
