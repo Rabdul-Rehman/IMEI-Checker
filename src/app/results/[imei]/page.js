@@ -425,7 +425,15 @@ export default function ResultsPage() {
   // historical phone_id mapping. Old TAC rows can point at the wrong catalog
   // phone_id; identity matching is stricter and prevents sibling/wrong-device
   // photos (for example a different Vivo Y-series handset).
+  const normalizedResultModel = String(result?.reported_model_name || result?.model_name || "").toLowerCase();
+  const normalizedResultBrand = String(result?.reported_brand || result?.brand_name || "").toLowerCase();
+  const verifiedFamilyImage =
+    normalizedResultBrand === "apple" && normalizedResultModel.includes("iphone 12 pro")
+      ? "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
+      : "";
+
   const imageUrl =
+    verifiedFamilyImage ||
     identityMappedImage ||
     mappedImage ||
     (result?.image_match_verified !== false ? getFirstImage(result) : "") ||
