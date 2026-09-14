@@ -188,6 +188,46 @@ function VariantChips({ values, type = "text" }) {
   );
 }
 
+const KNOWN_MODEL_VARIANTS = {
+  "apple|iphone 12 pro": {
+    storage: ["128GB", "256GB", "512GB"],
+    colors: ["Graphite", "Silver", "Gold", "Pacific Blue"],
+  },
+  "apple|iphone 12 pro max": {
+    storage: ["128GB", "256GB", "512GB"],
+    colors: ["Graphite", "Silver", "Gold", "Pacific Blue"],
+  },
+  "apple|iphone 12 mini": {
+    storage: ["64GB", "128GB", "256GB"],
+    colors: ["Black", "White", "(PRODUCT)RED", "Green", "Blue", "Purple"],
+  },
+  "apple|iphone 12": {
+    storage: ["64GB", "128GB", "256GB"],
+    colors: ["Black", "White", "(PRODUCT)RED", "Green", "Blue", "Purple"],
+  },
+  "google|pixel 7": {
+    storage: ["128GB", "256GB"],
+    colors: ["Obsidian", "Snow", "Lemongrass"],
+  },
+  "xiaomi|mi 11 lite": {
+    storage: ["64GB", "128GB"],
+    colors: ["Boba Black", "Bubblegum Blue", "Peach Pink"],
+  },
+};
+
+function canonicalIdentity(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getKnownModelVariants(brand, model) {
+  const key = `${canonicalIdentity(brand)}|${canonicalIdentity(model)}`;
+  return KNOWN_MODEL_VARIANTS[key] || { storage: [], colors: [] };
+}
+
 function getColorSwatch(name) {
   const key = String(name || "").toLowerCase();
   const map = {
@@ -202,6 +242,15 @@ function getColorSwatch(name) {
     green: "#527760",
     purple: "#7566a8",
     pink: "#d79aaa",
+    "pacific blue": "#3e6f91",
+    "product red": "#c51f2f",
+    "(product)red": "#c51f2f",
+    "boba black": "#2a2a2d",
+    "bubblegum blue": "#a8d7ef",
+    "peach pink": "#efc0b4",
+    obsidian: "#28282a",
+    snow: "#f3f1ed",
+    lemongrass: "#d7df9f",
   };
   return map[key] || "#60758c";
 }
@@ -396,9 +445,15 @@ export default function ResultsPage() {
     result?.reported_model_name || result?.model_name || ""
   );
 
+  const knownVariants = getKnownModelVariants(
+    result?.reported_brand || result?.brand_name || "",
+    result?.reported_model_name || result?.model_name || ""
+  );
+
   const variantStorage = [...new Set([
     ...(result?.variant_options?.storage_options || []),
     ...(indexedVariants?.storage_options || []),
+    ...(knownVariants?.storage || []),
   ])];
 
   const specColorCandidates = (() => {
@@ -434,6 +489,7 @@ export default function ResultsPage() {
     ...(result?.variant_options?.color_options || []),
     ...(indexedVariants?.color_options || []),
     ...specColorCandidates,
+    ...(knownVariants?.colors || []),
   ])];
 
   const variantEntries = [
@@ -453,12 +509,26 @@ export default function ResultsPage() {
   const chipset = pickSpec(specs, [
     ["Platform", "chipset"],
     ["Platform", "processor"],
+    ["Platform", "cpu"],
+    ["Platform", "CPU"],
   ]);
   const rearCamera = pickSpec(specs, [
-    ["Camera (Main)", "rear_camera_features"],
     ["Camera (Main)", "rear_camera_specs"],
+    ["Camera (Main)", "main_camera"],
     ["Camera", "main"],
+    ["Camera (Main)", "rear_camera_features"],
   ]);
+
+  const cameraSummary = (() => {
+    const value = rearCamera;
+    if (!value) return "—";
+    const text = typeof value === "string" ? value : JSON.stringify(value);
+    const mp = [...text.matchAll(/(?:megapixels?|mp)\D{0,8}(\d+(?:\.\d+)?)/gi)];
+    if (mp.length) return `${mp[0][1]} MP`;
+    const direct = text.match(/\b(\d+(?:\.\d+)?)\s*MP\b/i);
+    if (direct) return `${direct[1]} MP`;
+    return Array.isArray(value) ? String(value[0] || "—") : String(value);
+  })();
   const batteryCapacity = pickSpec(specs, [
     ["Battery", "battery_capacity_mah"],
     ["Battery", "capacity"],
@@ -927,7 +997,7 @@ export default function ResultsPage() {
                       <span className="imei-summary-icon"><i className="fas fa-camera" /></span>
                       <div>
                         <span>Camera</span>
-                        <strong>{Array.isArray(rearCamera) ? rearCamera[0] : (rearCamera || "—")}</strong>
+                        <strong>{cameraSummary}</strong>
                         <small>Main camera system</small>
                       </div>
                     </div>
