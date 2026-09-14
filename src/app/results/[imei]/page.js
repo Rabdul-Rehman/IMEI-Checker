@@ -51,36 +51,71 @@ function displayValue(value) {
   return String(parsed);
 }
 
-function SpecValue({ value }) {
-  if (
-    value === null ||
-    value === undefined ||
-    value === "" ||
-    value === "null"
-  ) {
-    return <span>—</span>;
-  }
+function humanizeKey(value) {
+  return String(value || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
+function flattenSpecValue(value, prefix = "") {
   const parsed = parsePossibleJson(value);
 
-  if (typeof parsed === "object" && parsed !== null) {
-    return (
-      <pre
-        style={{
-          margin: 0,
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-          fontFamily: "inherit",
-          color: "inherit",
-          fontSize: "inherit",
-        }}
-      >
-        {JSON.stringify(parsed, null, 2)}
-      </pre>
+  if (
+    parsed === null ||
+    parsed === undefined ||
+    parsed === "" ||
+    parsed === "null"
+  ) {
+    return [];
+  }
+
+  if (Array.isArray(parsed)) {
+    return parsed.flatMap((item) => {
+      if (item && typeof item === "object") {
+        return flattenSpecValue(item, prefix);
+      }
+      return [[prefix, String(item)]];
+    });
+  }
+
+  if (typeof parsed === "object") {
+    return Object.entries(parsed).flatMap(([key, child]) =>
+      flattenSpecValue(child, prefix ? `${prefix} · ${humanizeKey(key)}` : humanizeKey(key))
     );
   }
 
-  return <span>{String(parsed)}</span>;
+  return [[prefix, String(parsed)]];
+}
+
+function SpecValue({ value }) {
+  const rows = flattenSpecValue(value);
+
+  if (!rows.length) return <span>—</span>;
+
+  const hasLabels = rows.some(([label]) => label);
+
+  if (!hasLabels) {
+    return (
+      <div className="spec-readable-list">
+        {rows.map(([, text], index) => (
+          <span className="spec-readable-chip" key={`${text}-${index}`}>
+            {text}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="spec-readable-object">
+      {rows.map(([label, text], index) => (
+        <div className="spec-readable-row" key={`${label}-${text}-${index}`}>
+          {label ? <span className="spec-readable-key">{label}</span> : null}
+          <span className="spec-readable-text">{text}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function normalizeImageUrl(value) {
@@ -1072,11 +1107,6 @@ export default function ResultsPage() {
                   <SpecGroup
                     title="Platform"
                     values={platformEntries}
-                  />
-
-                  <SpecGroup
-                    title="Model Variants"
-                    values={variantEntries}
                   />
 
                   <SpecGroup
