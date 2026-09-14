@@ -1,4 +1,4 @@
-// Deployment trigger: render model variants and hide single storage 2026-09-14.
+// Deployment trigger: FORCE Cloudflare redeploy 2026-09-14 16:35 PKT.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
