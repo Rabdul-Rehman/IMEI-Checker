@@ -10989,9 +10989,58 @@ function normalizeModel(value) {
   return parts.join(" ");
 }
 
-export function getMappedPhoneImageByIdentity(brand, model) {
+export function getMappedPhoneImageByIdentity(brand, model, modelNumber = "") {
   const b = normalizeBrand(brand);
   const m = normalizeModel(model);
+  const n = normalize(modelNumber);
+
   if (!m) return "";
-  return MODEL_PHONE_IMAGE_INDEX[b + "|" + m] || "";
+
+  const exact = MODEL_PHONE_IMAGE_INDEX[b + "|" + m];
+  if (exact) return exact;
+
+  // Random IMEI/TAC results usually return a clean marketing model such as
+  // "iPhone 12 Mini", while our verified catalog keys include region/network/
+  // storage/model-number suffixes. Prefer an exact model-number hit first.
+  const prefix = b + "|" + m;
+  const matches = [];
+
+  for (const [key, image] of Object.entries(MODEL_PHONE_IMAGE_INDEX)) {
+    if (!key.startsWith(prefix)) continue;
+
+    // Prevent sibling devices such as Pixel 7 Pro, iPhone 12 Pro/Pro Max, etc.
+    const remainder = key.slice(prefix.length).trim();
+    if (remainder && /^(pro|max|mini|ultra|plus|lite|fold|flip|fe|se|neo)\b/.test(remainder)) {
+      continue;
+    }
+
+    matches.push([key, image]);
+  }
+
+  if (n) {
+    const byNumber = matches.filter(([key]) =>
+      key.split(" ").includes(n) || key.includes(" " + n + " ")
+    );
+
+    if (byNumber.length) {
+      const counts = new Map();
+      for (const [, image] of byNumber) {
+        counts.set(image, (counts.get(image) || 0) + 1);
+      }
+      return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    }
+  }
+
+  if (!matches.length) return "";
+
+  // If all exact-marketing-model variants use the same verified image, it is
+  // safe to use it regardless of storage/region/network suffixes.
+  const uniqueImages = [...new Set(matches.map(([, image]) => image))];
+  if (uniqueImages.length === 1) return uniqueImages[0];
+
+  // Prefer the least-specific catalog entry (e.g. "Pixel 7 5G") when several
+  // regional/storage variants exist. This gives a correct physical model image
+  // without crossing into sibling Pro/Max/Mini devices.
+  matches.sort((a, b) => a[0].length - b[0].length);
+  return matches[0][1] || "";
 }
