@@ -48,15 +48,36 @@ function numericTokens(value) {
     .filter((t) => /\d/.test(t));
 }
 
+const BRAND_PREFIXES = [
+  "apple", "google", "xiaomi", "samsung", "motorola", "oneplus",
+  "oppo", "realme", "vivo", "iqoo", "huawei", "honor", "nokia",
+  "sony", "tecno", "infinix", "itel", "lg", "htc", "zte", "asus"
+];
+
+function canonicalModel(value) {
+  const parts = normalizeText(value).split(" ").filter(Boolean);
+
+  while (parts.length && BRAND_PREFIXES.includes(parts[0])) {
+    parts.shift();
+  }
+
+  return parts.join(" ");
+}
+
 function modelsAgree(reportedModel, phoneModel, reportedNumber = "") {
-  const reported = normalizeText(reportedModel);
-  const phone = normalizeText(phoneModel);
+  const reported = canonicalModel(reportedModel);
+  const phone = canonicalModel(phoneModel);
   const number = normalizeText(reportedNumber);
 
   if (!reported && !number) return true;
   if (!phone) return false;
+
+  // Exact marketing-model equality after removing manufacturer prefixes.
+  // This safely handles:
+  // "Apple iPhone 12 Mini" -> "iPhone 12 mini"
+  // "Google Pixel 7"       -> "Pixel 7"
+  // "Xiaomi Mi 11 Lite"    -> "Mi 11 Lite"
   if (reported && reported === phone) return true;
-  if (number && (phone === number || phone.includes(number) || number.includes(phone))) return true;
 
   const rv = variants(reported);
   const pv = variants(phone);
@@ -65,6 +86,15 @@ function modelsAgree(reportedModel, phoneModel, reportedNumber = "") {
   const rn = numericTokens(reported);
   const pn = numericTokens(phone);
   if (rn.length && pn.length && rn.join("|") !== pn.join("|")) return false;
+
+  // Model-number match is useful only when the internal model string actually
+  // contains the identifier. Do not let it override sibling-model checks.
+  if (
+    number &&
+    (phone === number || phone.includes(number) || number.includes(phone))
+  ) {
+    return true;
+  }
 
   return false;
 }
@@ -83,13 +113,24 @@ async function findStrictPhoneByReportedIdentity(supabase, row) {
   const reportedModel = row?.reported_model_name || row?.model_name || "";
   const reportedNumber = row?.reported_model_number || row?.model_number || "";
 
-  const terms = [reportedModel, reportedNumber]
+  const canonicalReportedModel = canonicalModel(reportedModel);
+
+  const terms = [
+    reportedModel,
+    canonicalReportedModel,
+    reportedNumber,
+    ...canonicalReportedModel
+      .split(" ")
+      .filter((token) => token.length >= 3)
+  ]
     .map((x) => String(x || "").trim())
     .filter((x) => x.length >= 3);
 
+  const uniqueTerms = [...new Set(terms)];
+
   const candidates = new Map();
 
-  for (const term of terms) {
+  for (const term of uniqueTerms) {
     const { data, error } = await supabase
       .from("phones")
       .select("phone_id,model_name,slug,specs_json,images,brand_id,brands(brand_id,name)")
