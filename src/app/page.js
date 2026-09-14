@@ -49,11 +49,10 @@ export default function Home() {
         return;
       }
 
-      if (data.data?.slug) {
-        window.location.href = `/phones/${data.data.slug}`;
-      } else {
-        window.location.href = `/results/${value}`;
-      }
+      // IMEI checks must always open the dedicated IMEI result page.
+      // The old behavior redirected matched records to /phones/[slug], which
+      // bypassed the IMEI result UI and showed one storage-specific DB row.
+      window.location.href = `/results/${value}`;
 
     } catch (err) {
       console.error(err);
