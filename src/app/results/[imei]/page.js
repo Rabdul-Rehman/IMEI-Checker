@@ -336,12 +336,6 @@ export default function ResultsPage() {
     ["Memory"]
   );
 
-  // Do not present one catalog record's capacity as if it were the user's
-  // exact handset capacity. Variant capacities are shown separately below.
-  const memoryEntries = rawMemoryEntries.filter(([key]) =>
-    !/storage|capacity|internal|rom/i.test(String(key))
-  );
-
   // IMEI/TAC identifies the model family, not an individual handset's exact
   // storage/color. Show every known option for this model instead of claiming
   // one catalog variant is the user's exact configuration.
@@ -351,6 +345,37 @@ export default function ResultsPage() {
     ...(variantStorage.length ? [["Available storage options", variantStorage.join(", ")]] : []),
     ...(variantColors.length ? [["Available colors", variantColors.join(", ")]] : []),
   ];
+
+  const normalizedVariantStorage = new Set(
+    variantStorage.map((v) => String(v).replace(/\s+/g, "").toUpperCase())
+  );
+
+  // Hide a single catalog record's storage (for example 512GB) from Memory.
+  // Keep RAM and other memory-related fields. Storage is shown only in the
+  // Model Variants section above.
+  const memoryEntries = rawMemoryEntries.filter(([key, value]) => {
+    const label = String(key || "");
+    if (/storage|capacity|internal|rom|flash|non.?volatile|built.?in/i.test(label)) {
+      return false;
+    }
+
+    const text = Array.isArray(value)
+      ? value.join(" ")
+      : typeof value === "object" && value !== null
+        ? JSON.stringify(value)
+        : String(value || "");
+
+    const capacities = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
+    if (
+      capacities.some((v) =>
+        normalizedVariantStorage.has(String(v).replace(/\s+/g, "").toUpperCase())
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   const batteryEntries = getCategoryEntries(
     specs,
@@ -799,6 +824,16 @@ export default function ResultsPage() {
                   <SpecGroup
                     title="Platform"
                     values={platformEntries}
+                  />
+
+                  <SpecGroup
+                    title="Model Variants"
+                    values={variantEntries}
+                  />
+
+                  <SpecGroup
+                    title="Model Variants"
+                    values={variantEntries}
                   />
 
                   <SpecGroup
