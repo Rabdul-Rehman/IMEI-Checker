@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import csv, re, sys
+import csv, re
 from pathlib import Path
 
-ROOT = Path(r"E:export function getMappedPhoneImageByIdentity(brand, model, modelNumber = "") {\n  const b = normalizeBrand(brand);\n  const m = normalizeModel(model);\n  const n = normalize(modelNumber);\n\n  if (!m) return "";\n\n  const exact = MODEL_PHONE_IMAGE_INDEX[b + "|" + m];\n  if (exact) return exact;\n\n  // Random IMEI/TAC results usually return a clean marketing model such as\n  // "iPhone 12 Mini", while our verified catalog keys include region/network/\n  // storage/model-number suffixes. Prefer an exact model-number hit first.\n  const prefix = b + "|" + m;\n  const matches = [];\n\n  for (const [key, image] of Object.entries(MODEL_PHONE_IMAGE_INDEX)) {\n    if (!key.startsWith(prefix)) continue;\n\n    // Prevent sibling devices such as Pixel 7 Pro, iPhone 12 Pro/Pro Max, etc.\n    const remainder = key.slice(prefix.length).trim();\n    if (remainder && /^(pro|max|mini|ultra|plus|lite|fold|flip|fe|se|neo)\b/.test(remainder)) {\n      continue;\n    }\n\n    matches.push([key, image]);\n  }\n\n  if (n) {\n    const byNumber = matches.filter(([key]) =>\n      key.split(" ").includes(n) || key.includes(" " + n + " ")\n    );\n\n    if (byNumber.length) {\n      const counts = new Map();\n      for (const [, image] of byNumber) {\n        counts.set(image, (counts.get(image) || 0) + 1);\n      }\n      return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];\n    }\n  }\n\n  if (!matches.length) return "";\n\n  // If all exact-marketing-model variants use the same verified image, it is\n  // safe to use it regardless of storage/region/network suffixes.\n  const uniqueImages = [...new Set(matches.map(([, image]) => image))];\n  if (uniqueImages.length === 1) return uniqueImages[0];\n\n  // Prefer the least-specific catalog entry (e.g. "Pixel 7 5G") when several\n  // regional/storage variants exist. This gives a correct physical model image\n  // without crossing into sibling Pro/Max/Mini devices.\n  matches.sort((a, b) => a[0].length - b[0].length);\n  return matches[0][1] || "";\n}IMEI-checker\imei.info2")
+ROOT = Path(r"E:\IMEI-checker\imei.info2")
 CAT = ROOT / "image-audit-input" / "images.csv"
 MAP = ROOT / "src" / "data" / "phoneImageMap.js"
 OUT = ROOT / "src" / "data" / "modelPhoneImageIndex.js"
@@ -140,9 +140,10 @@ lines += [
     "  return normalizeModel(model).split(\" \").filter((t) => t && !NOISE.has(t) && !/^a\\d{4}$/.test(t) && !/^\\d+gb$/.test(t));",
     "}",
     "",
-    "export function getMappedPhoneImageByIdentity(brand, model) {",
+    "export function getMappedPhoneImageByIdentity(brand, model, modelNumber = \"\") {",
     "  const b = normalizeBrand(brand);",
     "  const m = normalizeModel(model);",
+    "  const n = normalize(modelNumber);",
     "  if (!m) return \"\";",
     "  const exact = MODEL_PHONE_IMAGE_INDEX[b + \"|\" + m];",
     "  if (exact) return exact;",
@@ -153,11 +154,13 @@ lines += [
     "  for (const [key, image] of Object.entries(MODEL_PHONE_IMAGE_INDEX)) {",
     "    const split = key.indexOf(\"|\");",
     "    if (split < 0 || key.slice(0, split) !== b) continue;",
-    "    const candidate = coreTokens(key.slice(split + 1));",
+    "    const candidateModel = key.slice(split + 1);",
+    "    const candidate = coreTokens(candidateModel);",
     "    const cv = candidate.filter((t) => VARIANTS.has(t)).join(\"|\");",
     "    const cn = candidate.filter((t) => /\\d/.test(t) && !/^\\d+gb$/.test(t)).join(\"|\");",
     "    if (cv !== wantedVariants || cn !== wantedNums) continue;",
     "    if (!wanted.every((t) => candidate.includes(t))) continue;",
+    "    if (n && !normalize(candidateModel).split(\" \").includes(n) && !normalize(candidateModel).includes(\" \" + n + \" \")) continue;",
     "    hits.push(image);",
     "  }",
     "  const unique = [...new Set(hits)];",
