@@ -336,6 +336,16 @@ export default function ResultsPage() {
     ["Memory"]
   );
 
+  // IMEI/TAC identifies the model family, not an individual handset's exact
+  // storage/color. Show every known option for this model instead of claiming
+  // one catalog variant is the user's exact configuration.
+  const variantStorage = result?.variant_options?.storage_options || [];
+  const variantColors = result?.variant_options?.color_options || [];
+  const variantEntries = [
+    ...(variantStorage.length ? [["Available storage options", variantStorage.join(", ")]] : []),
+    ...(variantColors.length ? [["Available colors", variantColors.join(", ")]] : []),
+  ];
+
   const batteryEntries = getCategoryEntries(
     specs,
     ["Battery"]
