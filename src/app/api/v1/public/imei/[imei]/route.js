@@ -119,9 +119,22 @@ async function findStrictPhoneByReportedIdentity(supabase, row) {
     reportedModel,
     canonicalReportedModel,
     reportedNumber,
+    // IMPORTANT: search useful multi-token model phrases, not only the whole
+    // reported string. Supabase ILIKE "%Apple iPhone 12 Mini%" will not find
+    // an internal model stored as "iPhone 12 mini".
+    ...(() => {
+      const tokens = canonicalReportedModel.split(" ").filter(Boolean);
+      const phrases = [];
+      for (let size = Math.min(4, tokens.length); size >= 2; size -= 1) {
+        for (let i = 0; i <= tokens.length - size; i += 1) {
+          phrases.push(tokens.slice(i, i + size).join(" "));
+        }
+      }
+      return phrases;
+    })(),
     ...canonicalReportedModel
       .split(" ")
-      .filter((token) => token.length >= 3)
+      .filter((token) => token.length >= 2)
   ]
     .map((x) => String(x || "").trim())
     .filter((x) => x.length >= 3);
@@ -205,6 +218,20 @@ export async function GET(request, { params }) {
         const verify = (verifyRows || []).find((row) => row.reported_model_name || row.reported_model_number);
         if (!verify || modelsAgree(verify.reported_model_name, phone.model_name, verify.reported_model_number)) {
           return json({ success: true, data: buildPhoneResponse(phone, imei, tac, { ...mapped, ...(verify || {}), source: "tac_allocations" }) });
+        }
+
+        // The TAC row can contain an old/wrong phone_id while the reported
+        // marketing identity is correct. Resolve that identity to the phones
+        // table so the response gets the correct phone_id and local image.
+        const correctedPhone = await findStrictPhoneByReportedIdentity(supabase, verify);
+        if (correctedPhone) {
+          return json({ success: true, data: buildPhoneResponse(correctedPhone, imei, tac, {
+            ...mapped,
+            ...(verify || {}),
+            match_status: "reported_model_exact_match",
+            match_confidence: Math.max(Number(mapped.match_confidence) || 0, 0.9),
+            source: "tac_allocation_identity_corrected",
+          }) });
         }
       }
     }
