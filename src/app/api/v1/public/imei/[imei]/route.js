@@ -278,7 +278,7 @@ async function enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
   });
 }
 
-function await enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
+function buildPhoneResponse(phone, imei, tac, extra = {}) {
   return {
     ...extra,
     tac,
