@@ -11016,9 +11016,23 @@ export function getMappedPhoneImageByIdentity(brand, model, modelNumber = "") {
     const cn = candidate.filter((t) => /\d/.test(t) && !/^\d+gb$/.test(t)).join("|");
     if (cv !== wantedVariants || cn !== wantedNums) continue;
     if (!wanted.every((t) => candidate.includes(t))) continue;
-    if (n && !normalize(candidateModel).split(" ").includes(n) && !normalize(candidateModel).includes(" " + n + " ")) continue;
+    // A reported hardware/model number (for example Apple's A2176) is useful
+    // when the catalog key contains it, but must NOT be mandatory. Most image
+    // catalog names are marketing names and omit hardware identifiers entirely.
+    // Brand + exact physical model/variant matching above is the safety gate.
     hits.push(image);
   }
   const unique = [...new Set(hits)];
-  return unique.length === 1 ? unique[0] : "";
+  if (unique.length === 1) return unique[0];
+
+  // Multiple regional/storage records can legitimately point at different
+  // photos of the SAME physical model. Prefer the least-specific verified
+  // catalog entry rather than returning no image at all.
+  if (hits.length) {
+    for (const [key, image] of Object.entries(MODEL_PHONE_IMAGE_INDEX)) {
+      if (key === b + "|" + m) return image;
+    }
+    return hits[0];
+  }
+  return "";
 }
