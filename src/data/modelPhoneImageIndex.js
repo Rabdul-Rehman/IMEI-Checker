@@ -11036,3 +11036,42 @@ export function getMappedPhoneImageByIdentity(brand, model, modelNumber = "") {
   }
   return "";
 }
+
+
+export function getModelVariantOptionsByIdentity(brand, model) {
+  const b = normalizeBrand(brand);
+  const m = normalizeModel(model);
+  if (!b || !m) return { storage_options: [], color_options: [] };
+
+  const wanted = coreTokens(m);
+  const wantedVariants = wanted.filter((t) => VARIANTS.has(t)).join("|");
+  const wantedNums = wanted.filter((t) => /\d/.test(t) && !/^\d+gb$/.test(t)).join("|");
+
+  const storage = new Set();
+
+  for (const key of Object.keys(MODEL_PHONE_IMAGE_INDEX)) {
+    const split = key.indexOf("|");
+    if (split < 0 || key.slice(0, split) !== b) continue;
+
+    const candidateModel = key.slice(split + 1);
+    const candidate = coreTokens(candidateModel);
+    const cv = candidate.filter((t) => VARIANTS.has(t)).join("|");
+    const cn = candidate.filter((t) => /\d/.test(t) && !/^\d+gb$/.test(t)).join("|");
+
+    if (cv !== wantedVariants || cn !== wantedNums) continue;
+    if (!wanted.every((t) => candidate.includes(t))) continue;
+
+    const capacities = candidateModel.match(/\b\d+(?:\.\d+)?\s*(?:gb|tb)\b/gi) || [];
+    capacities.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
+  }
+
+  const toGb = (v) => {
+    const n = parseFloat(v) || 0;
+    return /TB$/i.test(v) ? n * 1024 : n;
+  };
+
+  return {
+    storage_options: [...storage].sort((a, b) => toGb(a) - toGb(b)),
+    color_options: [],
+  };
+}
