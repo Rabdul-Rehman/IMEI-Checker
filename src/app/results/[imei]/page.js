@@ -534,6 +534,10 @@ export default function ResultsPage() {
 
   const displaySize = pickSpec(specs, [
     ["Display", "display_size_inches"],
+    ["Display", "screen_size_inches"],
+    ["Display", "diagonal"],
+    ["Display", "diagonal_inches"],
+    ["Display", "size_inches"],
     ["Display", "size"],
     ["Display", "display_size"],
   ]);
@@ -562,7 +566,15 @@ export default function ResultsPage() {
     if (mp.length) return `${mp[0][1]} MP`;
     const direct = text.match(/\b(\d+(?:\.\d+)?)\s*MP\b/i);
     if (direct) return `${direct[1]} MP`;
-    return Array.isArray(value) ? String(value[0] || "—") : String(value);
+    if (Array.isArray(value)) {
+      const first = value[0];
+      if (first && typeof first === "object") {
+        const mpValue = first.megapixels ?? first.megapixel ?? first.mp;
+        if (mpValue) return `${mpValue} MP`;
+      }
+      return String(first || "—");
+    }
+    return typeof value === "object" ? "Camera system" : String(value);
   })();
   const batteryCapacity = pickSpec(specs, [
     ["Battery", "battery_capacity_mah"],
