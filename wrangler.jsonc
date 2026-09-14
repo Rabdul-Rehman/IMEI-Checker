@@ -1,4 +1,4 @@
-// Deployment trigger: model family storage/color variants 2026-09-14.
+// Deployment trigger: fix IMEI variant aggregation syntax 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
