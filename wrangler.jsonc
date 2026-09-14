@@ -1,4 +1,4 @@
-// Deployment trigger: merge verified storage variants 2026-09-14.
+// Deployment trigger: aggregate phone database variants 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
