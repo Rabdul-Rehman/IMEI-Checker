@@ -3303,3 +3303,34 @@ a { color: inherit; }
 }
 
 /* ===== PHONE DATABASE WHITE IMAGE AREA END ===== */
+
+
+/* ============================================================
+   URGENT UI RESTORE: white product-photo canvases
+   Keep cards/site dark; only phone image presentation is white.
+   ============================================================ */
+.database-card-icon:not(.database-card-icon--unavailable),
+.database-card-icon:not(.database-card-icon--unavailable) .adaptive-device-photo,
+.database-card-icon:not(.database-card-icon--unavailable) img,
+.device-modern-photo,
+.device-modern-photo .adaptive-device-photo,
+.device-modern-photo img,
+.detail-image,
+.detail-image .adaptive-device-photo,
+.detail-image img {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.database-card-icon:not(.database-card-icon--unavailable),
+.device-modern-photo,
+.detail-image {
+  overflow: hidden !important;
+}
+
+.database-card-icon:not(.database-card-icon--unavailable) img,
+.device-modern-photo img,
+.detail-image img {
+  object-fit: contain !important;
+  object-position: center !important;
+}
