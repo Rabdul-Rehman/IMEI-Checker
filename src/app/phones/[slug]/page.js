@@ -101,6 +101,56 @@ export default async function PhoneDetailPage({ params }) {
   const specs = phone.specs_json || {};
   const general = specs.General || {};
 
+  // Treat region/network/storage-specific rows as variants of one physical
+  // model. Example:
+  // "iPhone 12 Pro 5G A2407 Global Dual SIM TD-LTE 512GB"
+  // becomes the family "iPhone 12 Pro".
+  const familyKey = getModelFamilyKey(phone.model_name);
+  const displayModelName = getCleanModelName(phone.model_name);
+
+  let familyPhones = [phone];
+
+  if (!featured && familyKey && phone.brand_id) {
+    try {
+      const { data: siblingRows, error: siblingError } = await supabase
+        .from("phones")
+        .select(`
+          phone_id,
+          model_name,
+          slug,
+          specs_json,
+          brand_id,
+          images,
+          brands (
+            brand_id,
+            name
+          )
+        `)
+        .eq("brand_id", phone.brand_id)
+        .ilike("model_name", `%${familyKey}%`)
+        .limit(500);
+
+      if (!siblingError && siblingRows?.length) {
+        familyPhones = siblingRows.filter(
+          (candidate) =>
+            getModelFamilyKey(candidate.model_name) === familyKey
+        );
+
+        if (
+          !familyPhones.some(
+            (candidate) => candidate.phone_id === phone.phone_id
+          )
+        ) {
+          familyPhones.push(phone);
+        }
+      }
+    } catch (error) {
+      console.error("Phone family lookup failed:", error);
+    }
+  }
+
+  const variantInfo = collectModelVariantOptions(familyPhones);
+
   const brand =
     phone.brands?.name ||
     general.brand ||
@@ -133,7 +183,7 @@ export default async function PhoneDetailPage({ params }) {
         <span>/</span>
         <Link href="/phones">Phone Database</Link>
         <span>/</span>
-        <span>{phone.model_name}</span>
+        <span>{displayModelName}</span>
       </div>
 
 
@@ -171,7 +221,7 @@ export default async function PhoneDetailPage({ params }) {
 
             <DevicePhoto
               src={image}
-              alt={phone.model_name}
+              alt={displayModelName}
             />
 
             <span className="detail-image-badge">
@@ -239,7 +289,7 @@ export default async function PhoneDetailPage({ params }) {
 
             <div>
               <span>Model</span>
-              <strong>{phone.model_name}</strong>
+              <strong>{displayModelName}</strong>
             </div>
 
             <div>
@@ -269,7 +319,7 @@ export default async function PhoneDetailPage({ params }) {
               {brand.toUpperCase()} · DEVICE PROFILE
             </span>
 
-            <h1>{phone.model_name}</h1>
+            <h1>{displayModelName}</h1>
 
             {/* <p className="text-secondary mb-4">
               Complete specifications, hardware information,
@@ -463,10 +513,10 @@ export default async function PhoneDetailPage({ params }) {
                     ],
 
                     [
-                      "Colors",
-                      arrayValue(
-                        body.colors_available
-                      ),
+                      "Available colors",
+                      variantInfo.colors.length
+                        ? variantInfo.colors.join(", ")
+                        : arrayValue(body.colors_available),
                     ],
                   ],
                 },
@@ -485,10 +535,10 @@ export default async function PhoneDetailPage({ params }) {
                     ],
 
                     [
-                      "Storage",
-                      arrayValue(
-                        memory.storage_options
-                      ),
+                      "Available storage options",
+                      variantInfo.storage.length
+                        ? variantInfo.storage.join(", ")
+                        : arrayValue(memory.storage_options),
                     ],
 
                     [
@@ -871,6 +921,120 @@ export default async function PhoneDetailPage({ params }) {
 /* =========================================================
    HELPERS
 ========================================================= */
+
+function getModelFamilyKey(value) {
+  let text = String(value || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:gb|tb|mb)\b/gi, " ")
+    .replace(/\ba\d{4}\b/gi, " ")
+    .replace(/\b(?:global|dual|single|sim|td|lte|td-lte|uw|emea|latam|apac|usa|us|cn|jp|ca|eu|uk|india)\b/gi, " ")
+    .replace(/\b(?:standard|premium)\s+edition\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Network generation is not a storage/color variant for these catalog rows.
+  text = text.replace(/\b(?:3g|4g|5g)\b/gi, " ").replace(/\s+/g, " ").trim();
+
+  return text;
+}
+
+function getCleanModelName(value) {
+  const source = String(value || "").trim();
+  if (!source) return "Unknown device";
+
+  // Keep user-facing capitalization from the original name while stripping
+  // region/network/model-number/storage suffixes.
+  let cleaned = source
+    .replace(/\b\d+(?:\.\d+)?\s*(?:GB|TB|MB)\b/gi, " ")
+    .replace(/\bA\d{4}\b/gi, " ")
+    .replace(/\b(?:Global|Dual|Single|SIM|TD|LTE|TD-LTE|UW|EMEA|LATAM|APAC|USA|US|CN|JP|CA|EU|UK|India)\b/gi, " ")
+    .replace(/\b(?:Standard|Premium)\s+Edition\b/gi, " ")
+    .replace(/\b(?:3G|4G|5G)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned || source;
+}
+
+function collectModelVariantOptions(phones) {
+  const storage = new Set();
+  const colors = new Set();
+
+  const addStorage = (value) => {
+    const text = Array.isArray(value) ? value.join(" ") : String(value || "");
+    const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
+    matches.forEach((item) =>
+      storage.add(item.replace(/\s+/g, "").toUpperCase())
+    );
+  };
+
+  const addColors = (value) => {
+    if (value == null) return;
+    const list = Array.isArray(value)
+      ? value
+      : String(value).split(/[,/|;]+/);
+
+    for (const item of list) {
+      const color = String(item || "").trim();
+      if (color && color.toLowerCase() !== "null") colors.add(color);
+    }
+  };
+
+  const walk = (node, path = "") => {
+    if (node == null) return;
+
+    if (typeof node === "string") {
+      const trimmed = node.trim();
+
+      if (
+        (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+        (trimmed.startsWith("[") && trimmed.endsWith("]"))
+      ) {
+        try {
+          walk(JSON.parse(trimmed), path);
+          return;
+        } catch {}
+      }
+
+      if (/storage|capacity|internal|rom/i.test(path)) addStorage(node);
+      if (/colou?r|finish/i.test(path)) addColors(node);
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((item) => walk(item, path));
+      return;
+    }
+
+    if (typeof node === "object") {
+      for (const [key, value] of Object.entries(node)) {
+        const nextPath = path ? `${path}.${key}` : key;
+
+        if (/storage|capacity|internal|rom/i.test(key)) addStorage(value);
+        if (/colou?r|finish/i.test(key)) addColors(value);
+
+        walk(value, nextPath);
+      }
+    }
+  };
+
+  for (const item of phones || []) {
+    addStorage(item?.model_name);
+    walk(item?.specs_json || {});
+  }
+
+  const toGb = (value) => {
+    const amount = parseFloat(value) || 0;
+    return /TB$/i.test(value) ? amount * 1024 : amount;
+  };
+
+  return {
+    storage: [...storage].sort((a, b) => toGb(a) - toGb(b)),
+    colors: [...colors].sort((a, b) => a.localeCompare(b)),
+  };
+}
+
 
 function arrayValue(value) {
   if (!Array.isArray(value)) {
