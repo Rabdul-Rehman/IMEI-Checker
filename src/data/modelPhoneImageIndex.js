@@ -11061,8 +11061,16 @@ export function getModelVariantOptionsByIdentity(brand, model) {
     if (cv !== wantedVariants || cn !== wantedNums) continue;
     if (!wanted.every((t) => candidate.includes(t))) continue;
 
-    const capacities = candidateModel.match(/\b\d+(?:\.\d+)?\s*(?:gb|tb)\b/gi) || [];
-    capacities.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
+    // Catalog names may contain both RAM and storage, e.g.
+    // "12GB RAM 256GB". Never treat a capacity immediately followed by RAM
+    // as a storage variant.
+    const capacityRegex = /\b(\d+(?:\.\d+)?)\s*(gb|tb)\b/gi;
+    let match;
+    while ((match = capacityRegex.exec(candidateModel)) !== null) {
+      const after = candidateModel.slice(capacityRegex.lastIndex);
+      if (/^\s*ram\b/i.test(after)) continue;
+      storage.add(`${match[1]}${match[2]}`.toUpperCase());
+    }
   }
 
   const toGb = (v) => {
