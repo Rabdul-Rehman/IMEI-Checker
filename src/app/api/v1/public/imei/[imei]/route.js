@@ -189,7 +189,96 @@ async function findStrictPhoneByReportedIdentity(supabase, row) {
   return null;
 }
 
-function buildPhoneResponse(phone, imei, tac, extra = {}) {
+function extractVariantOptions(phones) {
+  const storage = new Set();
+  const colors = new Set();
+
+  const addText = (set, value) => {
+    if (value == null) return;
+    const values = Array.isArray(value) ? value : String(value).split(/[,/|;]+/);
+    for (const item of values) {
+      const v = String(item || "").trim();
+      if (v && v.toLowerCase() !== "null") set.add(v);
+    }
+  };
+
+  for (const phone of phones || []) {
+    const specs = phone?.specs_json || {};
+    const memory = specs.Memory || {};
+    const general = specs.General || {};
+    const misc = specs.Miscellaneous || {};
+    const body = specs["Body / Design"] || specs.Body || {};
+
+    for (const [key, value] of Object.entries(memory)) {
+      if (/storage|capacity|internal|rom/i.test(key)) {
+        const text = Array.isArray(value) ? value.join(" ") : String(value || "");
+        const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
+        matches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
+      }
+    }
+
+    // Many catalog variants encode capacity directly in model_name.
+    const nameMatches = String(phone?.model_name || "").match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
+    nameMatches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
+
+    for (const source of [general, misc, body]) {
+      for (const [key, value] of Object.entries(source || {})) {
+        if (/colou?r|finish/i.test(key)) addText(colors, value);
+      }
+    }
+  }
+
+  const storageSort = (a, b) => {
+    const toGb = (v) => {
+      const n = parseFloat(v) || 0;
+      return /TB$/i.test(v) ? n * 1024 : n;
+    };
+    return toGb(a) - toGb(b);
+  };
+
+  return {
+    storage_options: [...storage].sort(storageSort),
+    color_options: [...colors],
+  };
+}
+
+async function findModelFamily(supabase, phone, reportedModel, reportedBrand) {
+  const base = canonicalModel(reportedModel || phone?.model_name);
+  if (!base) return phone ? [phone] : [];
+
+  const tokens = base.split(" ").filter(Boolean);
+  const searchTerm = tokens.slice(0, Math.min(tokens.length, 4)).join(" ");
+  const { data, error } = await supabase
+    .from("phones")
+    .select("phone_id,model_name,specs_json,brand_id,brands(brand_id,name)")
+    .ilike("model_name", `%${searchTerm}%`)
+    .limit(200);
+
+  if (error) return phone ? [phone] : [];
+
+  const family = (data || []).filter((candidate) =>
+    brandCompatible(candidate?.brands?.name, reportedBrand || phone?.brands?.name) &&
+    modelsAgree(base, candidate?.model_name, "")
+  );
+
+  if (phone && !family.some((p) => p.phone_id === phone.phone_id)) family.push(phone);
+  return family;
+}
+
+async function enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
+  const family = await findModelFamily(
+    supabase,
+    phone,
+    extra.reported_model_name || phone?.model_name,
+    extra.reported_brand || phone?.brands?.name
+  );
+  return buildPhoneResponse(phone, imei, tac, {
+    ...extra,
+    variant_options: extractVariantOptions(family),
+  });
+}
+
+function await enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
   return {
     ...extra,
     tac,
@@ -221,7 +310,7 @@ export async function GET(request, { params }) {
 
     if (/^99\d{6}$/.test(tac)) {
       const phone = await getPhoneById(supabase, Number(tac.slice(2)));
-      if (phone) return json({ success: true, data: buildPhoneResponse(phone, imei, tac, { match_status: "local_tac_match", match_confidence: 1, source: "cloudflare_local_tac" }) });
+      if (phone) return json({ success: true, data: await enrichPhoneResponse(supabase, phone, imei, tac, { match_status: "local_tac_match", match_confidence: 1, source: "cloudflare_local_tac" }) });
     }
 
     const { data: allocations } = await supabase
@@ -243,7 +332,7 @@ export async function GET(request, { params }) {
           .limit(5);
         const verify = (verifyRows || []).find((row) => row.reported_model_name || row.reported_model_number);
         if (!verify || modelsAgree(verify.reported_model_name, phone.model_name, verify.reported_model_number)) {
-          return json({ success: true, data: buildPhoneResponse(phone, imei, tac, { ...mapped, ...(verify || {}), source: "tac_allocations" }) });
+          return json({ success: true, data: await enrichPhoneResponse(supabase, phone, imei, tac, { ...mapped, ...(verify || {}), source: "tac_allocations" }) });
         }
 
         // The TAC row can contain an old/wrong phone_id while the reported
@@ -251,7 +340,7 @@ export async function GET(request, { params }) {
         // table so the response gets the correct phone_id and local image.
         const correctedPhone = await findStrictPhoneByReportedIdentity(supabase, verify);
         if (correctedPhone) {
-          return json({ success: true, data: buildPhoneResponse(correctedPhone, imei, tac, {
+          return json({ success: true, data: await enrichPhoneResponse(supabase, correctedPhone, imei, tac, {
             ...mapped,
             ...(verify || {}),
             match_status: "reported_model_exact_match",
@@ -272,7 +361,7 @@ export async function GET(request, { params }) {
       const legacy = (legacyRows || []).find((row) => row.phone_id);
       if (legacy) {
         const phone = await getPhoneById(supabase, legacy.phone_id);
-        if (phone) return json({ success: true, data: buildPhoneResponse(phone, imei, tac, { match_status: "legacy_tac_match", match_confidence: 1, source: "imei_lookups" }) });
+        if (phone) return json({ success: true, data: await enrichPhoneResponse(supabase, phone, imei, tac, { match_status: "legacy_tac_match", match_confidence: 1, source: "imei_lookups" }) });
       }
     } catch {}
 
@@ -289,7 +378,7 @@ export async function GET(request, { params }) {
       if (best.phone_id) {
         const phone = await getPhoneById(supabase, best.phone_id);
         if (phone && modelsAgree(best.reported_model_name, phone.model_name, best.reported_model_number)) {
-          return json({ success: true, data: buildPhoneResponse(phone, imei, tac, best) });
+          return json({ success: true, data: await enrichPhoneResponse(supabase, phone, imei, tac, best) });
         }
       }
 
@@ -297,7 +386,7 @@ export async function GET(request, { params }) {
       if (strictPhone) {
         return json({
           success: true,
-          data: buildPhoneResponse(strictPhone, imei, tac, {
+          data: await enrichPhoneResponse(supabase, strictPhone, imei, tac, {
             ...best,
             match_status: best.match_status || "reported_model_exact_match",
             match_confidence: best.match_confidence ?? 0.9,
