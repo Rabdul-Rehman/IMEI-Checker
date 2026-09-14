@@ -6,35 +6,93 @@ import { notFound } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import DevicePhoto from "../../components/DevicePhoto";
 import PhoneSpecsTabs from "../../components/PhoneSpecsTabs";
+import { popularDevices } from "../../data/devices";
 
 
 export default async function PhoneDetailPage({ params }) {
   const { slug } = await params;
 
-  let { data: phone, error } = await supabase
-    .from("phones")
-    .select(`
-      phone_id,
-      model_name,
-      slug,
-      specs_json,
-      brand_id,
-      images,
-      brands (
-        brand_id,
-        name
-      )
-    `)
-    .eq("slug", slug)
-    .single();
+  // Homepage featured devices are intentionally not guaranteed to exist in
+  // Supabase/local catalog. Resolve them first so clicking Popular devices can
+  // never crash the server route.
+  const featured = popularDevices.find((device) => device.slug === slug);
 
-  if (error || !phone) {
-    phone = getLocalPhoneBySlug(slug);
+  let phone = null;
+
+  if (featured) {
+    const displayMatch = featured.specs.match(/([0-9.]+)"/);
+    const cameraMatch = featured.specs.match(/(\d+)MP/);
+
+    phone = {
+      phone_id: `featured-${featured.slug}`,
+      model_name: featured.name,
+      slug: featured.slug,
+      images: [featured.image],
+      brands: { name: featured.brand },
+      specs_json: {
+        General: {
+          brand: featured.brand,
+          model_name: featured.name,
+          model_number: featured.model,
+          release_date: featured.releaseDate,
+          market_status: "Available",
+          availability_status: "Available",
+        },
+        Display: {
+          display_size_inches: displayMatch ? Number(displayMatch[1]) : null,
+          display_type: featured.keySpecs?.find((item) => item.label === "Display")?.value || null,
+        },
+        Platform: {
+          chipset: featured.keySpecs?.find((item) => item.label === "Processor")?.value || null,
+          os: featured.keySpecs?.find((item) => item.label === "Software")?.value || null,
+        },
+        "Camera (Main)": {
+          rear_camera_count: cameraMatch ? 1 : null,
+          rear_camera_features: featured.keySpecs?.find((item) => item.label === "Camera")?.value
+            ? [featured.keySpecs.find((item) => item.label === "Camera").value]
+            : [],
+        },
+        Battery: {
+          endurance_rating: featured.keySpecs?.find((item) => item.label === "Battery")?.value || null,
+        },
+      },
+    };
+  } else {
+    // A network/Supabase problem must not turn a valid local phone route into
+    // an unhandled server-side exception on Cloudflare.
+    try {
+      const { data, error } = await supabase
+        .from("phones")
+        .select(`
+          phone_id,
+          model_name,
+          slug,
+          specs_json,
+          brand_id,
+          images,
+          brands (
+            brand_id,
+            name
+          )
+        `)
+        .eq("slug", slug)
+        .single();
+
+      if (!error && data) phone = data;
+    } catch (error) {
+      console.error("Supabase phone detail lookup failed:", error);
+    }
+
+    if (!phone) {
+      try {
+        phone = getLocalPhoneBySlug(slug);
+      } catch (error) {
+        console.error("Local phone detail lookup failed:", error);
+      }
+    }
   }
 
-  if (!phone) {
-    notFound();
-  }
+  if (!phone) notFound();
 
   /* =========================================================
      BASIC DATA
@@ -61,7 +119,7 @@ export default async function PhoneDetailPage({ params }) {
   const sensors = specs["Sensors & Features"] || {};
   const miscellaneous = specs.Miscellaneous || {};
 
-  const image = getMappedPhoneImage(phone.phone_id);
+  const image = featured?.image || getMappedPhoneImage(phone.phone_id) || phone.images?.[0];
 
   return (
     <div className="detail-modern">
