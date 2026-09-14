@@ -331,9 +331,15 @@ export default function ResultsPage() {
     ["Confidence", confidence],
   ];
 
-  const memoryEntries = getCategoryEntries(
+  const rawMemoryEntries = getCategoryEntries(
     specs,
     ["Memory"]
+  );
+
+  // Do not present one catalog record's capacity as if it were the user's
+  // exact handset capacity. Variant capacities are shown separately below.
+  const memoryEntries = rawMemoryEntries.filter(([key]) =>
+    !/storage|capacity|internal|rom/i.test(String(key))
   );
 
   // IMEI/TAC identifies the model family, not an individual handset's exact
