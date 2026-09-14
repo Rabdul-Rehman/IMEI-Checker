@@ -1,4 +1,4 @@
-// Deployment trigger: approved IMEI result redesign 2026-09-14.
+// Deployment trigger: route IMEI checks to redesigned results page 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
