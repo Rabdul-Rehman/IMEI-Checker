@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { lookupPublicImei } from "../../lib/api";
 import { getMappedPhoneImage } from "../../lib/phoneImageMap";
+import { getMappedPhoneImageByIdentity } from "../../../data/modelPhoneImageIndex";
 
 function parsePossibleJson(value) {
   if (typeof value !== "string") {
@@ -266,11 +267,18 @@ export default function ResultsPage() {
       ? getMappedPhoneImage(result.phone_id)
       : "";
 
-  // Prefer the verified local phone-image map whenever the backend resolved
-  // this IMEI to an internal phone_id. DB "images" can contain stale/external
-  // URLs and previously prevented the verified mapped image from rendering.
+  // Real/random IMEIs often have correct TAC-reported brand/model details but
+  // no internal phone_id. Fall back to a build-generated exact identity index
+  // from our verified local catalog so those results still get the same local
+  // image used by the Phone Database.
+  const identityMappedImage = getMappedPhoneImageByIdentity(
+    result?.reported_brand || result?.brand_name || "",
+    result?.reported_model_name || result?.model_name || ""
+  );
+
   const imageUrl =
     mappedImage ||
+    identityMappedImage ||
     getFirstImage(result) ||
     "";
 
