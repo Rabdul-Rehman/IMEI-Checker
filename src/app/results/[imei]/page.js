@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { lookupPublicImei } from "../../lib/api";
 import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
-import { getMappedPhoneImageByIdentity } from "../../../data/modelPhoneImageIndex";
+import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "../../../data/modelPhoneImageIndex";
 
 function parsePossibleJson(value) {
   if (typeof value !== "string") {
@@ -339,8 +339,21 @@ export default function ResultsPage() {
   // IMEI/TAC identifies the model family, not an individual handset's exact
   // storage/color. Show every known option for this model instead of claiming
   // one catalog variant is the user's exact configuration.
-  const variantStorage = result?.variant_options?.storage_options || [];
-  const variantColors = result?.variant_options?.color_options || [];
+  const indexedVariants = getModelVariantOptionsByIdentity(
+    result?.reported_brand || result?.brand_name || "",
+    result?.reported_model_name || result?.model_name || ""
+  );
+
+  const variantStorage = [...new Set([
+    ...(result?.variant_options?.storage_options || []),
+    ...(indexedVariants?.storage_options || []),
+  ])];
+
+  const variantColors = [...new Set([
+    ...(result?.variant_options?.color_options || []),
+    ...(indexedVariants?.color_options || []),
+  ])];
+
   const variantEntries = [
     ...(variantStorage.length ? [["Available storage options", variantStorage.join(", ")]] : []),
     ...(variantColors.length ? [["Available colors", variantColors.join(", ")]] : []),
