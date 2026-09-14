@@ -1,4 +1,4 @@
-// Deployment trigger: random IMEI variant image resolver 2026-09-14.
+// Deployment trigger: IMEI image fallback precedence fix 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
