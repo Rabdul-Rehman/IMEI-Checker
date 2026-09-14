@@ -1,4 +1,4 @@
-// Deployment trigger: urgent white-background + featured-route redeploy 2026-09-14.
+// Deployment trigger: canonical IMEI phone image map fix 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
