@@ -266,9 +266,12 @@ export default function ResultsPage() {
       ? getMappedPhoneImage(result.phone_id)
       : "";
 
+  // Prefer the verified local phone-image map whenever the backend resolved
+  // this IMEI to an internal phone_id. DB "images" can contain stale/external
+  // URLs and previously prevented the verified mapped image from rendering.
   const imageUrl =
-    getFirstImage(result) ||
     mappedImage ||
+    getFirstImage(result) ||
     "";
 
   const brand =
