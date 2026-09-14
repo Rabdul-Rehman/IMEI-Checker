@@ -401,9 +401,39 @@ export default function ResultsPage() {
     ...(indexedVariants?.storage_options || []),
   ])];
 
+  const specColorCandidates = (() => {
+    const body = getCategory(specs, ["Body / Design", "Body"]) || {};
+    const misc = getCategory(specs, ["Miscellaneous"]) || {};
+    const values = [
+      body?.colors_available,
+      body?.colors,
+      body?.colour,
+      body?.color,
+      misc?.colors_available,
+      misc?.colors,
+      misc?.colour,
+      misc?.color,
+      misc?.finish,
+    ];
+
+    const out = [];
+    for (const value of values) {
+      if (!value) continue;
+      const list = Array.isArray(value)
+        ? value
+        : String(value).split(/[,/|;]+/);
+      for (const item of list) {
+        const clean = String(item || "").trim();
+        if (clean) out.push(clean);
+      }
+    }
+    return out;
+  })();
+
   const variantColors = [...new Set([
     ...(result?.variant_options?.color_options || []),
     ...(indexedVariants?.color_options || []),
+    ...specColorCandidates,
   ])];
 
   const variantEntries = [
