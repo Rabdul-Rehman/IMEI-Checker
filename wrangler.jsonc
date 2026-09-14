@@ -1,4 +1,4 @@
-// Deployment trigger: aggregate phone database variants 2026-09-14.
+// Deployment trigger: approved IMEI result redesign 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
