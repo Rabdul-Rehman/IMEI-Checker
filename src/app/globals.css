@@ -3334,3 +3334,227 @@ a { color: inherit; }
   object-fit: contain !important;
   object-position: center !important;
 }
+
+
+/* ============================================================
+   APPROVED IMEI RESULT REFERENCE DESIGN
+   ============================================================ */
+.imei-valid-strip {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.imei-valid-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(73, 221, 122, .14);
+  color: #5ee58b;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.imei-valid-pill i { font-size: 14px; }
+
+.imei-tac-inline {
+  color: #304355;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.imei-overview-dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.imei-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0c1118;
+}
+
+.imei-summary-card {
+  min-height: 150px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: start;
+  gap: 16px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.imei-summary-card:nth-child(2n) { border-right: 0; }
+.imei-summary-card:nth-last-child(-n+2) { border-bottom: 0; }
+
+.imei-summary-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(35, 136, 242, .12);
+  color: #36a9ff;
+  font-size: 17px;
+}
+
+.imei-summary-card span:not(.imei-summary-icon) {
+  display: block;
+  margin-bottom: 6px;
+  color: #4dafff;
+  font-size: 12px;
+}
+
+.imei-summary-card strong {
+  display: block;
+  color: #fff;
+  font-size: 17px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.imei-summary-card small {
+  display: block;
+  margin-top: 6px;
+  color: #768392;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.imei-variant-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.imei-variant-block {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #0d1219;
+}
+
+.imei-variant-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #4dafff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.variant-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.variant-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  padding: 9px 12px;
+  border: 1px solid rgba(68, 164, 255, .55);
+  border-radius: 10px;
+  background: rgba(35, 136, 242, .05);
+  color: #f2f7fb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.variant-color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.variant-color-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d9e2ea;
+  font-size: 11px;
+}
+
+.variant-color-dot {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.12);
+}
+
+.variant-empty {
+  color: #6f7d8b;
+  font-size: 11px;
+}
+
+.imei-model-variants-box {
+  padding: 22px;
+  border: 1px solid rgba(68, 164, 255, .18);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #0d141d, #0a1118);
+}
+
+.imei-model-variants-box h3 {
+  margin: 5px 0 4px;
+  color: #fff;
+  font-size: 17px;
+}
+
+.imei-model-variants-box p {
+  margin: 0 0 18px;
+  color: #758292;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.imei-model-variants-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.imei-model-variants-grid > div {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #0b1016;
+}
+
+.imei-model-variants-grid > div > span {
+  display: block;
+  margin-bottom: 12px;
+  color: #4dafff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .imei-summary-grid,
+  .imei-variant-panel,
+  .imei-model-variants-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imei-summary-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .imei-summary-card:last-child { border-bottom: 0 !important; }
+}
