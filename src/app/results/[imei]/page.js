@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { lookupPublicImei } from "../../lib/api";
-import { getMappedPhoneImage } from "../../lib/phoneImageMap";
+import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
 import { getMappedPhoneImageByIdentity } from "../../../data/modelPhoneImageIndex";
 
 function parsePossibleJson(value) {
@@ -261,10 +261,18 @@ export default function ResultsPage() {
   const snr = imei.slice(8, 14);
   const checkDigit = imei.slice(14);
 
-  const mappedImage =
+  const mappedCandidate =
     result?.phone_id &&
     result?.image_match_verified !== false
       ? getMappedPhoneImage(result.phone_id)
+      : "";
+
+  // IMPORTANT: getMappedPhoneImage() returns PHONE_IMAGE_FALLBACK when a
+  // phone_id has no real image. Treat that fallback as "no mapped image" so
+  // the exact brand+model identity index can provide the real device image.
+  const mappedImage =
+    mappedCandidate && mappedCandidate !== PHONE_IMAGE_FALLBACK
+      ? mappedCandidate
       : "";
 
   // Real/random IMEIs often have correct TAC-reported brand/model details but
