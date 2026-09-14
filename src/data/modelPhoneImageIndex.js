@@ -11000,6 +11000,25 @@ export function getMappedPhoneImageByIdentity(brand, model, modelNumber = "") {
   const b = normalizeBrand(brand);
   const m = normalizeModel(model);
   const n = normalize(modelNumber);
+  if (!m && !n) return "";
+
+  // Hardware/model numbers (V2111, SM-N975F, A2341, etc.) are often much
+  // safer than fuzzy marketing-name matching. If that identifier occurs in
+  // the verified catalog, use it only when every matching row resolves to the
+  // same physical-device image.
+  if (b && n && n.length >= 3) {
+    const numberHits = [];
+    for (const [key, image] of Object.entries(MODEL_PHONE_IMAGE_INDEX)) {
+      const split = key.indexOf("|");
+      if (split < 0 || key.slice(0, split) !== b) continue;
+      const candidateModel = key.slice(split + 1);
+      const tokens = normalize(candidateModel).split(" ");
+      if (tokens.includes(n)) numberHits.push(image);
+    }
+    const uniqueNumberHits = [...new Set(numberHits)];
+    if (uniqueNumberHits.length === 1) return uniqueNumberHits[0];
+  }
+
   if (!m) return "";
   const exact = MODEL_PHONE_IMAGE_INDEX[b + "|" + m];
   if (exact) return exact;
