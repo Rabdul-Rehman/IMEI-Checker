@@ -20,6 +20,21 @@ const PHONE_SELECT = `
   brand_id
 `;
 
+const VERIFIED_FAMILY_IMAGES = {
+  "apple|iphone 12 pro": "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+  "apple|iphone 12 pro max": "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+};
+
+function getVerifiedFamilyImage(phone) {
+  const brand = phone?.specs_json?.General?.brand?.trim()?.toLowerCase() || "";
+  const model = phone?.model_name?.trim()?.toLowerCase() || "";
+  if (brand === "apple") {
+    if (model.includes("iphone 12 pro max")) return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro max"];
+    if (model.includes("iphone 12 pro") && !model.includes("iphone 12 mini")) return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro"];
+  }
+  return "";
+}
+
 function formatPhone(phone) {
   return {
     ...phone,
@@ -28,7 +43,7 @@ function formatPhone(phone) {
       phone.specs_json?.General?.brand?.trim() ||
       "Unknown",
 
-    image: getMappedPhoneImage(phone.phone_id),
+    image: getVerifiedFamilyImage(phone) || getMappedPhoneImage(phone.phone_id),
   };
 }
 
