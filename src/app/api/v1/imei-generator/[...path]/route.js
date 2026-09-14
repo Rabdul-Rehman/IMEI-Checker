@@ -15,21 +15,13 @@ function cleanTac(value) {
 }
 
 async function deterministicLocalTac(phone) {
-  const seed = [
-    phone.phone_id,
-    phone.brands?.name || "",
-    phone.model_name || "",
-    phone.slug || "",
-  ].join("|");
+  const phoneId = Number(phone?.phone_id);
 
-  const bytes = new TextEncoder().encode(seed);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  const view = new Uint8Array(digest);
+  if (!Number.isInteger(phoneId) || phoneId < 0 || phoneId > 999999) {
+    throw new Error("Unable to allocate local TAC for this phone");
+  }
 
-  let n = 0;
-  for (let i = 0; i < 6; i++) n = (n * 256 + view[i]) % 1000000;
-
-  return "99" + String(n).padStart(6, "0");
+  return "99" + String(phoneId).padStart(6, "0");
 }
 
 function luhnDigit(number14) {
