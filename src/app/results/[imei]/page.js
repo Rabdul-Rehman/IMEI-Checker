@@ -260,9 +260,11 @@ export default function ResultsPage() {
   const snr = imei.slice(8, 14);
   const checkDigit = imei.slice(14);
 
-  const mappedImage = result?.phone_id
-    ? getMappedPhoneImage(result.phone_id)
-    : "";
+  const mappedImage =
+    result?.phone_id &&
+    result?.image_match_verified !== false
+      ? getMappedPhoneImage(result.phone_id)
+      : "";
 
   const imageUrl =
     getFirstImage(result) ||
@@ -275,8 +277,8 @@ export default function ResultsPage() {
     "Unknown";
 
   const model =
-    result?.model_name ||
     result?.reported_model_name ||
+    result?.model_name ||
     "Unknown device";
 
   const modelNumber =
