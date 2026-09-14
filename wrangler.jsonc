@@ -1,4 +1,4 @@
-// Deployment trigger: retry Cloudflare after external IMEI accuracy fix.
+// Deployment trigger: urgent white-background + featured-route redeploy 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
