@@ -45,7 +45,13 @@ function variants(value) {
 function numericTokens(value) {
   return normalizeText(value)
     .split(" ")
-    .filter((t) => /\d/.test(t));
+    .filter((t) =>
+      /\d/.test(t) &&
+      !/^(?:4g|5g|3g|lte)$/.test(t) &&
+      !/^\d+(?:gb|tb|mb)$/.test(t) &&
+      !/^a\d{4}$/.test(t) &&
+      !/^(?:19|20)\d{2}$/.test(t)
+    );
 }
 
 const BRAND_PREFIXES = [
@@ -78,6 +84,26 @@ function modelsAgree(reportedModel, phoneModel, reportedNumber = "") {
   // "Google Pixel 7"       -> "Pixel 7"
   // "Xiaomi Mi 11 Lite"    -> "Mi 11 Lite"
   if (reported && reported === phone) return true;
+
+  // Accept catalog variants whose suffix only describes network/region/storage
+  // while preserving the exact physical marketing model. Variant words
+  // (Pro/Max/Mini/etc.) are checked below so sibling devices never cross-match.
+  const safeSuffix = (base, candidate) => {
+    if (!base || !candidate.startsWith(base + " ")) return false;
+    const suffix = candidate.slice(base.length).trim().split(" ").filter(Boolean);
+    const harmless = new Set([
+      "3g","4g","5g","lte","td","global","dual","sim","emea","latam","apac",
+      "eu","us","na","jp","ca","cn","au","uk","india","standard","edition",
+      "premium","gb","ram"
+    ]);
+    return suffix.every((t) =>
+      harmless.has(t) ||
+      /^\d+(?:gb|tb|mb)$/.test(t) ||
+      /^a\d{4}$/.test(t) ||
+      /^(?:19|20)\d{2}$/.test(t)
+    );
+  };
+  if (safeSuffix(reported, phone)) return true;
 
   const rv = variants(reported);
   const pv = variants(phone);
