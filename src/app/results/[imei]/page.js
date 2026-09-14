@@ -154,6 +154,58 @@ function getCategoryEntries(specs, names) {
   return [["Value", category]];
 }
 
+function pickSpec(specs, paths) {
+  for (const [section, key] of paths) {
+    const value = specs?.[section]?.[key];
+    if (value !== null && value !== undefined && value !== "") return value;
+  }
+  return null;
+}
+
+function normalizeVariantList(values) {
+  return [...new Set((values || []).map((v) => String(v).trim()).filter(Boolean))];
+}
+
+function VariantChips({ values, type = "text" }) {
+  if (!values?.length) return <span className="variant-empty">Not available</span>;
+
+  return (
+    <div className={type === "color" ? "variant-color-list" : "variant-chip-list"}>
+      {values.map((value) =>
+        type === "color" ? (
+          <span className="variant-color-item" key={value}>
+            <span
+              className="variant-color-dot"
+              style={{ background: getColorSwatch(value) }}
+            />
+            <span>{value}</span>
+          </span>
+        ) : (
+          <span className="variant-chip" key={value}>{value}</span>
+        )
+      )}
+    </div>
+  );
+}
+
+function getColorSwatch(name) {
+  const key = String(name || "").toLowerCase();
+  const map = {
+    graphite: "#4c4d4f",
+    black: "#181818",
+    silver: "#dfe2e5",
+    white: "#f5f5f3",
+    gold: "#e6c58b",
+    blue: "#2c6ea7",
+    "pacific blue": "#2f698f",
+    red: "#b73131",
+    green: "#527760",
+    purple: "#7566a8",
+    pink: "#d79aaa",
+  };
+  return map[key] || "#60758c";
+}
+
 function SpecGroup({ title, values }) {
   if (!values || values.length === 0) {
     return null;
@@ -358,6 +410,36 @@ export default function ResultsPage() {
     ...(variantStorage.length ? [["Available storage options", variantStorage.join(", ")]] : []),
     ...(variantColors.length ? [["Available colors", variantColors.join(", ")]] : []),
   ];
+
+  const displaySize = pickSpec(specs, [
+    ["Display", "display_size_inches"],
+    ["Display", "size"],
+    ["Display", "display_size"],
+  ]);
+  const displayType = pickSpec(specs, [
+    ["Display", "display_type"],
+    ["Display", "type"],
+  ]);
+  const chipset = pickSpec(specs, [
+    ["Platform", "chipset"],
+    ["Platform", "processor"],
+  ]);
+  const rearCamera = pickSpec(specs, [
+    ["Camera (Main)", "rear_camera_features"],
+    ["Camera (Main)", "rear_camera_specs"],
+    ["Camera", "main"],
+  ]);
+  const batteryCapacity = pickSpec(specs, [
+    ["Battery", "battery_capacity_mah"],
+    ["Battery", "capacity"],
+  ]);
+  const ramOptions = pickSpec(specs, [
+    ["Memory", "ram_options"],
+    ["Memory", "ram"],
+  ]);
+
+  const cleanVariantStorage = normalizeVariantList(variantStorage);
+  const cleanVariantColors = normalizeVariantList(variantColors);
 
   const normalizedVariantStorage = new Set(
     variantStorage.map((v) => String(v).replace(/\s+/g, "").toUpperCase())
@@ -578,6 +660,14 @@ export default function ResultsPage() {
               <i className="fas fa-mobile-screen-button device-icon-fallback" />
             )}
 
+            <div className="imei-valid-strip">
+              <span className="imei-valid-pill">
+                <i className="fas fa-circle-check" />
+                Valid IMEI
+              </span>
+              <span className="imei-tac-inline">TAC: {tac}</span>
+            </div>
+
           </div>
 
 
@@ -792,33 +882,78 @@ export default function ResultsPage() {
               ============================================ */}
 
               {activeTab === "overview" && (
-                <div className="phone-spec-group">
+                <div className="imei-overview-dashboard">
+                  <div className="imei-summary-grid">
+                    <div className="imei-summary-card">
+                      <span className="imei-summary-icon"><i className="fas fa-mobile-screen" /></span>
+                      <div>
+                        <span>Display</span>
+                        <strong>{displaySize ? `${displaySize}"` : "—"}</strong>
+                        <small>{displayType || "Display specification"}</small>
+                      </div>
+                    </div>
 
-                  <h3 className="phone-spec-group-title">
-                    Device Information
-                  </h3>
+                    <div className="imei-summary-card">
+                      <span className="imei-summary-icon"><i className="fas fa-camera" /></span>
+                      <div>
+                        <span>Camera</span>
+                        <strong>{Array.isArray(rearCamera) ? rearCamera[0] : (rearCamera || "—")}</strong>
+                        <small>Main camera system</small>
+                      </div>
+                    </div>
 
-                  <div className="spec-grid-modern">
+                    <div className="imei-summary-card">
+                      <span className="imei-summary-icon"><i className="fas fa-microchip" /></span>
+                      <div>
+                        <span>Processor</span>
+                        <strong>{chipset || "—"}</strong>
+                        <small>{Array.isArray(ramOptions) ? ramOptions.join(", ") : (ramOptions || "RAM data")}</small>
+                      </div>
+                    </div>
 
-                    {overviewEntries.map(
-                      ([label, value]) => (
-                        <div
-                          className="spec-modern-card"
-                          key={label}
-                        >
-                          <div className="spec-modern-label">
-                            {label}
-                          </div>
-
-                          <div className="spec-modern-value">
-                            <SpecValue value={value} />
-                          </div>
-                        </div>
-                      )
-                    )}
-
+                    <div className="imei-summary-card">
+                      <span className="imei-summary-icon"><i className="fas fa-battery-three-quarters" /></span>
+                      <div>
+                        <span>Battery</span>
+                        <strong>{batteryCapacity ? `${batteryCapacity} mAh` : "—"}</strong>
+                        <small>Model battery specification</small>
+                      </div>
+                    </div>
                   </div>
 
+                  <div className="imei-variant-panel">
+                    <div className="imei-variant-block">
+                      <span className="imei-variant-label">
+                        <i className="fas fa-hard-drive" /> Storage Options
+                      </span>
+                      <VariantChips values={cleanVariantStorage} />
+                    </div>
+
+                    <div className="imei-variant-block">
+                      <span className="imei-variant-label">
+                        <i className="fas fa-palette" /> Available Colors
+                      </span>
+                      <VariantChips values={cleanVariantColors} type="color" />
+                    </div>
+                  </div>
+
+                  <div className="imei-model-variants-box">
+                    <div>
+                      <span className="section-eyebrow">MODEL VARIANTS</span>
+                      <h3>Available configurations for this model</h3>
+                      <p>IMEI identifies the device family. These are the known storage and color variants in the catalog.</p>
+                    </div>
+                    <div className="imei-model-variants-grid">
+                      <div>
+                        <span>Storage Variants</span>
+                        <VariantChips values={cleanVariantStorage} />
+                      </div>
+                      <div>
+                        <span>Color Variants</span>
+                        <VariantChips values={cleanVariantColors} type="color" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
