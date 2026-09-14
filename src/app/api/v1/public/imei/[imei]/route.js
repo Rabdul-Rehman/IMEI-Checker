@@ -209,7 +209,13 @@ function extractVariantOptions(phones) {
     const misc = specs.Miscellaneous || {};
     const body = specs["Body / Design"] || specs.Body || {};
 
-    for (const [key, value] of Object.entries(memory)) {
+    // Some records store JSON as strings.
+    const normalizedMemory = typeof memory === "string" ? (() => { try { return JSON.parse(memory); } catch { return {}; } })() : memory;
+    const normalizedGeneral = typeof general === "string" ? (() => { try { return JSON.parse(general); } catch { return {}; } })() : general;
+    const normalizedMisc = typeof misc === "string" ? (() => { try { return JSON.parse(misc); } catch { return {}; } })() : misc;
+    const normalizedBody = typeof body === "string" ? (() => { try { return JSON.parse(body); } catch { return {}; } })() : body;
+
+    for (const [key, value] of Object.entries(normalizedMemory || {})) {
       if (/storage|capacity|internal|rom/i.test(key)) {
         const text = Array.isArray(value) ? value.join(" ") : String(value || "");
         const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
@@ -221,7 +227,7 @@ function extractVariantOptions(phones) {
     const nameMatches = String(phone?.model_name || "").match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
     nameMatches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
 
-    for (const source of [general, misc, body]) {
+    for (const source of [normalizedGeneral, normalizedMisc, normalizedBody]) {
       for (const [key, value] of Object.entries(source || {})) {
         if (/colou?r|finish/i.test(key)) addText(colors, value);
       }
@@ -256,10 +262,27 @@ async function findModelFamily(supabase, phone, reportedModel, reportedBrand) {
 
   if (error) return phone ? [phone] : [];
 
-  const family = (data || []).filter((candidate) =>
-    brandCompatible(candidate?.brands?.name, reportedBrand || phone?.brands?.name) &&
-    modelsAgree(base, candidate?.model_name, "")
-  );
+  const baseVariants = variants(base);
+  const baseNums = numericTokens(base);
+
+  const family = (data || []).filter((candidate) => {
+    if (!brandCompatible(candidate?.brands?.name, reportedBrand || phone?.brands?.name)) {
+      return false;
+    }
+
+    const candidateModel = canonicalModel(candidate?.model_name);
+    const candidateVariants = variants(candidateModel);
+    const candidateNums = numericTokens(candidateModel);
+
+    // Same physical model family: allow storage/region/network/model-number
+    // suffixes, but do NOT cross into sibling Pro/Max/Mini/Ultra/etc devices.
+    if (candidateVariants.join("|") !== baseVariants.join("|")) return false;
+    if (baseNums.length && candidateNums.length && baseNums.join("|") !== candidateNums.join("|")) {
+      return false;
+    }
+
+    return candidateModel === base || candidateModel.startsWith(base + " ");
+  });
 
   if (phone && !family.some((p) => p.phone_id === phone.phone_id)) family.push(phone);
   return family;
