@@ -273,7 +273,8 @@ export default function ResultsPage() {
   // image used by the Phone Database.
   const identityMappedImage = getMappedPhoneImageByIdentity(
     result?.reported_brand || result?.brand_name || "",
-    result?.reported_model_name || result?.model_name || ""
+    result?.reported_model_name || result?.model_name || "",
+    result?.reported_model_number || result?.model_number || ""
   );
 
   const imageUrl =
