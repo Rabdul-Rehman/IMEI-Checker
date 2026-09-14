@@ -421,10 +421,14 @@ export default function ResultsPage() {
     result?.reported_model_number || result?.model_number || ""
   );
 
+  // Prefer the verified brand/model/model-number identity image over a
+  // historical phone_id mapping. Old TAC rows can point at the wrong catalog
+  // phone_id; identity matching is stricter and prevents sibling/wrong-device
+  // photos (for example a different Vivo Y-series handset).
   const imageUrl =
-    mappedImage ||
     identityMappedImage ||
-    getFirstImage(result) ||
+    mappedImage ||
+    (result?.image_match_verified !== false ? getFirstImage(result) : "") ||
     "";
 
   const brand =
