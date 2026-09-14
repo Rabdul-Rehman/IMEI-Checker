@@ -193,45 +193,59 @@ function extractVariantOptions(phones) {
   const storage = new Set();
   const colors = new Set();
 
-  const addText = (set, value) => {
+  const addStorageFromText = (value) => {
+    const text = Array.isArray(value) ? value.join(" ") : String(value || "");
+    const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
+    matches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
+  };
+
+  const addColors = (value) => {
     if (value == null) return;
-    const values = Array.isArray(value) ? value : String(value).split(/[,/|;]+/);
+    const values = Array.isArray(value)
+      ? value
+      : String(value).split(/[,/|;]+/);
     for (const item of values) {
       const v = String(item || "").trim();
-      if (v && v.toLowerCase() !== "null") set.add(v);
+      if (v && v.toLowerCase() !== "null" && v.length <= 80) colors.add(v);
+    }
+  };
+
+  const walk = (node, path = "") => {
+    if (node == null) return;
+
+    if (typeof node === "string") {
+      const trimmed = node.trim();
+      if ((trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+          (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+        try {
+          walk(JSON.parse(trimmed), path);
+          return;
+        } catch {}
+      }
+
+      if (/storage|capacity|internal|rom|memory/i.test(path)) addStorageFromText(node);
+      if (/colou?r|finish/i.test(path)) addColors(node);
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((item) => walk(item, path));
+      return;
+    }
+
+    if (typeof node === "object") {
+      for (const [key, value] of Object.entries(node)) {
+        const nextPath = path ? path + "." + key : key;
+        if (/storage|capacity|internal|rom/i.test(key)) addStorageFromText(value);
+        if (/colou?r|finish/i.test(key)) addColors(value);
+        walk(value, nextPath);
+      }
     }
   };
 
   for (const phone of phones || []) {
-    const specs = phone?.specs_json || {};
-    const memory = specs.Memory || {};
-    const general = specs.General || {};
-    const misc = specs.Miscellaneous || {};
-    const body = specs["Body / Design"] || specs.Body || {};
-
-    // Some records store JSON as strings.
-    const normalizedMemory = typeof memory === "string" ? (() => { try { return JSON.parse(memory); } catch { return {}; } })() : memory;
-    const normalizedGeneral = typeof general === "string" ? (() => { try { return JSON.parse(general); } catch { return {}; } })() : general;
-    const normalizedMisc = typeof misc === "string" ? (() => { try { return JSON.parse(misc); } catch { return {}; } })() : misc;
-    const normalizedBody = typeof body === "string" ? (() => { try { return JSON.parse(body); } catch { return {}; } })() : body;
-
-    for (const [key, value] of Object.entries(normalizedMemory || {})) {
-      if (/storage|capacity|internal|rom/i.test(key)) {
-        const text = Array.isArray(value) ? value.join(" ") : String(value || "");
-        const matches = text.match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
-        matches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
-      }
-    }
-
-    // Many catalog variants encode capacity directly in model_name.
-    const nameMatches = String(phone?.model_name || "").match(/\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi) || [];
-    nameMatches.forEach((v) => storage.add(v.replace(/\s+/g, "").toUpperCase()));
-
-    for (const source of [normalizedGeneral, normalizedMisc, normalizedBody]) {
-      for (const [key, value] of Object.entries(source || {})) {
-        if (/colou?r|finish/i.test(key)) addText(colors, value);
-      }
-    }
+    walk(phone?.specs_json || {});
+    addStorageFromText(phone?.model_name || "");
   }
 
   const storageSort = (a, b) => {
@@ -244,7 +258,7 @@ function extractVariantOptions(phones) {
 
   return {
     storage_options: [...storage].sort(storageSort),
-    color_options: [...colors],
+    color_options: [...colors].sort((a, b) => a.localeCompare(b)),
   };
 }
 
