@@ -353,8 +353,7 @@ export default async function PhoneDetailPage({ params }) {
 
                     [
                       "Model",
-                      general.model_name ||
-                        phone.model_name,
+                      displayModelName,
                     ],
 
                     [
