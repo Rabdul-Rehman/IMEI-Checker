@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { lookupPublicImei } from "../../lib/api";
+import { getMappedPhoneImage } from "../../lib/phoneImageMap";
 
 function parsePossibleJson(value) {
   if (typeof value !== "string") {
@@ -259,7 +260,14 @@ export default function ResultsPage() {
   const snr = imei.slice(8, 14);
   const checkDigit = imei.slice(14);
 
-  const imageUrl = getFirstImage(result);
+  const mappedImage = result?.phone_id
+    ? getMappedPhoneImage(result.phone_id)
+    : "";
+
+  const imageUrl =
+    getFirstImage(result) ||
+    mappedImage ||
+    "";
 
   const brand =
     result?.brand_name ||
