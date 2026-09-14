@@ -1,4 +1,4 @@
-// Deployment trigger: readable nested specs across result tabs 2026-09-14.
+// Deployment trigger: correct iPhone 12 Pro image mappings 2026-09-14.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "imei-checker",
