@@ -16,3 +16,7 @@ const PHONE_RICH_MEDIA = Object.freeze({
 
 export function getPhoneRichMedia(brand,model){return PHONE_RICH_MEDIA[keyFor(brand,model)]||null;}
 export default getPhoneRichMedia;
+
+// Optional generated batch. Kept separate so large media imports do not require
+// hand-editing this source file. Build environments without a populated batch
+// simply use the curated object above.
