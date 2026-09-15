@@ -3806,3 +3806,9 @@ a { color: inherit; }
 @media(max-width:1100px){
   .imei-color-photo-grid,.imei-view-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* Rich-media final flow: headings always precede their own galleries. */
+.imei-more-views-section{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:12px}
+.imei-more-views-section .imei-media-heading{order:0;margin:0}
+.imei-more-views-section .imei-view-photo-grid{order:1;margin:0}
