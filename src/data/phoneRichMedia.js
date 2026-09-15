@@ -10,22 +10,28 @@ const PHONE_RICH_MEDIA = Object.freeze({
   // Apple Newsroom launch media. Rich slots are deliberately conservative:
   // only distinct, exact-model assets should be added here.
   "apple|iphone 12 pro": {
-    hero: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+    // Hero and finish cards use full front+back product renders so the device
+    // is never represented by a cropped promo shot or a mislabeled side view.
+    hero: "https://www.elpalaciodehierro.com/on/demandware.static/-/Sites-palacio-master-catalog/default/dwa3c923e1/images/41966866/large/41966866_x1.jpg",
     colors: [
       {
+        name: "Graphite",
+        src: "https://www.elpalaciodehierro.com/on/demandware.static/-/Sites-palacio-master-catalog/default/dwa3c923e1/images/41966866/large/41966866_x1.jpg"
+      },
+      {
+        name: "Silver",
+        src: "https://static01.galaxus.com/productimages/3/8/9/1/6/4/6/0/iPhone_12_Pro_Silver_PDP_Image_Position-2__en-US.jpg_sea.jpeg"
+      },
+      {
         name: "Gold",
-        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-stainless-steel-gold_10132020_inline.jpg.large.jpg"
+        src: "https://i5.walmartimages.com/seo/Verizon-iPhone-12-Pro-128GB-Gold_2d458bd0-9317-460b-af7d-db97bc90c45f.fff1a62d78c15c7129fdb89d82f0ac74.jpeg"
       },
       {
         name: "Pacific Blue",
-        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-pacific-blue_10132020_Full-Bleed-Image.jpg.large.jpg"
+        src: "https://i5.walmartimages.com/asr/0aa428ff-a597-43e9-ab49-7e6e687f0ff5.f7728cc6a63f818ebbcfb25ad62897e2.jpeg"
       }
     ],
     views: [
-      {
-        name: "Official Product View",
-        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
-      },
       {
         name: "Side Profile",
         src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-pacific-blue_10132020_Full-Bleed-Image.jpg.large.jpg"
@@ -36,12 +42,12 @@ const PHONE_RICH_MEDIA = Object.freeze({
       }
     ],
     mediaStatus: {
-      hero: "verified",
-      colors: "partial-verified",
+      hero: "exact-model",
+      colors: "four-finish-exact-model",
       views: "partial-verified"
     },
     finishes: ["Graphite", "Silver", "Gold", "Pacific Blue"],
-    source: "Apple"
+    source: "Apple + exact-model retail product media"
   },
   "apple|iphone 13 pro": {
     hero: null,
