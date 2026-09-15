@@ -6,12 +6,21 @@ function normalize(value){return String(value||"").toLowerCase().replace(/[^a-z0
 function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(b&&m.startsWith(b+" "))m=m.slice(b.length+1).trim();return b+"|"+m;}
 
 const PHONE_RICH_MEDIA = Object.freeze({
-  // Add verified records here. Never label one image as multiple colors/views.
-  // "apple|iphone 12 pro": {
-  //   hero: "/phones/apple/iphone-12-pro/hero.webp",
-  //   colors: [{name:"Graphite",src:"/phones/apple/iphone-12-pro/colors/graphite.webp"}],
-  //   views: [{name:"Front View",src:"/phones/apple/iphone-12-pro/views/front.webp"}]
-  // }
+  // Verified against Apple's iPhone 12 Pro technical specifications and
+  // Apple Newsroom launch media. Rich slots are deliberately conservative:
+  // only distinct, exact-model assets should be added here.
+  "apple|iphone 12 pro": {
+    hero: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+    colors: [],
+    views: [
+      {
+        name: "Official Product View",
+        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
+      }
+    ],
+    finishes: ["Graphite", "Silver", "Gold", "Pacific Blue"],
+    source: "Apple"
+  }
 });
 
 export function getPhoneRichMedia(brand,model){return PHONE_RICH_MEDIA[keyFor(brand,model)]||null;}
