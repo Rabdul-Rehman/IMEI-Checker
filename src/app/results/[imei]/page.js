@@ -673,6 +673,16 @@ export default function ResultsPage() {
     else add(result?.images);
     add(result?.image);
 
+    // The API now returns deduplicated images from every catalog row that
+    // belongs to the SAME physical model family (regional/storage variants
+    // are allowed; Pro/Max/Mini/Ultra sibling models are rejected server-side).
+    // This lets the result page show front/back/color product photography
+    // whenever those exact-model assets exist in our database.
+    const familyImages = result?.variant_options?.family_images || [];
+    if (Array.isArray(familyImages)) {
+      familyImages.forEach((item) => add(item));
+    }
+
     const colorImages =
       result?.variant_options?.color_images ||
       result?.variant_options?.colour_images ||
@@ -961,7 +971,7 @@ export default function ResultsPage() {
                 </div>
                 {resultMedia.length <= 1 ? (
                   <small className="imei-media-note">
-                    Color-specific product photos are shown only when an exact image for that model/color exists in the catalog.
+                    Exact-model product photos will appear above whenever they exist in the catalog; color names are never paired with an unverified photo.
                   </small>
                 ) : null}
               </>
