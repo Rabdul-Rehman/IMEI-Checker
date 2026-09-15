@@ -7,6 +7,7 @@ import { lookupPublicImei } from "../../lib/api";
 import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
 import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "../../../data/modelPhoneImageIndex";
 import { getCuratedPhoneMedia } from "../../../data/curatedPhoneMedia";
+import { isAmbiguousCanonicalPhoneModel } from "../../../data/ambiguousCanonicalPhoneModels";
 
 function parsePossibleJson(value) {
   if (typeof value !== "string") {
@@ -469,10 +470,10 @@ export default function ResultsPage() {
       "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
   };
 
-  const curatedMedia = getCuratedPhoneMedia(
-    result?.reported_brand || result?.brand_name || "",
-    result?.reported_model_name || result?.model_name || ""
-  );
+  const mediaBrand = result?.reported_brand || result?.brand_name || "";
+  const mediaModel = result?.reported_model_name || result?.model_name || "";
+  const mediaIsAmbiguous = isAmbiguousCanonicalPhoneModel(mediaBrand, mediaModel);
+  const curatedMedia = mediaIsAmbiguous ? null : getCuratedPhoneMedia(mediaBrand, mediaModel);
 
   const imageUrl =
     curatedMedia?.hero ||
