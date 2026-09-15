@@ -1,3 +1,4 @@
+import { getSafeCanonicalPhoneImage } from "../../data/canonicalPhoneImageIndex";
 import {
   getMappedPhoneImage,
   PHONE_IMAGE_FALLBACK,
@@ -54,6 +55,14 @@ export function resolvePhoneImage(phone) {
 
   const verifiedOverride = getVerifiedModelImageOverride(phone);
   if (verifiedOverride) return verifiedOverride;
+
+  // Prefer a reviewed canonical physical-model image before phone_id mappings.
+  // This prevents regional/storage/TAC variants from inheriting sibling-model art.
+  const canonicalImage = getSafeCanonicalPhoneImage(
+    phone?.brand_name ?? phone?.reported_brand ?? phone?.brand ?? "",
+    phone?.reported_model_name ?? phone?.model_name ?? phone?.model ?? ""
+  );
+  if (canonicalImage) return canonicalImage;
 
   /*
    * First priority:
