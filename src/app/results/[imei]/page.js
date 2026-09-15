@@ -711,21 +711,6 @@ export default function ResultsPage() {
       Object.entries(viewImages).forEach(([label, item]) => add(item, label));
     }
 
-    const exactVerified = VERIFIED_MODEL_MEDIA[exactModelKey] || [];
-    if (exactVerified.length) {
-      // Keep one card per verified label even when a model currently shares
-      // the same master product photograph. This ensures the reference-style
-      // color gallery renders instead of being collapsed by URL deduplication.
-      const merged = [...exactVerified, ...raw];
-      const seen = new Set();
-      return merged.filter((item) => {
-        const key = `${item.src}|${item.label || ""}`;
-        if (!item.src || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).slice(0, 12);
-    }
-
     const seen = new Set();
     return raw.filter((item) => {
       const key = item.src;
