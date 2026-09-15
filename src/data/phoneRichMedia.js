@@ -11,17 +11,34 @@ const PHONE_RICH_MEDIA = Object.freeze({
   // only distinct, exact-model assets should be added here.
   "apple|iphone 12 pro": {
     hero: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
-    colors: [],
+    colors: [
+      {
+        name: "Gold",
+        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-stainless-steel-gold_10132020_inline.jpg.large.jpg"
+      },
+      {
+        name: "Pacific Blue",
+        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-pacific-blue_10132020_Full-Bleed-Image.jpg.large.jpg"
+      }
+    ],
     views: [
       {
         name: "Official Product View",
         src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
+      },
+      {
+        name: "Side Profile",
+        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-pacific-blue_10132020_Full-Bleed-Image.jpg.large.jpg"
+      },
+      {
+        name: "Camera Close-up",
+        src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-back-camera_10132020_big.jpg.large.jpg"
       }
     ],
     mediaStatus: {
       hero: "verified",
-      colors: "awaiting-distinct-assets",
-      views: "partial"
+      colors: "partial-verified",
+      views: "partial-verified"
     },
     finishes: ["Graphite", "Silver", "Gold", "Pacific Blue"],
     source: "Apple"
