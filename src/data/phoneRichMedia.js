@@ -8,6 +8,11 @@ function normalize(value){return String(value||"").toLowerCase().replace(/[^a-z0
 function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(b&&m.startsWith(b+" "))m=m.slice(b.length+1).trim();return b+"|"+m;}
 
 const PHONE_RICH_MEDIA = Object.freeze({
+// IMPORTANT: Rich-media records below are intentionally source-verifiable.
+// Known finishes are metadata; a finish is promoted to colors[] only after a
+// distinct exact-model product image URL is verified. This keeps random IMEI
+// results truthful while the catalog is enriched brand-by-brand.
+
   // Verified against Apple's iPhone 12 Pro technical specifications and
   // Apple Newsroom launch media. Rich slots are deliberately conservative:
   // only distinct, exact-model assets should be added here.
