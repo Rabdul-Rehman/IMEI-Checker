@@ -18,7 +18,7 @@ const CURATED_PHONE_MEDIA = Object.freeze({
     hero: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
     colors: ["Graphite", "Silver", "Gold", "Pacific Blue"],
     images: [
-      { src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg", label: "Official product view", kind: "view" }
+      { src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg", label: "Product image", kind: "hero" }
     ]
   }
 });
