@@ -725,6 +725,14 @@ export default function ResultsPage() {
     }).slice(0, 12);
   })();
 
+  const richColorMedia = (richMedia?.colors || []).filter((item) => item?.src);
+  const richViewMedia = (richMedia?.views || []).filter((item) => item?.src);
+  const supplementalMedia = resultMedia.filter((item) =>
+    !richColorMedia.some((color) => color.src === item.src) &&
+    !richViewMedia.some((view) => view.src === item.src) &&
+    item.src !== imageUrl
+  );
+
   const normalizedVariantStorage = new Set(
     variantStorage.map((v) => String(v).replace(/\s+/g, "").toUpperCase())
   );
@@ -957,40 +965,50 @@ export default function ResultsPage() {
           </div>
 
           <div className="imei-device-media">
-            {resultMedia.length > 1 ? (
+            {richColorMedia.length ? (
               <>
-                <span className="imei-media-heading">Device Views</span>
-                <div className="imei-media-grid">
-                  {resultMedia.map((item, index) => (
-                    <div className="imei-media-card" key={`${item.src}-${index}`}>
-                      <img src={item.src} alt={item.label ? `${model} - ${item.label}` : model} />
-                      <span>{item.label || `View ${index + 1}`}</span>
+                <span className="imei-media-heading">Available Colors</span>
+                <div className="imei-media-grid imei-color-photo-grid">
+                  {richColorMedia.map((item, index) => (
+                    <div className="imei-media-card" key={`color-${item.src}-${index}`}>
+                      <img src={item.src} alt={`${model} - ${item.name || "color"}`} loading="lazy" />
+                      <span>{item.name || `Color ${index + 1}`}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : cleanVariantColors.length ? (
+              <>
+                <span className="imei-media-heading">Available Colors</span>
+                <div className="imei-media-colors">
+                  {cleanVariantColors.map((color) => (
+                    <div className="imei-media-color" key={color}>
+                      <span className="variant-color-dot" style={{ background: getColorSwatch(color) }} />
+                      <span>{color}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : null}
 
-            {cleanVariantColors.length ? (
+            {(richViewMedia.length || supplementalMedia.length) ? (
               <>
-                <span className="imei-media-heading">Available Colors</span>
-                <div className="imei-media-colors">
-                  {cleanVariantColors.map((color) => (
-                    <div className="imei-media-color" key={color}>
-                      <span
-                        className="variant-color-dot"
-                        style={{ background: getColorSwatch(color) }}
-                      />
-                      <span>{color}</span>
+                <span className="imei-media-heading">More Views</span>
+                <div className="imei-media-grid imei-view-photo-grid">
+                  {[...richViewMedia, ...supplementalMedia].map((item, index) => (
+                    <div className="imei-media-card" key={`view-${item.src}-${index}`}>
+                      <img src={item.src} alt={`${model} - ${item.name || item.label || `view ${index + 1}`}`} loading="lazy" />
+                      <span>{item.name || item.label || `View ${index + 1}`}</span>
                     </div>
                   ))}
                 </div>
-                {resultMedia.length <= 1 ? (
-                  <small className="imei-media-note">
-                    Exact-model product photos will appear above whenever they exist in the catalog; color names are never paired with an unverified photo.
-                  </small>
-                ) : null}
               </>
+            ) : null}
+
+            {!richColorMedia.length && cleanVariantColors.length ? (
+              <small className="imei-media-note">
+                Color photos appear here only after an exact-model asset has been verified.
+              </small>
             ) : null}
           </div>
 
