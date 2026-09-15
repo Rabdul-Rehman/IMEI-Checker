@@ -109,8 +109,7 @@ export function getPhoneRichMedia(brand,model){
 
   // Database-wide exact-model baseline. Every model already present in the
   // generated brand+model image index gets a deterministic rich-media record.
-  // We intentionally do NOT manufacture color/view cards from one hero image:
-  // those slots are populated only when distinct exact-model assets exist.
+  // Distinct colors/views remain empty until separately verified.
   const hero=getMappedPhoneImageByIdentity(brand,model);
   if(!hero) return null;
   const variants=getModelVariantOptionsByIdentity(brand,model)||{};
@@ -121,6 +120,19 @@ export function getPhoneRichMedia(brand,model){
     finishes: Array.isArray(variants.color_options)?variants.color_options:[],
     mediaStatus:{hero:"catalog-exact-model",colors:"awaiting-distinct-assets",views:"awaiting-distinct-assets"},
     source:"local exact-model catalog"
+  };
+}
+
+export function getPhoneMediaCoverage(brand,model){
+  const media=getPhoneRichMedia(brand,model);
+  if(!media) return {hero:false,colors:0,views:0,complete:false};
+  const colors=(media.colors||[]).filter(x=>x?.name&&x?.src);
+  const views=(media.views||[]).filter(x=>x?.name&&x?.src);
+  return {
+    hero:Boolean(media.hero),
+    colors:colors.length,
+    views:views.length,
+    complete:Boolean(media.hero)&&colors.length>0&&views.length>0
   };
 }
 export default getPhoneRichMedia;
