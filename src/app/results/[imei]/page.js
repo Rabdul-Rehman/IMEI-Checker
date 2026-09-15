@@ -427,8 +427,19 @@ export default function ResultsPage() {
   // photos (for example a different Vivo Y-series handset).
   const normalizedResultModel = String(result?.reported_model_name || result?.model_name || "").toLowerCase();
   const normalizedResultBrand = String(result?.reported_brand || result?.brand_name || "").toLowerCase();
+  // Never let a family substring cross from Pro to Pro Max (or vice versa).
+  // The local generated index currently shares one historical asset between
+  // these two families, so only the exact iPhone 12 Pro family gets this
+  // verified Apple product image override.
+  const canonicalResultModel = normalizedResultModel
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:gb|tb|mb)\b/g, " ")
+    .replace(/\ba\d{4}\b/g, " ")
+    .replace(/\b(?:global|dual|single|sim|td|lte|td-lte|uw|emea|latam|apac|usa|us|cn|jp|ca|eu|uk|india|3g|4g|5g)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   const verifiedFamilyImage =
-    normalizedResultBrand === "apple" && normalizedResultModel.includes("iphone 12 pro")
+    normalizedResultBrand === "apple" && canonicalResultModel === "iphone 12 pro"
       ? "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
       : "";
 
