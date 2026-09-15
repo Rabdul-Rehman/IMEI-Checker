@@ -1,3 +1,5 @@
+import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "./modelPhoneImageIndex";
+
 // Rich-media schema for exact physical phone models.
 // This is the single source of truth for hero, color and view galleries.
 // Media URLs can point to /public assets or durable object-storage URLs.
@@ -101,7 +103,26 @@ const PHONE_RICH_MEDIA = Object.freeze({
   }
 });
 
-export function getPhoneRichMedia(brand,model){return PHONE_RICH_MEDIA[keyFor(brand,model)]||null;}
+export function getPhoneRichMedia(brand,model){
+  const curated=PHONE_RICH_MEDIA[keyFor(brand,model)];
+  if(curated) return curated;
+
+  // Database-wide exact-model baseline. Every model already present in the
+  // generated brand+model image index gets a deterministic rich-media record.
+  // We intentionally do NOT manufacture color/view cards from one hero image:
+  // those slots are populated only when distinct exact-model assets exist.
+  const hero=getMappedPhoneImageByIdentity(brand,model);
+  if(!hero) return null;
+  const variants=getModelVariantOptionsByIdentity(brand,model)||{};
+  return {
+    hero,
+    colors: [],
+    views: [],
+    finishes: Array.isArray(variants.color_options)?variants.color_options:[],
+    mediaStatus:{hero:"catalog-exact-model",colors:"awaiting-distinct-assets",views:"awaiting-distinct-assets"},
+    source:"local exact-model catalog"
+  };
+}
 export default getPhoneRichMedia;
 
 // Optional generated batch. Kept separate so large media imports do not require
