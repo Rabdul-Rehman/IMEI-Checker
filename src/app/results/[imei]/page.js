@@ -992,7 +992,7 @@ export default function ResultsPage() {
             ) : null}
 
             {(richViewMedia.length || supplementalMedia.length) ? (
-              <>
+              <section className="imei-more-views-section">
                 <span className="imei-media-heading">More Views</span>
                 <div className="imei-media-grid imei-view-photo-grid">
                   {[...richViewMedia, ...supplementalMedia].map((item, index) => (
@@ -1002,7 +1002,7 @@ export default function ResultsPage() {
                     </div>
                   ))}
                 </div>
-              </>
+              </section>
             ) : null}
 
             {!richColorMedia.length && cleanVariantColors.length ? (
