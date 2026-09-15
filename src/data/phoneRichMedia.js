@@ -25,6 +25,56 @@ const PHONE_RICH_MEDIA = Object.freeze({
     },
     finishes: ["Graphite", "Silver", "Gold", "Pacific Blue"],
     source: "Apple"
+  },
+  "apple|iphone 13 pro": {
+    hero: null,
+    colors: [],
+    views: [],
+    finishes: ["Sierra Blue","Graphite","Gold","Silver","Alpine Green"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 13 pro max": {
+    hero: null, colors: [], views: [],
+    finishes: ["Sierra Blue","Graphite","Gold","Silver","Alpine Green"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 14": {
+    hero: null, colors: [], views: [],
+    finishes: ["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 14 plus": {
+    hero: null, colors: [], views: [],
+    finishes: ["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 14 pro": {
+    hero: null, colors: [], views: [],
+    finishes: ["Space Black","Silver","Gold","Deep Purple"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 14 pro max": {
+    hero: null, colors: [], views: [],
+    finishes: ["Space Black","Silver","Gold","Deep Purple"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 15 pro": {
+    hero: null, colors: [], views: [],
+    finishes: ["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
+  },
+  "apple|iphone 15 pro max": {
+    hero: null, colors: [], views: [],
+    finishes: ["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"],
+    mediaStatus: { hero: "awaiting-distinct-asset", colors: "awaiting-distinct-assets", views: "awaiting-distinct-assets" },
+    source: "Apple Newsroom"
   }
 });
 
