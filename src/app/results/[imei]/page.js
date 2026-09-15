@@ -7,6 +7,7 @@ import { lookupPublicImei } from "../../lib/api";
 import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
 import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "../../../data/modelPhoneImageIndex";
 import { getCuratedPhoneMedia } from "../../../data/curatedPhoneMedia";
+import { getPhoneRichMedia } from "../../../data/phoneRichMedia";
 import { isAmbiguousCanonicalPhoneModel } from "../../../data/ambiguousCanonicalPhoneModels";
 
 function parsePossibleJson(value) {
@@ -473,9 +474,11 @@ export default function ResultsPage() {
   const mediaBrand = result?.reported_brand || result?.brand_name || "";
   const mediaModel = result?.reported_model_name || result?.model_name || "";
   const mediaIsAmbiguous = isAmbiguousCanonicalPhoneModel(mediaBrand, mediaModel);
+  const richMedia = mediaIsAmbiguous ? null : getPhoneRichMedia(mediaBrand, mediaModel);
   const curatedMedia = mediaIsAmbiguous ? null : getCuratedPhoneMedia(mediaBrand, mediaModel);
 
   const imageUrl =
+    richMedia?.hero ||
     curatedMedia?.hero ||
     VERIFIED_RESULT_IMAGE_OVERRIDES[exactModelKey] ||
     identityMappedImage ||
@@ -649,6 +652,8 @@ export default function ResultsPage() {
   // color/view labels). We never borrow images from sibling models.
   const resultMedia = (() => {
     const raw = [];
+    for (const item of richMedia?.colors || []) raw.push({ src: item.src, label: item.name || "", kind: "color" });
+    for (const item of richMedia?.views || []) raw.push({ src: item.src, label: item.name || "", kind: "view" });
     for (const item of curatedMedia?.images || []) raw.push(item);
     const add = (item, label = "") => {
       if (!item) return;
