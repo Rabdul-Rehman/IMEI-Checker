@@ -438,13 +438,10 @@ export default function ResultsPage() {
     .replace(/\b(?:global|dual|single|sim|td|lte|td-lte|uw|emea|latam|apac|usa|us|cn|jp|ca|eu|uk|india|3g|4g|5g)\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  const verifiedFamilyImage =
-    normalizedResultBrand === "apple" && canonicalResultModel === "iphone 12 pro"
-      ? "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
-      : "";
-
+  // Do not override an exact catalog identity with a generic remote family
+  // image. Remote editorial assets can be composites/crops and previously
+  // caused an incorrect four-lens iPhone image on the IMEI result page.
   const imageUrl =
-    verifiedFamilyImage ||
     identityMappedImage ||
     mappedImage ||
     (result?.image_match_verified !== false ? getFirstImage(result) : "") ||
@@ -610,6 +607,71 @@ export default function ResultsPage() {
 
   const cleanVariantStorage = normalizeVariantList(variantStorage);
   const cleanVariantColors = normalizeVariantList(variantColors);
+
+  // Build a media gallery only from images that belong to this exact result.
+  // The API may return strings or objects (url/src/path/image_url + optional
+  // color/view labels). We never borrow images from sibling models.
+  const resultMedia = (() => {
+    const raw = [];
+    const add = (item, label = "") => {
+      if (!item) return;
+      if (typeof item === "string") {
+        const src = normalizeImageUrl(item);
+        if (src) raw.push({ src, label });
+        return;
+      }
+      if (typeof item === "object") {
+        const src = normalizeImageUrl(
+          item.url || item.src || item.path || item.image_url || item.image
+        );
+        if (!src) return;
+        raw.push({
+          src,
+          label:
+            item.label ||
+            item.color ||
+            item.colour ||
+            item.finish ||
+            item.view ||
+            item.type ||
+            label ||
+            "",
+        });
+      }
+    };
+
+    add(imageUrl, "Main");
+    if (Array.isArray(result?.images)) result.images.forEach((item) => add(item));
+    else add(result?.images);
+    add(result?.image);
+
+    const colorImages =
+      result?.variant_options?.color_images ||
+      result?.variant_options?.colour_images ||
+      result?.color_images ||
+      result?.colour_images ||
+      null;
+
+    if (Array.isArray(colorImages)) {
+      colorImages.forEach((item) => add(item));
+    } else if (colorImages && typeof colorImages === "object") {
+      Object.entries(colorImages).forEach(([label, item]) => add(item, label));
+    }
+
+    const viewImages = result?.view_images || result?.device_views || null;
+    if (Array.isArray(viewImages)) viewImages.forEach((item) => add(item));
+    else if (viewImages && typeof viewImages === "object") {
+      Object.entries(viewImages).forEach(([label, item]) => add(item, label));
+    }
+
+    const seen = new Set();
+    return raw.filter((item) => {
+      const key = item.src;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  })();
 
   const normalizedVariantStorage = new Set(
     variantStorage.map((v) => String(v).replace(/\s+/g, "").toUpperCase())
@@ -838,6 +900,44 @@ export default function ResultsPage() {
               <span className="imei-tac-inline">TAC: {tac}</span>
             </div>
 
+          </div>
+
+          <div className="imei-device-media">
+            {resultMedia.length > 1 ? (
+              <>
+                <span className="imei-media-heading">Device Views</span>
+                <div className="imei-media-grid">
+                  {resultMedia.map((item, index) => (
+                    <div className="imei-media-card" key={`${item.src}-${index}`}>
+                      <img src={item.src} alt={item.label ? `${model} - ${item.label}` : model} />
+                      <span>{item.label || `View ${index + 1}`}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
+            {cleanVariantColors.length ? (
+              <>
+                <span className="imei-media-heading">Available Colors</span>
+                <div className="imei-media-colors">
+                  {cleanVariantColors.map((color) => (
+                    <div className="imei-media-color" key={color}>
+                      <span
+                        className="variant-color-dot"
+                        style={{ background: getColorSwatch(color) }}
+                      />
+                      <span>{color}</span>
+                    </div>
+                  ))}
+                </div>
+                {resultMedia.length <= 1 ? (
+                  <small className="imei-media-note">
+                    Color-specific product photos are shown only when an exact image for that model/color exists in the catalog.
+                  </small>
+                ) : null}
+              </>
+            ) : null}
           </div>
 
 
