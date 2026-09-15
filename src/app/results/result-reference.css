@@ -1,0 +1,48 @@
+/* IMEI result reference redesign — isolated to /results */
+.detail-modern{--rr-bg:#050b13;--rr-panel:#0b1521;--rr-line:#203246;--rr-blue:#28a9ff;--rr-green:#19e6a2;max-width:1500px!important;margin:0 auto!important;padding:30px 38px 70px!important;background:radial-gradient(circle at 70% 0,rgba(0,122,255,.10),transparent 34%),#050b13!important;color:#eef6ff;position:relative}
+.detail-modern .detail-breadcrumb{display:none!important}
+.detail-modern:before{content:"✓   IMEI Verified     This device information was found in our database.";display:flex;align-items:center;height:62px;margin:0 0 24px;padding:0 22px;border:1px solid rgba(25,230,162,.35);border-radius:14px;background:linear-gradient(90deg,rgba(4,75,66,.72),rgba(4,38,43,.72));color:#22e6a5;font-size:16px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.detail-modern .phone-detail-main{display:grid!important;grid-template-columns:minmax(420px,.92fr) minmax(560px,1.08fr)!important;gap:30px!important;align-items:start!important;margin:0!important}
+.detail-modern .phone-detail-left,.detail-modern .phone-detail-right{width:auto!important;min-width:0!important}
+.detail-modern .detail-image{height:520px!important;width:100%!important;padding:18px!important;border:1px solid #2a3c52!important;border-radius:16px!important;background:radial-gradient(circle at 25% 20%,#26354e 0,#101b29 55%,#08111b 100%)!important;box-shadow:inset 0 0 80px rgba(54,121,206,.10);position:relative!important}
+.detail-modern .detail-image>img{width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;border-radius:10px!important}
+.detail-modern .detail-image-badge{position:absolute!important;z-index:2;top:16px!important;left:16px!important;padding:7px 13px!important;border-radius:7px!important;background:#287be0!important;color:white!important;font-size:12px!important;font-weight:800!important}
+.detail-modern .imei-valid-strip{display:none!important}
+.detail-modern .detail-copy{position:relative!important;padding:0 210px 18px 0!important;min-height:190px}
+.detail-modern .detail-copy:after{content:"✓  Valid IMEI\A This IMEI is genuine and matches device records.";white-space:pre-wrap;position:absolute;right:0;top:8px;width:180px;padding:18px;border:1px solid rgba(25,230,162,.42);border-radius:13px;background:rgba(0,70,56,.28);color:#23e7a5;font-size:12px;line-height:1.55;font-weight:700}
+.detail-modern .section-eyebrow{color:#47baff!important;letter-spacing:.13em!important;font-size:11px!important;font-weight:800!important}
+.detail-modern .detail-copy h1{font-size:34px!important;line-height:1.15!important;margin:10px 0 6px!important;text-transform:none!important;letter-spacing:-.02em!important}
+.detail-modern .detail-copy .text-secondary{font-size:18px!important;color:#a9bad0!important;margin:0 0 12px!important}
+.detail-modern .detail-meta{display:flex!important;gap:8px!important;flex-wrap:wrap!important}
+.detail-modern .detail-tag{padding:7px 13px!important;border-radius:999px!important;background:#111b36!important;border:1px solid #1e2c4c!important;color:#dce9ff!important;font-size:11px!important}
+.detail-modern .detail-actions{display:none!important}
+.detail-modern .phone-spec-tabs{border:1px solid #26394e!important;border-radius:14px!important;background:linear-gradient(145deg,#0b1521,#08111a)!important;overflow:hidden!important}
+.detail-modern .phone-spec-tab-buttons{display:flex!important;justify-content:space-around!important;border-bottom:1px solid #26394e!important;padding:0 14px!important}
+.detail-modern .phone-spec-tab-buttons button{flex:1!important;padding:16px 8px!important;background:transparent!important;border:0!important;color:#aabbd0!important;font-size:13px!important}
+.detail-modern .phone-spec-tab-buttons button.active{color:#45c4ff!important;box-shadow:inset 0 -3px #29b8f6!important}
+.detail-modern .phone-spec-tab-content{padding:18px!important;max-height:none!important;overflow:visible!important}
+.detail-modern .imei-summary-grid{border:0!important;background:transparent!important;border-radius:0!important}
+.detail-modern .imei-summary-card{min-height:128px!important;padding:18px!important;background:transparent!important;border-color:#1e3043!important}
+.detail-modern .imei-summary-icon{background:transparent!important;color:#a8c8ff!important}
+.detail-modern .imei-summary-card span:not(.imei-summary-icon){color:#9fb2ca!important}
+.detail-modern .imei-summary-card strong{font-size:15px!important;font-weight:500!important}
+.detail-modern .imei-summary-card small{color:#8294aa!important}
+.detail-modern .imei-variant-panel{margin-top:8px!important}
+.detail-modern .imei-variant-block{background:#09131e!important;border-color:#21364b!important}
+.detail-modern .imei-model-variants-box{display:none!important}
+.detail-modern .detail-summary-left{display:none!important}
+.detail-modern .imei-device-media{margin-top:22px!important}
+.detail-modern .imei-media-heading{display:block!important;margin:14px 0 10px!important;color:#fff!important;font-size:18px!important;letter-spacing:0!important;text-transform:none!important}
+.detail-modern .imei-media-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+.detail-modern .imei-media-card{background:#0c1824!important;border-color:#263b51!important;border-radius:11px!important;padding:8px!important}
+.detail-modern .imei-media-card img{height:135px!important;background:radial-gradient(circle,#26354b,#0b1520)!important;border-radius:8px!important;object-fit:contain!important}
+.detail-modern .imei-media-card>span{text-align:center!important;font-size:11px!important;padding:8px 2px 2px!important}
+.detail-modern .imei-media-colors{gap:10px!important}
+.detail-modern .imei-media-color{padding:9px 12px!important;border-radius:10px!important;background:#0c1824!important;border-color:#263b51!important}
+.detail-modern .imei-media-note{display:none!important}
+.detail-modern .detail-next-step{margin-top:34px!important;min-height:112px!important;padding:24px 30px!important;border:1px solid #17476c!important;border-radius:16px!important;background:linear-gradient(100deg,#071524,#09233c)!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+.detail-modern .detail-next-step h2{font-size:20px!important;margin:5px 0!important}
+.detail-modern .detail-next-step p{margin:0!important;color:#9db0c5!important;font-size:12px!important}
+.detail-modern .detail-next-step .primary-action{padding:15px 24px!important;border-radius:11px!important;background:linear-gradient(90deg,#159df1,#225cff)!important;color:#fff!important;text-decoration:none!important}
+@media(max-width:1050px){.detail-modern .phone-detail-main{grid-template-columns:1fr!important}.detail-modern .detail-image{height:470px!important}.detail-modern .detail-copy{padding-right:210px!important}}
+@media(max-width:700px){.detail-modern{padding:18px 14px 45px!important}.detail-modern:before{height:auto;min-height:58px;font-size:12px;padding:14px}.detail-modern .detail-image{height:360px!important}.detail-modern .detail-copy{padding:0!important}.detail-modern .detail-copy:after{position:relative;display:block;width:auto;margin:16px 0}.detail-modern .detail-copy h1{font-size:28px!important}.detail-modern .phone-spec-tab-buttons{overflow-x:auto;justify-content:flex-start!important}.detail-modern .phone-spec-tab-buttons button{min-width:105px}.detail-modern .imei-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.detail-modern .detail-next-step{align-items:flex-start!important;gap:18px;flex-direction:column!important}}
