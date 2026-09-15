@@ -498,13 +498,13 @@ export default function ResultsPage() {
     result?.model_number ||
     null;
 
+  const confidenceNumber = Number(result?.match_confidence);
   const confidence =
     result?.match_confidence !== null &&
     result?.match_confidence !== undefined &&
-    result?.match_confidence !== ""
-      ? `${Math.round(
-          Number(result.match_confidence) * 100
-        )}%`
+    result?.match_confidence !== "" &&
+    Number.isFinite(confidenceNumber)
+      ? `${Math.round(confidenceNumber <= 1 ? confidenceNumber * 100 : confidenceNumber)}%`
       : "—";
 
   const matchStatus =
@@ -934,6 +934,8 @@ export default function ResultsPage() {
               <img
                 src={imageUrl}
                 alt={model}
+                loading="eager"
+                decoding="async"
               />
             ) : (
               <i className="fas fa-mobile-screen-button device-icon-fallback" />
@@ -990,7 +992,7 @@ export default function ResultsPage() {
 
           {/* IMEI SUMMARY */}
 
-          <div className="detail-summary detail-summary-left">
+          <div className="detail-summary detail-summary-left imei-technical-details">
 
             <div>
               <span>IMEI</span>
