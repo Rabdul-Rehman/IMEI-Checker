@@ -46,3 +46,27 @@
 .detail-modern .detail-next-step .primary-action{padding:15px 24px!important;border-radius:11px!important;background:linear-gradient(90deg,#159df1,#225cff)!important;color:#fff!important;text-decoration:none!important}
 @media(max-width:1050px){.detail-modern .phone-detail-main{grid-template-columns:1fr!important}.detail-modern .detail-image{height:470px!important}.detail-modern .detail-copy{padding-right:210px!important}}
 @media(max-width:700px){.detail-modern{padding:18px 14px 45px!important}.detail-modern:before{height:auto;min-height:58px;font-size:12px;padding:14px}.detail-modern .detail-image{height:360px!important}.detail-modern .detail-copy{padding:0!important}.detail-modern .detail-copy:after{position:relative;display:block;width:auto;margin:16px 0}.detail-modern .detail-copy h1{font-size:28px!important}.detail-modern .phone-spec-tab-buttons{overflow-x:auto;justify-content:flex-start!important}.detail-modern .phone-spec-tab-buttons button{min-width:105px}.detail-modern .imei-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.detail-modern .detail-next-step{align-items:flex-start!important;gap:18px;flex-direction:column!important}}
+
+/* Reference-match pass 2: denser hero, visual color cards, more-views strip */
+.detail-modern .phone-detail-main{grid-template-columns:minmax(500px,1fr) minmax(590px,1.12fr)!important}
+.detail-modern .detail-image{height:500px!important}
+.detail-modern .imei-device-media{display:flex!important;flex-direction:column!important}
+.detail-modern .imei-media-heading{order:1!important}
+.detail-modern .imei-media-grid{order:2!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.detail-modern .imei-media-colors{order:4!important}
+.detail-modern .imei-device-media>.imei-media-heading:nth-of-type(2){order:3!important}
+.detail-modern .imei-media-card{min-height:180px!important}
+.detail-modern .imei-media-card img{height:145px!important}
+.detail-modern .imei-media-card:nth-child(n+5){min-height:135px!important}
+.detail-modern .imei-media-card:nth-child(n+5) img{height:105px!important}
+.detail-modern .phone-spec-tab-content{min-height:440px!important}
+.detail-modern .imei-summary-grid{grid-template-columns:1fr 1fr!important}
+.detail-modern .imei-summary-card{min-height:140px!important}
+.detail-modern .detail-next-step{margin-top:42px!important}
+@media(min-width:1100px){
+ .detail-modern{padding-top:26px!important}
+ .detail-modern .phone-detail-left{display:flex!important;flex-direction:column!important}
+ .detail-modern .detail-image{order:1}
+ .detail-modern .imei-device-media{order:2}
+ .detail-modern .detail-copy h1{font-size:36px!important}
+}
