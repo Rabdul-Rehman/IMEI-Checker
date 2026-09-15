@@ -1,3 +1,5 @@
+import { getGeneratedCanonicalMedia } from "./generatedCanonicalMedia";
+
 // Curated media collections for exact physical models.
 // Keep this file conservative: only add media that is known to belong to the
 // exact model. A color name is never paired with an unverified photograph.
@@ -24,7 +26,10 @@ const CURATED_PHONE_MEDIA = Object.freeze({
 });
 
 export function getCuratedPhoneMedia(brand, model) {
-  return CURATED_PHONE_MEDIA[exactKey(brand, model)] || null;
+  // Hand-curated exact-model media always wins. If it is not available,
+  // use the generated SAFE canonical hero catalog. The generated catalog
+  // intentionally contains no guessed color/view associations.
+  return CURATED_PHONE_MEDIA[exactKey(brand, model)] || getGeneratedCanonicalMedia(brand, model) || null;
 }
 
 export default getCuratedPhoneMedia;
