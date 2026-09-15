@@ -18,6 +18,11 @@ const PHONE_RICH_MEDIA = Object.freeze({
         src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg"
       }
     ],
+    mediaStatus: {
+      hero: "verified",
+      colors: "awaiting-distinct-assets",
+      views: "partial"
+    },
     finishes: ["Graphite", "Silver", "Gold", "Pacific Blue"],
     source: "Apple"
   }
