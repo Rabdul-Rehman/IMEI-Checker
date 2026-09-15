@@ -259,7 +259,17 @@ function canonicalIdentity(value) {
 }
 
 function getKnownModelVariants(brand, model) {
-  const key = `${canonicalIdentity(brand)}|${canonicalIdentity(model)}`;
+  const brandKey = canonicalIdentity(brand);
+  let modelKey = canonicalIdentity(model);
+
+  // TAC feeds often return model names prefixed with the manufacturer
+  // (for example "Apple iPhone 12 Pro"). Our variant keys intentionally
+  // store only the marketing model, so remove that duplicate prefix.
+  if (brandKey && modelKey.startsWith(brandKey + " ")) {
+    modelKey = modelKey.slice(brandKey.length + 1).trim();
+  }
+
+  const key = `${brandKey}|${modelKey}`;
   return KNOWN_MODEL_VARIANTS[key] || { storage: [], colors: [] };
 }
 
@@ -441,7 +451,25 @@ export default function ResultsPage() {
   // Do not override an exact catalog identity with a generic remote family
   // image. Remote editorial assets can be composites/crops and previously
   // caused an incorrect four-lens iPhone image on the IMEI result page.
+  const exactModelKey = (() => {
+    const brandKey = canonicalIdentity(result?.reported_brand || result?.brand_name || "");
+    let modelKey = canonicalIdentity(result?.reported_model_name || result?.model_name || "");
+    if (brandKey && modelKey.startsWith(brandKey + " ")) {
+      modelKey = modelKey.slice(brandKey.length + 1).trim();
+    }
+    return `${brandKey}|${modelKey}`;
+  })();
+
+  // Exact verified override for the iPhone 12 Pro result. The generated
+  // identity catalog currently points some 12 Pro rows at a bad four-lens
+  // composite. Never allow that asset to win on this exact model.
+  const VERIFIED_RESULT_IMAGE_OVERRIDES = {
+    "apple|iphone 12 pro":
+      "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+  };
+
   const imageUrl =
+    VERIFIED_RESULT_IMAGE_OVERRIDES[exactModelKey] ||
     identityMappedImage ||
     mappedImage ||
     (result?.image_match_verified !== false ? getFirstImage(result) : "") ||
