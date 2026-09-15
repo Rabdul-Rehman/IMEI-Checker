@@ -21,17 +21,39 @@ const PHONE_SELECT = `
 `;
 
 const VERIFIED_FAMILY_IMAGES = {
-  "apple|iphone 12 pro": "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
-  "apple|iphone 12 pro max": "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+  // Apple Support's own model-identification images. These are family-level
+  // images, so every regional/storage SKU of the same physical iPhone uses
+  // the same verified hardware photo instead of an unrelated catalog image.
+  "apple|iphone 12": "https://cdsassets.apple.com/live/7WUAS350/images/iphone/2021-iphone12-colors.png",
+  "apple|iphone 12 mini": "https://cdsassets.apple.com/live/7WUAS350/images/iphone/2021-iphone12-mini-colors.png",
+  "apple|iphone 12 pro": "https://cdsassets.apple.com/live/7WUAS350/images/iphone/iphone-12-pro/iphone12-pro-colors.jpg",
+  "apple|iphone 12 pro max": "https://cdsassets.apple.com/live/7WUAS350/images/iphone/iphone-12-pro-max/iphone12-pro-max-colors.jpg",
 };
 
 function getVerifiedFamilyImage(phone) {
   const brand = phone?.specs_json?.General?.brand?.trim()?.toLowerCase() || "";
   const model = phone?.model_name?.trim()?.toLowerCase() || "";
-  if (brand === "apple") {
-    if (model.includes("iphone 12 pro max")) return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro max"];
-    if (model.includes("iphone 12 pro") && !model.includes("iphone 12 mini")) return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro"];
+
+  if (brand !== "apple") return "";
+
+  // Order matters: match the most specific names first.
+  if (model.includes("iphone 12 pro max")) {
+    return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro max"];
   }
+
+  if (model.includes("iphone 12 pro")) {
+    return VERIFIED_FAMILY_IMAGES["apple|iphone 12 pro"];
+  }
+
+  if (model.includes("iphone 12 mini")) {
+    return VERIFIED_FAMILY_IMAGES["apple|iphone 12 mini"];
+  }
+
+  // Covers all iPhone 12 regional/storage SKUs but does not catch 12 Pro/Mini.
+  if (/\biphone\s+12\b/.test(model)) {
+    return VERIFIED_FAMILY_IMAGES["apple|iphone 12"];
+  }
+
   return "";
 }
 
