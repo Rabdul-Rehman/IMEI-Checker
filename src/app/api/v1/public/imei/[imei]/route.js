@@ -270,7 +270,7 @@ async function findModelFamily(supabase, phone, reportedModel, reportedBrand) {
   const searchTerm = tokens.slice(0, Math.min(tokens.length, 4)).join(" ");
   const { data, error } = await supabase
     .from("phones")
-    .select("phone_id,model_name,specs_json,brand_id,brands(brand_id,name)")
+    .select("phone_id,model_name,specs_json,images,brand_id,brands(brand_id,name)")
     .ilike("model_name", `%${searchTerm}%`)
     .limit(200);
 
@@ -302,6 +302,40 @@ async function findModelFamily(supabase, phone, reportedModel, reportedBrand) {
   return family;
 }
 
+function extractFamilyImages(phones) {
+  const out = [];
+  const seen = new Set();
+
+  const add = (item, fallbackLabel = "") => {
+    if (!item) return;
+    let src = "";
+    let label = fallbackLabel;
+
+    if (typeof item === "string") {
+      src = item.trim();
+    } else if (typeof item === "object") {
+      src = String(item.url || item.src || item.path || item.image_url || item.image || "").trim();
+      label = item.label || item.color || item.colour || item.finish || item.view || item.type || fallbackLabel;
+    }
+
+    if (!src || seen.has(src)) return;
+    seen.add(src);
+    out.push({ src, label: String(label || "").trim() });
+  };
+
+  for (const p of phones || []) {
+    const label = String(p?.model_name || "").trim();
+    if (Array.isArray(p?.images)) p.images.forEach((item) => add(item, label));
+    else if (p?.images && typeof p.images === "object") {
+      Object.entries(p.images).forEach(([key, item]) => add(item, key));
+    } else {
+      add(p?.images, label);
+    }
+  }
+
+  return out.slice(0, 16);
+}
+
 async function enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
   const family = await findModelFamily(
     supabase,
@@ -309,9 +343,12 @@ async function enrichPhoneResponse(supabase, phone, imei, tac, extra = {}) {
     extra.reported_model_name || phone?.model_name,
     extra.reported_brand || phone?.brands?.name
   );
+  const variants = extractVariantOptions(family);
+  variants.family_images = extractFamilyImages(family);
+
   return buildPhoneResponse(phone, imei, tac, {
     ...extra,
-    variant_options: extractVariantOptions(family),
+    variant_options: variants,
   });
 }
 
