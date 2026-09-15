@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { lookupPublicImei } from "../../lib/api";
 import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
 import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "../../../data/modelPhoneImageIndex";
+import { getCuratedPhoneMedia } from "../../../data/curatedPhoneMedia";
 
 function parsePossibleJson(value) {
   if (typeof value !== "string") {
@@ -468,7 +469,13 @@ export default function ResultsPage() {
       "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
   };
 
+  const curatedMedia = getCuratedPhoneMedia(
+    result?.reported_brand || result?.brand_name || "",
+    result?.reported_model_name || result?.model_name || ""
+  );
+
   const imageUrl =
+    curatedMedia?.hero ||
     VERIFIED_RESULT_IMAGE_OVERRIDES[exactModelKey] ||
     identityMappedImage ||
     mappedImage ||
@@ -650,6 +657,7 @@ export default function ResultsPage() {
 
   const resultMedia = (() => {
     const raw = [];
+    for (const item of curatedMedia?.images || []) raw.push(item);
     const add = (item, label = "") => {
       if (!item) return;
       if (typeof item === "string") {
