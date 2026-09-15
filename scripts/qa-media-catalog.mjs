@@ -1,0 +1,23 @@
+import fs from "node:fs";
+const root=new URL("../",import.meta.url);
+const read=(p)=>fs.readFileSync(new URL(p,root),"utf8");
+const canonical=read("src/data/canonicalPhoneImageIndex.js");
+const generated=read("src/data/generatedCanonicalMedia.js");
+const ambiguous=read("src/data/ambiguousCanonicalPhoneModels.js");
+const page=read("src/app/results/[imei]/page.js");
+const rows=(s)=>[...s.matchAll(/^\s*"([^"]+\|[^"]+)":\s*(?:"([^"]+)"|\{\s*hero:\s*"([^"]+)")/gm)].map(m=>[m[1],m[2]||m[3]]);
+const c=rows(canonical),g=rows(generated);
+const errors=[];
+if(!c.length)errors.push("canonical catalog empty");
+if(g.length<c.length)errors.push(`generated media incomplete: ${g.length}/${c.length}`);
+const gm=new Map(g);
+for(const [k,v] of c)if(gm.get(k)!==v)errors.push("catalog mismatch: "+k);
+if(/VERIFIED_MODEL_MEDIA\s*\[/.test(page))errors.push("stale VERIFIED_MODEL_MEDIA reference");
+if(!page.includes("isAmbiguousCanonicalPhoneModel"))errors.push("ambiguity guard missing");
+if(!ambiguous.includes("AMBIGUOUS_CANONICAL_MODELS"))errors.push("ambiguity catalog missing");
+const duplicateKeys=g.map(x=>x[0]).filter((x,i,a)=>a.indexOf(x)!==i);
+if(duplicateKeys.length)errors.push("duplicate generated keys: "+duplicateKeys.slice(0,5).join(", "));
+console.log(`canonical=${c.length} generated=${g.length}`);
+console.log(`ambiguity_guard=${page.includes("isAmbiguousCanonicalPhoneModel")?"ok":"missing"}`);
+if(errors.length){console.error(errors.join("\n"));process.exit(1)}
+console.log("MEDIA QA PASS");
