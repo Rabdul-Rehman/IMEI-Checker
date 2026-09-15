@@ -3,6 +3,32 @@ import {
   PHONE_IMAGE_FALLBACK,
 } from "./phoneImageMap";
 
+
+function canonicalDeviceIdentity(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:gb|tb|mb)\b/gi, " ")
+    .replace(/\ba\d{4}\b/gi, " ")
+    .replace(/\b(?:global|dual|single|sim|td|lte|td-lte|uw|emea|latam|apac|usa|us|cn|jp|ca|eu|uk|india)\b/gi, " ")
+    .replace(/\b(?:3g|4g|5g)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const VERIFIED_MODEL_IMAGE_OVERRIDES = {
+  // The generated catalog currently reuses group-1229 for both iPhone 12 Pro
+  // and iPhone 12 Pro Max. That shared asset is not safe for exact-model UI.
+  // Use Apple's official iPhone 12 Pro product artwork for the 12 Pro family.
+  "apple|iphone 12 pro": "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_announce-iphone12pro_10132020_big.jpg.large.jpg",
+};
+
+function getVerifiedModelImageOverride(phone) {
+  const brand = canonicalDeviceIdentity(phone?.brand_name ?? phone?.reported_brand ?? phone?.brand ?? "");
+  const model = canonicalDeviceIdentity(phone?.reported_model_name ?? phone?.model_name ?? phone?.model ?? "");
+  return VERIFIED_MODEL_IMAGE_OVERRIDES[brand + "|" + model] || null;
+}
+
 function normalizeImageReference(value) {
   if (!value || typeof value !== "string") return null;
 
@@ -25,6 +51,9 @@ export function resolvePhoneImage(phone) {
   if (!phone) {
     return PHONE_IMAGE_FALLBACK;
   }
+
+  const verifiedOverride = getVerifiedModelImageOverride(phone);
+  if (verifiedOverride) return verifiedOverride;
 
   /*
    * First priority:
