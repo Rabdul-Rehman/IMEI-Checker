@@ -27,21 +27,20 @@ for (const [index, item] of data.entries()) {
   }
 
   sql.push(`INSERT INTO devices (brand,model,marketing_name,model_number,release_year,device_type,display_size,display_type,processor,ram,battery,main_camera,os,dimensions,weight,sim,network,source,source_url,verified_at) VALUES (${esc(item.brand)},${esc(item.model)},${nullable(item.marketingName)},${nullable(item.modelNumber)},${item.releaseYear ? Number(item.releaseYear) : "NULL"},${esc(item.deviceType || "smartphone")},${nullable(item.displaySize)},${nullable(item.displayType)},${nullable(item.processor)},${nullable(item.ram)},${nullable(item.battery)},${nullable(item.mainCamera)},${nullable(item.os)},${nullable(item.dimensions)},${nullable(item.weight)},${nullable(item.sim)},${nullable(item.network)},${nullable(item.source)},${nullable(item.sourceUrl)},${nullable(item.verifiedAt)});`);
-  sql.push("SELECT last_insert_rowid() AS device_id;");
-  sql.push("-- The following rows target the device inserted immediately above.");
+  const deviceId = "(SELECT id FROM devices ORDER BY id DESC LIMIT 1)";
 
-  for (const tac of tacs) sql.push(`INSERT INTO tac_allocations (tac,device_id,allocation_source,confidence) VALUES (${esc(tac)},last_insert_rowid(),${nullable(item.tacSource || item.sourceUrl)},${esc(item.tacConfidence || "verified")});`);
-  for (const [i, value] of (item.storageOptions || []).entries()) sql.push(`INSERT INTO device_storage_options (device_id,value,sort_order) VALUES (last_insert_rowid(),${esc(value)},${i});`);
+  for (const tac of tacs) sql.push(`INSERT INTO tac_allocations (tac,device_id,allocation_source,confidence) VALUES (${esc(tac)},${deviceId},${nullable(item.tacSource || item.sourceUrl)},${esc(item.tacConfidence || "verified")});`);
+  for (const [i, value] of (item.storageOptions || []).entries()) sql.push(`INSERT INTO device_storage_options (device_id,value,sort_order) VALUES (${deviceId},${esc(value)},${i});`);
   for (const [i, c] of (item.colors || []).entries()) {
     if (!c?.name) throw new Error(`Row ${index}: color name required`);
-    sql.push(`INSERT INTO device_colors (device_id,name,image_url,hex_value,sort_order,verified,source_url) VALUES (last_insert_rowid(),${esc(c.name)},${nullable(c.imageUrl)},${nullable(c.hex)},${i},${c.verified ? 1 : 0},${nullable(c.sourceUrl)});`);
+    sql.push(`INSERT INTO device_colors (device_id,name,image_url,hex_value,sort_order,verified,source_url) VALUES (${deviceId},${esc(c.name)},${nullable(c.imageUrl)},${nullable(c.hex)},${i},${c.verified ? 1 : 0},${nullable(c.sourceUrl)});`);
   }
   for (const [i, m] of (item.media || []).entries()) {
     if (!m?.kind || !m?.label || !m?.imageUrl) throw new Error(`Row ${index}: media kind, label and imageUrl required`);
-    sql.push(`INSERT INTO device_media (device_id,kind,label,image_url,sort_order,verified,source_url) VALUES (last_insert_rowid(),${esc(m.kind)},${esc(m.label)},${esc(m.imageUrl)},${i},${m.verified ? 1 : 0},${nullable(m.sourceUrl)});`);
+    sql.push(`INSERT INTO device_media (device_id,kind,label,image_url,sort_order,verified,source_url) VALUES (${deviceId},${esc(m.kind)},${esc(m.label)},${esc(m.imageUrl)},${i},${m.verified ? 1 : 0},${nullable(m.sourceUrl)});`);
   }
   for (const [category, entries] of Object.entries(item.specs || {})) {
-    for (const [i, [key, value]] of Object.entries(entries).entries()) sql.push(`INSERT INTO device_specs (device_id,category,spec_key,spec_value,sort_order) VALUES (last_insert_rowid(),${esc(category)},${esc(key)},${esc(value)},${i});`);
+    for (const [i, [key, value]] of Object.entries(entries).entries()) sql.push(`INSERT INTO device_specs (device_id,category,spec_key,spec_value,sort_order) VALUES (${deviceId},${esc(category)},${esc(key)},${esc(value)},${i});`);
   }
 }
 
