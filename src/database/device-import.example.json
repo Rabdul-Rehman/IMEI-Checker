@@ -1,0 +1,30 @@
+[
+  {
+    "brand": "Apple",
+    "model": "Apple iPhone 12 Pro",
+    "slug": "apple-iphone-12-pro",
+    "modelNumber": "A2341",
+    "releaseYear": 2020,
+    "deviceType": "smartphone",
+    "region": null,
+    "source": "curated",
+    "tacSource": "REPLACE_WITH_AUTHORIZED_TAC_SOURCE",
+    "tacs": [],
+    "specs": {
+      "General": {
+        "model_number": "A2341",
+        "year": "2020"
+      },
+      "Display": {
+        "size": "6.06 in"
+      },
+      "Memory": {
+        "storage_options": ["128GB", "256GB", "512GB"]
+      },
+      "Design": {
+        "colors": ["Graphite", "Silver", "Gold", "Pacific Blue"]
+      }
+    },
+    "images": []
+  }
+]
