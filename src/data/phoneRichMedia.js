@@ -7,15 +7,15 @@ function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(
 
 const PHONE_RICH_MEDIA = Object.freeze({
   "apple|iphone 12 pro": {
-    hero: "https://ardes.bg/uploads/original/apple-iphone-12-pro-295645.jpg",
+    hero: "https://static-01.daraz.pk/p/f229cd3c48bf44292569c59eb3a75fb0.png",
     colors: [
-      { name: "Graphite", src: "https://ardes.bg/uploads/original/apple-iphone-12-pro-295645.jpg" },
+      { name: "Graphite", src: "https://static-01.daraz.pk/p/f229cd3c48bf44292569c59eb3a75fb0.png" },
       { name: "Silver", src: "https://need-a-phone.ca/cdn/shop/files/iPhone_12_Pro_Silver.png?v=1759923815&width=1946" },
       { name: "Gold", src: "https://plintech.com/images/detailed/9/Apple_IPhone_12_Pro_gold.jpg" },
       { name: "Pacific Blue", src: "https://store.gorecell.ca/cdn/shop/files/a26eb554b9714af08a4512011c15da25.jpg?v=1726258941" }
     ],
     views: [
-      { name: "Front + Back", src: "https://ardes.bg/uploads/original/apple-iphone-12-pro-295645.jpg" },
+      { name: "Front + Back", src: "https://static-01.daraz.pk/p/f229cd3c48bf44292569c59eb3a75fb0.png" },
       { name: "Left / Right / Top / Bottom", src: "https://cs-phone.de/cdn/shop/files/iPhone12Pro-09Rahmenalle.jpg?v=1709566230&width=1946" },
       { name: "Camera Close-up", src: "https://www.apple.com/newsroom/images/product/iphone/standard/Apple_iphone12pro-back-camera_10132020_big.jpg.large.jpg" },
       { name: "In the Box", src: "https://mxp-media.ilnmedia.com/media/content/2021/Sep/Every-Smartphone-In-The-Future-Might-Come-Without-A-Charger-In-The-Box-By-2024-2_614c6b83b5491.jpeg?cc=1&h=465&w=780" }
