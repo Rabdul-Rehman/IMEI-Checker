@@ -1,1 +1,150 @@
-PLACEHOLDER
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { lookupPublicImei } from "../../lib/api";
+import { getMappedPhoneImage, PHONE_IMAGE_FALLBACK } from "../../lib/phoneImageMap";
+import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "../../../data/modelPhoneImageIndex";
+import { getCuratedPhoneMedia } from "../../../data/curatedPhoneMedia";
+import { getPhoneRichMedia } from "../../../data/phoneRichMedia";
+import { isAmbiguousCanonicalPhoneModel } from "../../../data/ambiguousCanonicalPhoneModels";
+
+const normalize = (v) => String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+const display = (v) => v === null || v === undefined || v === "" ? "—" : String(v);
+
+function parseJson(v) {
+  if (typeof v !== "string") return v;
+  try { return JSON.parse(v); } catch { return v; }
+}
+
+function category(specs, names) {
+  for (const name of names) if (specs?.[name]) return specs[name];
+  return {};
+}
+
+function entries(specs, names) {
+  const value = category(specs, names);
+  return value && typeof value === "object" && !Array.isArray(value) ? Object.entries(value) : [];
+}
+
+function pick(specs, paths) {
+  for (const [section, key] of paths) {
+    const value = specs?.[section]?.[key];
+    if (value !== null && value !== undefined && value !== "") return value;
+  }
+  return null;
+}
+
+function imageUrl(v) {
+  if (typeof v !== "string") return "";
+  const s = v.trim();
+  return /^(https?:\/\/|\/)/.test(s) ? s : "";
+}
+
+function colorSwatch(name) {
+  const map = { graphite:"#4c4d4f", silver:"#dfe2e5", gold:"#e6c58b", "pacific blue":"#3e6f91", black:"#181818", white:"#f5f5f3", blue:"#2c6ea7", red:"#b73131", green:"#527760", purple:"#7566a8", pink:"#d79aaa", obsidian:"#28282a", snow:"#f3f1ed", lemongrass:"#d7df9f" };
+  return map[String(name || "").toLowerCase()] || "#60758c";
+}
+
+function VariantChips({ values, colors = false }) {
+  if (!values?.length) return <span className="variant-empty">Not available</span>;
+  return <div className={colors ? "variant-color-list" : "variant-chip-list"}>{values.map((v) => colors ? <span className="variant-color-item" key={v}><span className="variant-color-dot" style={{background:colorSwatch(v)}}/><span>{v}</span></span> : <span className="variant-chip" key={v}>{v}</span>)}</div>;
+}
+
+function SpecGroup({ title, values }) {
+  if (!values?.length) return null;
+  return <div className="phone-spec-group"><h3 className="phone-spec-group-title">{title}</h3><div className="spec-grid-modern">{values.map(([k,v]) => <div className="spec-modern-card" key={k}><div className="spec-modern-label">{String(k).replace(/_/g," ")}</div><div className="spec-modern-value">{typeof v === "object" ? JSON.stringify(v) : display(v)}</div></div>)}</div></div>;
+}
+
+function SafeMediaImage({ src, alt, className }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) return <div className={`device-icon-fallback ${className || ""}`} aria-label={`${alt} unavailable`}><i className="fas fa-mobile-screen-button" /></div>;
+  return <img className={className} src={src} alt={alt} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+}
+
+export default function ResultsPage() {
+  const params = useParams();
+  const imei = String(params?.imei || "");
+  const valid = /^\d{15}$/.test(imei);
+  const [loading,setLoading] = useState(valid);
+  const [error,setError] = useState("");
+  const [result,setResult] = useState(null);
+  const [activeTab,setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    if (!valid) { setLoading(false); return; }
+    let cancelled=false;
+    (async()=>{try{setLoading(true);setError("");const r=await lookupPublicImei(imei);if(!cancelled)setResult(r?.data||null);}catch(e){if(!cancelled)setError(e?.message||"Failed to load IMEI information.");}finally{if(!cancelled)setLoading(false);}})();
+    return()=>{cancelled=true;};
+  },[imei,valid]);
+
+  const specs = useMemo(()=>{const v=parseJson(result?.specs_json);return v&&typeof v==="object"?v:{};},[result]);
+  const brand=result?.brand_name||result?.reported_brand||"Unknown";
+  const model=result?.reported_model_name||result?.model_name||"Unknown device";
+  const modelNumber=result?.reported_model_number||result?.model_number||null;
+  const tac=result?.tac||imei.slice(0,8);
+  const checkDigit=imei.slice(14);
+  const confidenceNumber=Number(result?.match_confidence);
+  const confidence=Number.isFinite(confidenceNumber)?`${Math.round(confidenceNumber<=1?confidenceNumber*100:confidenceNumber)}%`:"—";
+  const matchStatus=result?.match_status||"Matched";
+
+  const ambiguous=isAmbiguousCanonicalPhoneModel(brand,model);
+  const rich=ambiguous?null:getPhoneRichMedia(brand,model);
+  const curated=ambiguous?null:getCuratedPhoneMedia(brand,model);
+  const identity=getMappedPhoneImageByIdentity(brand,model,modelNumber||"");
+  const mappedCandidate=result?.phone_id&&result?.image_match_verified!==false?getMappedPhoneImage(result.phone_id):"";
+  const mapped=mappedCandidate&&mappedCandidate!==PHONE_IMAGE_FALLBACK?mappedCandidate:"";
+  const firstApiImage=Array.isArray(result?.images)?imageUrl(result.images.find(x=>typeof x==="string")||""):imageUrl(result?.image||"");
+  const hero=rich?.hero||curated?.hero||identity||mapped||firstApiImage||"";
+
+  const indexed=getModelVariantOptionsByIdentity(brand,model)||{};
+  const storage=[...new Set([...(result?.variant_options?.storage_options||[]),...(indexed.storage_options||[])].map(String).filter(Boolean))];
+  const colors=[...new Set([...(result?.variant_options?.color_options||[]),...(indexed.color_options||[]),...(rich?.finishes||[])].map(String).filter(Boolean))];
+
+  // Strict rule: galleries only use explicitly semantic rich-media records.
+  // Generic API/family images are never relabelled as colors or device angles.
+  const colorMedia=(rich?.colors||[]).filter(x=>x?.name&&imageUrl(x?.src));
+  const viewMedia=(rich?.views||[]).filter(x=>x?.name&&imageUrl(x?.src));
+
+  const displaySize=pick(specs,[["Display","display_size_inches"],["Display","screen_size_inches"],["Display","size_inches"],["Display","size"]]);
+  const displayType=pick(specs,[["Display","display_type"],["Display","type"]]);
+  const chipset=pick(specs,[["Platform","chipset"],["Platform","processor"],["Platform","cpu"]]);
+  const battery=pick(specs,[["Battery","battery_capacity_mah"],["Battery","capacity"]]);
+  const camera=pick(specs,[["Camera (Main)","main_camera"],["Camera (Main)","rear_camera_specs"],["Camera","main"]]);
+
+  if(!valid) return <div className="not-found-page"><div className="not-found-card"><div className="not-found-status"><span className="not-found-dot"/>INVALID IMEI</div><h1 className="not-found-title">Invalid IMEI number</h1><p className="not-found-text">Please enter a valid 15-digit IMEI number.</p><Link href="/" className="primary-action">Back to IMEI Check</Link></div></div>;
+  if(loading) return <div className="loading-page"><div className="loading-ring"><span/><span/><span/><span/></div><div className="loading-text">Looking up IMEI information...</div></div>;
+  if(error||!result) return <div className="not-found-page"><div className="not-found-card"><div className="not-found-status"><span className="not-found-dot"/>LOOKUP FAILED</div><h1 className="not-found-title">Device information not found</h1><p className="not-found-text">{error||"No device information was found for this IMEI."}</p><Link href="/" className="primary-action">Check another IMEI</Link></div></div>;
+
+  const groups={
+    hardware:[["Display",entries(specs,["Display"])],["Platform",entries(specs,["Platform"])],["Memory",entries(specs,["Memory"])],["Battery",entries(specs,["Battery"])],["Body & Design",entries(specs,["Body / Design","Body"])],["Sensors & Features",entries(specs,["Sensors & Features","Sensors"])],["Sound",entries(specs,["Sound","Audio"])]],
+    camera:[["Main Camera",entries(specs,["Camera (Main)","Camera"])],["Front Camera",entries(specs,["Camera (Front)"])]],
+    connectivity:[["Connectivity & Communications",entries(specs,["Connectivity / Communications","Connectivity"])]]
+  };
+  const allGroups=[...groups.hardware,...groups.camera,...groups.connectivity,["Miscellaneous",entries(specs,["Miscellaneous"])]];
+
+  return <div className="detail-modern">
+    <div className="detail-breadcrumb"><Link href="/">IMEI Check</Link><span>/</span><span>Result</span></div>
+    <div className="phone-detail-main">
+      <div className="phone-detail-left">
+        <div className="detail-image"><span className="detail-image-badge">IMEI RESULT</span>{hero?<SafeMediaImage src={hero} alt={model}/>:<i className="fas fa-mobile-screen-button device-icon-fallback"/>}<div className="imei-valid-strip"><span className="imei-valid-pill"><i className="fas fa-circle-check"/> Valid IMEI</span><span className="imei-tac-inline">TAC: {tac}</span></div></div>
+        <div className="imei-device-media">
+          <span className="imei-media-heading">Available Colors</span>
+          {colorMedia.length?<div className="imei-media-grid imei-color-photo-grid">{colorMedia.map((item,i)=><div className="imei-media-card" key={`${item.name}-${i}`}><SafeMediaImage src={item.src} alt={`${model} - ${item.name}`}/><span>{item.name}</span></div>)}</div>:<div className="imei-media-colors">{colors.map(c=><div className="imei-media-color" key={c}><span className="variant-color-dot" style={{background:colorSwatch(c)}}/><span>{c}</span></div>)}</div>}
+          {viewMedia.length?<section className="imei-more-views-section"><span className="imei-media-heading">More Views</span><div className="imei-media-grid imei-view-photo-grid">{viewMedia.map((item,i)=><div className="imei-media-card" key={`${item.name}-${i}`}><SafeMediaImage src={item.src} alt={`${model} - ${item.name}`}/><span>{item.name}</span></div>)}</div></section>:null}
+          {!colorMedia.length&&colors.length?<small className="imei-media-note">Color photos appear only when an exact-model asset is explicitly mapped.</small>:null}
+        </div>
+        <div className="detail-summary detail-summary-left imei-technical-details"><div><span>IMEI</span><strong>{imei}</strong></div><div><span>TAC</span><strong>{tac}</strong></div><div><span>Check Digit</span><strong>{checkDigit}</strong></div><div><span>Brand</span><strong>{display(brand)}</strong></div><div><span>Year</span><strong>{display(result.reported_year)}</strong></div><div><span>Confidence</span><strong>{confidence}</strong></div></div>
+      </div>
+      <div className="phone-detail-right">
+        <div className="detail-copy"><span className="section-eyebrow">LIVE IMEI LOOKUP</span><h1>{display(model)}</h1><p className="text-secondary">{display(brand)}{modelNumber?` · ${modelNumber}`:""}</p><div className="detail-meta"><span className="detail-tag">{display(matchStatus)}</span><span className="detail-tag">Confidence {confidence}</span>{result.reported_year?<span className="detail-tag">{result.reported_year}</span>:null}</div><div className="detail-actions"><Link href="/" className="primary-action"><i className="fas fa-search"/> Check another IMEI</Link><Link href="/phones" className="outline-action">Phone Database <i className="fas fa-arrow-right"/></Link><Link href="/imei-generator" className="outline-action">IMEI Generator <i className="fas fa-arrow-right"/></Link></div></div>
+        <div className="phone-spec-tabs"><div className="phone-spec-tab-buttons">{[["overview","OVERVIEW"],["hardware","HARDWARE"],["camera","CAMERA"],["connectivity","CONNECTIVITY"],["all","ALL SPECS"]].map(([id,label])=><button type="button" key={id} className={activeTab===id?"active":""} onClick={()=>setActiveTab(id)}>{label}</button>)}</div><div className="phone-spec-tab-content">
+          {activeTab==="overview"?<div className="imei-overview-dashboard"><div className="imei-summary-grid"><div className="imei-summary-card"><span className="imei-summary-icon"><i className="fas fa-mobile-screen"/></span><div><span>Display</span><strong>{displaySize?`${displaySize}\"`:"—"}</strong><small>{displayType||"Display specification"}</small></div></div><div className="imei-summary-card"><span className="imei-summary-icon"><i className="fas fa-camera"/></span><div><span>Camera</span><strong>{camera?display(camera):"—"}</strong><small>Main camera system</small></div></div><div className="imei-summary-card"><span className="imei-summary-icon"><i className="fas fa-microchip"/></span><div><span>Processor</span><strong>{chipset||"—"}</strong><small>Platform specification</small></div></div><div className="imei-summary-card"><span className="imei-summary-icon"><i className="fas fa-battery-three-quarters"/></span><div><span>Battery</span><strong>{battery?`${battery} mAh`:"—"}</strong><small>Model battery specification</small></div></div></div><div className="imei-variant-panel"><div className="imei-variant-block"><span className="imei-variant-label"><i className="fas fa-hard-drive"/> Storage Options</span><VariantChips values={storage}/></div><div className="imei-variant-block"><span className="imei-variant-label"><i className="fas fa-palette"/> Available Colors</span><VariantChips values={colors} colors/></div></div></div>:null}
+          {activeTab!=="overview"?(activeTab==="all"?allGroups:groups[activeTab]||[]).map(([title,vals])=><SpecGroup key={title} title={title} values={vals}/>):null}
+        </div></div>
+      </div>
+    </div>
+    <div className="detail-next-step"><div><span className="section-eyebrow">NEXT STEP</span><h2>Need to check another device?</h2><p>Enter another 15-digit IMEI and get the latest device information from the database.</p></div><Link href="/" className="primary-action">Check another IMEI <i className="fas fa-arrow-right"/></Link></div>
+  </div>;
+}
