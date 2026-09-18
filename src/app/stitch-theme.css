@@ -82,3 +82,32 @@ body>header.st-site-header{display:block!important}
   .home-page .final-cta{max-width:1240px!important;min-height:230px!important;padding:54px 58px!important}.home-page .final-cta h2{font-size:31px!important}
   .st-footer{padding-top:64px!important}.st-footer-grid{max-width:1440px!important}.st-footer a,.st-footer p{font-size:12.5px!important}
 }
+
+/* Reference-fidelity desktop pass */
+@media(min-width:901px){
+  .home-page .hero-modern{min-height:590px!important}
+  .home-page .hero-inner{max-width:1400px!important}
+  .home-page .hero-copy h1{font-size:58px!important;max-width:690px!important}
+  .home-page .content-section,.st-extra-section{padding-top:82px!important;padding-bottom:82px!important}
+  .home-page .section-heading h2,.st-section-head h2,.st-split-head h2{font-size:34px!important}
+  .home-page .steps-grid{max-width:1400px!important}.home-page .modern-step-card{min-height:260px!important;padding:26px!important}
+  .home-page .services-grid,.st-service-grid{max-width:1400px!important}.home-page .service-modern-card,.st-service{min-height:230px!important;padding:25px!important}
+  .home-page .devices-section,.home-page .info-band{display:none!important}
+  .home-page .news-section{background:#f6f8fc!important;padding-top:80px!important;padding-bottom:80px!important}
+  .home-page .news-grid-modern{max-width:1400px!important}.home-page .news-modern-card{min-height:330px!important;padding-top:155px!important;position:relative!important;overflow:hidden!important}
+  .home-page .news-modern-card:before{content:"";position:absolute;left:0;right:0;top:0;height:135px;background:linear-gradient(135deg,#eef2ff,#dbeafe)}
+  .home-page .news-modern-card:nth-child(3):before{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}
+  .st-extra-section .st-preview,.st-extra-section .st-service-grid,.st-extra-section .st-alert{max-width:1400px!important}
+  .st-preview-grid{grid-template-columns:repeat(3,1fr)!important}
+  .st-warning-wrap{padding-top:88px!important;padding-bottom:88px!important}
+  .st-alert{min-height:420px!important;padding:58px!important}
+  .st-alert h2{font-size:42px!important;max-width:650px!important}
+  .st-faq{max-width:980px!important}
+  .home-page .final-cta{max-width:1180px!important;min-height:270px!important;margin:72px auto!important;text-align:center!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
+  .home-page .final-cta>div{width:100%!important}.home-page .final-cta h2{font-size:32px!important}
+}
+/* Put the Stitch composition in the same visual order as the supplied reference */
+.home-page{display:flex;flex-direction:column}
+.home-page .hero-modern{order:1}.home-page .stats-strip{order:2}.home-page .steps-section{order:3}.home-page .service-section{order:4}
+.home-page .devices-section{order:5}.home-page .info-band{order:6}.home-page .news-section{order:9}
+.home-page .st-extra-section:nth-last-of-type(4){order:7}.home-page .st-extra-section:nth-last-of-type(3){order:5}.home-page .st-warning-wrap{order:8}.home-page .st-extra-section:nth-last-of-type(1){order:10}.home-page .final-cta{order:11}
