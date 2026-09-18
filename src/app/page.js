@@ -228,7 +228,7 @@ export default function Home() {
         <div className="device-grid-modern">
           {popularDevices.map((device) => (
             <Link href={`/phones/${device.slug}`} key={device.slug} className="device-modern-card">
-              <div className="device-modern-photo"><DevicePhoto src={device.image} alt={device.name} /></div>
+              <div className={`device-modern-photo device-photo-${device.slug}`}><DevicePhoto src={device.image} alt={device.name} /></div>
               <span className="device-modern-brand">{device.brand}</span>
               <h3>{device.name}</h3>
               <p>{device.specs}</p>
