@@ -182,3 +182,9 @@ body>header.st-site-header{display:block!important}
 .st-footer .st-logo>span:last-child{font-weight:800!important;color:#0a1020!important}
 .home-page .stats-grid strong{font-weight:800!important;color:#080f1f!important}
 .home-page .stats-grid>div>span{color:#475467!important;font-weight:700!important}
+
+/* Counter accent — same indigo as “Know Exactly” */
+.home-page .stats-grid strong,
+.home-page .stats-grid strong span{
+  color:#4f46e5!important;
+}
