@@ -12,3 +12,41 @@ html{scroll-behavior:smooth}body{background:#fff;color:var(--st-text)}.st-site-h
 .st-danger-label{display:inline-block;color:#f87171;background:rgba(239,68,68,.08);border-radius:5px;padding:7px 9px;font:800 9px/1 monospace;letter-spacing:.04em}.st-alert-actions{display:flex;align-items:center;gap:18px;margin-top:22px}.st-alert-actions a{font-size:10px;color:#cbd5e1;text-decoration:none}.st-alert-actions .st-btn{color:#fff}.st-btn-danger{background:#ef4444!important}.st-faq-section{background:#fff}.st-faq summary{display:flex;justify-content:space-between;align-items:center}.st-faq summary::marker{content:""}.st-faq summary i{font-size:9px;color:#98a2b3}
 .st-home .st-section:nth-of-type(4){background:#f7f9fc}.st-home .st-section:nth-of-type(5){background:#fff}.st-home .st-section:nth-of-type(6){background:#f7f9fc}
 @media(max-width:640px){.st-trustline .st-container{overflow:auto;justify-content:flex-start}.st-alert-actions{align-items:flex-start;flex-direction:column}}
+
+/* Stable-baseline Stitch conversion: CSS-only homepage transformation */
+.home-page{background:#fff!important;color:#101828!important}
+.home-page .content-section{max-width:none!important;margin:0!important;padding:78px max(28px,calc((100vw - 1344px)/2))!important;background:#fff!important;color:#101828!important}
+.home-page .content-section:nth-of-type(even){background:#f6f8fc!important}
+.home-page .service-section,.home-page .devices-section,.home-page .info-band,.home-page .news-section{border:0!important}
+.home-page .section-heading{max-width:760px;margin:0 auto 38px!important;text-align:center}
+.home-page .split-heading{max-width:none!important;text-align:left!important;display:flex!important;align-items:end!important;justify-content:space-between!important}
+.home-page .section-eyebrow{color:#4f46e5!important;font-size:9px!important;letter-spacing:.15em!important;font-weight:800!important}
+.home-page .section-heading h2,.home-page .info-band h2{color:#101828!important;font-size:34px!important;letter-spacing:-.04em!important;font-weight:800!important}
+.home-page .section-heading p,.home-page .info-band p{color:#667085!important}
+.home-page .steps-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:18px!important;max-width:1344px;margin:auto}
+.home-page .modern-step-card{background:#fff!important;border:1px solid #dfe5ef!important;color:#101828!important;border-radius:10px!important;box-shadow:0 4px 16px rgba(16,24,40,.04)!important;padding:24px!important}
+.home-page .modern-step-card h3{color:#101828!important}.home-page .modern-step-card p{color:#667085!important}.home-page .step-icon{background:#eef2ff!important;color:#4f46e5!important}
+.home-page .services-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:16px!important;max-width:1344px;margin:auto}
+.home-page .service-modern-card{background:#fff!important;border:1px solid #dfe5ef!important;color:#101828!important;border-radius:10px!important;box-shadow:0 4px 16px rgba(16,24,40,.04)!important;min-height:170px!important}
+.home-page .service-modern-card h3{color:#101828!important}.home-page .service-modern-card p{color:#667085!important}.home-page .service-modern-card span{color:#4f46e5!important}
+.home-page .devices-section{background:#f6f8fc!important}
+.home-page .device-grid-modern{max-width:1344px;margin:auto;gap:16px!important}
+.home-page .device-modern-card{background:#fff!important;border:1px solid #dfe5ef!important;color:#101828!important;box-shadow:0 4px 16px rgba(16,24,40,.04)!important}
+.home-page .device-modern-card h3{color:#101828!important}.home-page .device-modern-card p{color:#667085!important}.home-page .device-modern-photo{background:#f8fafc!important}
+.home-page .info-band{max-width:none!important;display:grid!important;grid-template-columns:1.15fr .85fr!important;gap:55px!important;align-items:center!important;background:#fff!important}
+.home-page .imei-breakdown{gap:12px!important}.home-page .imei-breakdown>div{background:#f8fafc!important;border:1px solid #e5e9f2!important;color:#101828!important}.home-page .imei-breakdown span{color:#4f46e5!important}
+.home-page .news-section{background:#f6f8fc!important}.home-page .news-grid-modern{max-width:1344px;margin:auto;gap:18px!important}
+.home-page .news-modern-card{background:#fff!important;border:1px solid #dfe5ef!important;color:#101828!important;box-shadow:0 4px 16px rgba(16,24,40,.04)!important}.home-page .news-modern-card h3{color:#101828!important}.home-page .news-modern-card p{color:#667085!important}
+.home-page .final-cta{max-width:1180px!important;margin:76px auto!important;border:1px solid #1d2a43!important;border-radius:12px!important;background:radial-gradient(circle at 50% 0,#16254b,#09111f 65%)!important;color:#fff!important;padding:42px 48px!important}
+.home-page .final-cta h2{color:#fff!important}.home-page .final-cta p{color:#a8b2c5!important}
+.home-page .stats-strip{background:#fff!important;border-bottom:1px solid #e5e9f2!important}.home-page .stats-grid>div{border-color:#e5e9f2!important}.home-page .stats-grid strong{color:#101828!important}.home-page .stats-grid span{color:#667085!important}
+.home-page .hero-modern{background:linear-gradient(180deg,#fff,#fbfcff)!important}
+.home-page .hero-copy h1{color:#101828!important}.home-page .hero-copy h1 strong{color:#4f46e5!important}.home-page .hero-lead{color:#667085!important}
+.home-page .imei-check-card{background:#fff!important;border-color:#dfe5ef!important;box-shadow:0 10px 35px rgba(16,24,40,.08)!important}
+.home-page .primary-action{background:linear-gradient(135deg,#4f46e5,#6366f1)!important}
+.home-page .hero-trust{color:#667085!important}
+.home-page .outline-action{border-color:#dfe5ef!important;color:#344054!important;background:#fff!important}
+body>header.st-site-header{display:block!important}
+.home-page header,.home-page nav,.home-page .st-site-header,.home-page .st-nav{position:static}
+@media(max-width:900px){.home-page .steps-grid,.home-page .services-grid{grid-template-columns:1fr 1fr!important}.home-page .info-band{grid-template-columns:1fr!important}.home-page .content-section{padding:58px 20px!important}}
+@media(max-width:640px){.home-page .steps-grid,.home-page .services-grid{grid-template-columns:1fr!important}.home-page .split-heading{display:block!important}.home-page .final-cta{margin:45px 16px!important;padding:30px 22px!important}}
