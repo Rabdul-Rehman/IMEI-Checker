@@ -82,3 +82,13 @@ body>header.st-site-header{display:block!important}
   .home-page .final-cta{max-width:1240px!important;min-height:230px!important;padding:54px 58px!important}.home-page .final-cta h2{font-size:31px!important}
   .st-footer{padding-top:64px!important}.st-footer-grid{max-width:1440px!important}.st-footer a,.st-footer p{font-size:12.5px!important}
 }
+
+/* Large animated metrics strip */
+.home-page .stats-strip{padding:0!important;background:#fff!important;border-top:1px solid #e5e9f2!important;border-bottom:1px solid #e5e9f2!important}
+.home-page .stats-grid{max-width:1440px!important;min-height:180px!important;margin:auto!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;align-items:center!important;padding:20px 28px!important}
+.home-page .stats-grid>div{min-height:100px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;border-right:1px solid #dfe5ef!important}
+.home-page .stats-grid>div:last-child{border-right:0!important}
+.home-page .stats-grid strong{font-size:42px!important;line-height:1!important;font-weight:800!important;letter-spacing:-.04em!important;color:#101828!important;font-variant-numeric:tabular-nums}
+.home-page .stats-grid strong span{font-size:inherit!important;color:inherit!important}
+.home-page .stats-grid>div>span{margin-top:14px!important;font-size:12px!important;font-weight:700!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:#667085!important}
+@media(max-width:700px){.home-page .stats-grid{grid-template-columns:1fr 1fr!important;min-height:auto!important;padding:14px!important}.home-page .stats-grid>div{min-height:105px!important}.home-page .stats-grid>div:nth-child(2){border-right:0!important}.home-page .stats-grid strong{font-size:28px!important}.home-page .stats-grid>div>span{font-size:9px!important}}
