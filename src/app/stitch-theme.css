@@ -92,3 +92,16 @@ body>header.st-site-header{display:block!important}
 .home-page .stats-grid strong span{font-size:inherit!important;color:inherit!important}
 .home-page .stats-grid>div>span{margin-top:14px!important;font-size:12px!important;font-weight:700!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:#667085!important}
 @media(max-width:700px){.home-page .stats-grid{grid-template-columns:1fr 1fr!important;min-height:auto!important;padding:14px!important}.home-page .stats-grid>div{min-height:105px!important}.home-page .stats-grid>div:nth-child(2){border-right:0!important}.home-page .stats-grid strong{font-size:28px!important}.home-page .stats-grid>div>span{font-size:9px!important}}
+
+/* Reference palette + balanced counter scale */
+:root{--ref-page:#f5f7fb;--ref-soft:#f1f4f9;--ref-card:#ffffff;--ref-line:#dfe5ef;--ref-ink:#101828;--ref-muted:#667085}
+.home-page{background:var(--ref-page)!important}
+.home-page .hero-modern{background:#fff!important}
+.home-page .content-section,.st-extra-section{background:#fff!important}
+.home-page .content-section:nth-of-type(even),.home-page .service-section,.home-page .devices-section,.home-page .news-section,.st-extra-soft,.st-warning-wrap{background:var(--ref-soft)!important}
+.home-page .modern-step-card,.home-page .service-modern-card,.home-page .device-modern-card,.home-page .news-modern-card,.st-service,.st-preview,.st-spec,.st-faq details{background:var(--ref-card)!important;border-color:var(--ref-line)!important;box-shadow:0 5px 18px rgba(16,24,40,.055)!important}
+.home-page .stats-grid{min-height:132px!important;padding:14px 28px!important}
+.home-page .stats-grid>div{min-height:76px!important}
+.home-page .stats-grid strong{font-size:32px!important;letter-spacing:-.025em!important}
+.home-page .stats-grid>div>span{margin-top:10px!important;font-size:10px!important}
+@media(max-width:700px){.home-page .stats-grid strong{font-size:25px!important}.home-page .stats-grid>div{min-height:88px!important}}
