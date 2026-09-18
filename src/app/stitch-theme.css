@@ -421,3 +421,80 @@ body>header.st-site-header{display:block!important}
  .detail-image img{max-height:230px!important}
  .phone-spec-tab-buttons{overflow-x:auto!important;white-space:nowrap!important}
 }
+
+/* Product page density correction — compact imei.info-style spec matrix */
+.detail-modern .phone-detail-main{
+  grid-template-columns:330px minmax(0,1fr)!important;
+  gap:18px!important;
+  padding:18px!important;
+}
+.detail-modern .phone-detail-left{gap:9px!important}
+.detail-modern .detail-image{
+  height:270px!important;min-height:270px!important;padding:12px!important;
+}
+.detail-modern .detail-image img{max-height:240px!important}
+.detail-modern .detail-meta{margin:7px 0!important;gap:6px!important}
+.detail-modern .detail-tag{padding:7px 9px!important;font-size:12px!important}
+.detail-modern .detail-actions{margin:7px 0!important}
+.detail-modern .detail-summary{padding:10px!important;margin:6px 0!important}
+.detail-modern .detail-summary>div{padding:9px 10px!important}
+.detail-modern .detail-copy{margin:0 0 8px!important}
+.detail-modern .detail-copy h1{font-size:40px!important;margin:2px 0 6px!important}
+.detail-modern .phone-spec-tabs{margin-top:8px!important}
+.detail-modern .phone-spec-tab-buttons{min-height:46px!important}
+.detail-modern .phone-spec-tab-buttons button{padding:13px 16px!important;font-size:12px!important}
+.detail-modern .phone-spec-tab-content{
+  padding:12px!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:start!important;
+}
+.detail-modern .phone-spec-group{
+  margin:0!important;padding:12px!important;border-radius:10px!important;
+  box-shadow:none!important;min-width:0!important;
+}
+.detail-modern .phone-spec-group-title{
+  margin:0 0 9px!important;padding:0 0 7px!important;
+  font-size:13px!important;font-weight:800!important;letter-spacing:.04em!important;
+  color:#111827!important;border-bottom:1px solid #e7ebf2!important;
+}
+.detail-modern .phone-spec-table{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+.detail-modern .phone-spec-row{
+  display:block!important;
+  min-width:0!important;
+  padding:9px 10px!important;
+  border:1px solid #e6eaf1!important;
+  border-radius:8px!important;
+  background:#f8fafc!important;
+}
+.detail-modern .phone-spec-label{
+  margin:0 0 3px!important;
+  color:#667085!important;
+  font-size:10px!important;line-height:1.2!important;
+  font-weight:800!important;text-transform:uppercase!important;letter-spacing:.055em!important;
+}
+.detail-modern .phone-spec-value{
+  color:#101828!important;
+  font-size:12px!important;line-height:1.35!important;font-weight:700!important;
+  overflow-wrap:anywhere!important;
+}
+.detail-modern .detail-next-step{margin-top:16px!important}
+@media(max-width:1000px){
+  .detail-modern .phone-detail-main{grid-template-columns:285px minmax(0,1fr)!important}
+  .detail-modern .phone-spec-tab-content{grid-template-columns:1fr!important}
+}
+@media(max-width:760px){
+  .detail-modern .phone-detail-main{grid-template-columns:1fr!important}
+  .detail-modern .detail-image{height:240px!important;min-height:240px!important}
+  .detail-modern .detail-image img{max-height:215px!important}
+  .detail-modern .phone-spec-table{grid-template-columns:1fr 1fr!important}
+  .detail-modern .detail-copy h1{font-size:32px!important}
+}
+@media(max-width:480px){
+  .detail-modern .phone-spec-table{grid-template-columns:1fr!important}
+}
