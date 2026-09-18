@@ -293,3 +293,28 @@ body>header.st-site-header{display:block!important}
   .home-page .device-photo-pixel-10-pro img,
   .home-page .device-photo-xiaomi-15-ultra img{height:165px!important}
 }
+
+/* Hero IMEI field: visible text + caret on the light Stitch checker */
+.home-page .st-checker .imei-input-wrap input{
+  color:#0b1220!important;
+  caret-color:#4f46e5!important;
+  -webkit-text-fill-color:#0b1220!important;
+  opacity:1!important;
+  cursor:text!important;
+  font-weight:600!important;
+}
+.home-page .st-checker .imei-input-wrap input::placeholder{
+  color:#7b8494!important;
+  -webkit-text-fill-color:#7b8494!important;
+  opacity:1!important;
+}
+.home-page .st-checker .imei-input-wrap input:focus{
+  color:#0b1220!important;
+  caret-color:#4f46e5!important;
+  -webkit-text-fill-color:#0b1220!important;
+  outline:none!important;
+}
+.home-page .st-checker .imei-input-wrap:focus-within{
+  box-shadow:inset 0 0 0 2px rgba(79,70,229,.18)!important;
+  border-radius:10px!important;
+}
