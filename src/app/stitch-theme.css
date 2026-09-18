@@ -61,3 +61,24 @@ body>header.st-site-header{display:block!important}
 .st-extra-section .st-split-head{max-width:1344px;margin:0 auto 30px}
 @media(max-width:900px){.st-extra-section{padding:58px 20px}.st-extra-section .st-service-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.st-extra-section{padding:50px 16px}.st-extra-section .st-service-grid{grid-template-columns:1fr}.st-extra-section .st-preview-tabs{overflow-x:auto}.st-extra-section .st-alert{grid-template-columns:1fr}}
+
+/* Stitch reference scale pass — larger typography, cards and breathing room */
+@media(min-width:901px){
+  .st-nav{height:72px;max-width:1440px}.st-links a{font-size:14px}.st-logo{font-size:16px}
+  .home-page .hero-modern{min-height:650px!important}.home-page .hero-inner{max-width:1440px!important;padding-left:38px!important;padding-right:38px!important}
+  .home-page .hero-copy h1{font-size:64px!important;line-height:.96!important;letter-spacing:-.055em!important}.home-page .hero-lead{font-size:16px!important;line-height:1.65!important;max-width:680px!important}
+  .home-page .imei-check-card{min-height:72px!important;padding:10px!important;border-radius:12px!important}.home-page .imei-input input{font-size:16px!important}.home-page .primary-action{min-height:52px!important;padding:0 24px!important;font-size:13px!important}
+  .home-page .stats-strip{padding:8px 0!important}.home-page .stats-grid{min-height:92px!important}.home-page .stats-grid strong{font-size:27px!important}.home-page .stats-grid span{font-size:10px!important}
+  .home-page .content-section,.st-extra-section{padding-top:96px!important;padding-bottom:96px!important}
+  .home-page .section-heading,.st-extra-section .st-section-head{margin-bottom:48px!important}.home-page .section-heading h2,.home-page .info-band h2,.st-section-head h2,.st-split-head h2{font-size:39px!important;line-height:1.08!important}.home-page .section-heading p,.st-section-head p,.st-split-head p{font-size:14px!important}
+  .home-page .steps-grid{gap:22px!important}.home-page .modern-step-card{min-height:245px!important;padding:28px!important}.home-page .modern-step-card h3{font-size:18px!important}.home-page .modern-step-card p{font-size:13px!important;line-height:1.65!important}.home-page .step-icon{width:44px!important;height:44px!important}
+  .home-page .services-grid,.st-service-grid{gap:20px!important}.home-page .service-modern-card,.st-service{min-height:220px!important;padding:26px!important}.home-page .service-modern-card h3,.st-service h3{font-size:17px!important}.home-page .service-modern-card p,.st-service p{font-size:12.5px!important;line-height:1.65!important}.st-service-icon{width:42px!important;height:42px!important}
+  .home-page .device-grid-modern{gap:20px!important}.home-page .device-modern-card{min-height:390px!important;padding:16px!important}.home-page .device-modern-photo{height:230px!important}.home-page .device-modern-card h3{font-size:18px!important}.home-page .device-modern-card p{font-size:11px!important}
+  .home-page .info-band{padding-top:105px!important;padding-bottom:105px!important}.home-page .info-band h2{font-size:40px!important}.home-page .info-band p{font-size:14px!important;line-height:1.7!important}.home-page .imei-breakdown>div{min-height:120px!important;padding:25px!important}.home-page .imei-breakdown span{font-size:21px!important}
+  .home-page .news-modern-card{min-height:235px!important;padding:28px!important}.home-page .news-modern-card h3{font-size:17px!important}.home-page .news-modern-card p{font-size:12.5px!important;line-height:1.65!important}
+  .st-preview-tabs{padding:0 28px!important}.st-preview-tabs span{font-size:11px!important;padding:18px 0!important}.st-preview-grid{gap:16px!important;padding:26px!important}.st-spec{min-height:92px!important;padding:18px!important}.st-spec strong{font-size:14px!important}.st-spec small{font-size:9px!important}
+  .st-alert{padding:52px!important;min-height:360px!important;align-items:center!important}.st-alert h2{font-size:40px!important;line-height:1.05!important}.st-alert p{font-size:13px!important}.st-alert-box{padding:24px!important}.st-alert-row{padding:16px!important;font-size:10px!important}
+  .st-faq{max-width:980px!important}.st-faq details{margin:11px 0!important}.st-faq summary{padding:19px 21px!important;font-size:13px!important}.st-faq p{font-size:12px!important;padding:0 21px 19px!important}
+  .home-page .final-cta{max-width:1240px!important;min-height:230px!important;padding:54px 58px!important}.home-page .final-cta h2{font-size:31px!important}
+  .st-footer{padding-top:64px!important}.st-footer-grid{max-width:1440px!important}.st-footer a,.st-footer p{font-size:12.5px!important}
+}
