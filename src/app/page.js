@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { popularDevices } from "./data/devices";
 import DevicePhoto from "./components/DevicePhoto";
 import { lookupPublicImei } from "./lib/api";
@@ -18,8 +18,23 @@ const news = [
   { icon: "fa-sim-card", title: "eSIM, EID and IMEI explained", text: "Understand the identifiers used by modern phones and how they relate to mobile connectivity.", href: "/news/esim-eid-and-imei-explained" },
 ];
 
-function Count({ value }) {
-  return <span>{value.toLocaleString()}</span>;
+function Count({ value, duration = 1800 }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    let frame;
+    const started = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - started) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setDisplay(Math.floor(value * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value, duration]);
+
+  return <span>{display.toLocaleString()}</span>;
 }
 
 export default function Home() {
