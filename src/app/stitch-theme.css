@@ -204,3 +204,17 @@ body>header.st-site-header{display:block!important}
 .st-carousel-dots button.active{width:22px;border-radius:8px;background:#4f46e5}
 @keyframes stSlideIn{from{opacity:.25;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:700px){.st-preview-tabs{overflow-x:auto!important;gap:20px!important;padding:0 16px!important}.st-carousel-body{padding:0 28px}.st-carousel-arrow{width:30px;height:30px}.st-carousel-arrow.left{left:2px}.st-carousel-arrow.right{right:2px}}
+
+/* Header IMEI Tools contrast fix */
+.st-site-header .st-api,
+.st-nav .st-api,
+.st-nav-actions .st-api{
+  color:#ffffff!important;
+  background:#0b1220!important;
+  opacity:1!important;
+}
+.st-site-header .st-api:hover,
+.st-nav .st-api:hover{
+  color:#ffffff!important;
+  background:#111b30!important;
+}
