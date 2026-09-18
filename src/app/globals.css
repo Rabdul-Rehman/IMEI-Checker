@@ -3812,3 +3812,38 @@ a { color: inherit; }
 .imei-more-views-section{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:12px}
 .imei-more-views-section .imei-media-heading{order:0;margin:0}
 .imei-more-views-section .imei-view-photo-grid{order:1;margin:0}
+
+
+/* ============================================================
+   PHONE DETAIL — FULL-WIDTH MAIN CANVAS
+   Remove the dark side gutters while keeping header/footer intact.
+   ============================================================ */
+.phone-detail-page.detail-modern,
+.detail-modern.phone-detail-page,
+.detail-modern {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: clamp(20px, 4vw, 64px) !important;
+  padding-right: clamp(20px, 4vw, 64px) !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+}
+
+/* Let the product content use the available desktop width. */
+.detail-modern .phone-detail-main,
+.detail-modern .detail-next-step {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+@media (max-width: 820px) {
+  .phone-detail-page.detail-modern,
+  .detail-modern.phone-detail-page,
+  .detail-modern {
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
