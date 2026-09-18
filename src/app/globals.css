@@ -3879,3 +3879,17 @@ a { color: inherit; }
     padding-right: 16px !important;
   }
 }
+
+
+/* PHONE DETAIL — remove the actual source of the remaining side bars.
+   The page canvas is white whenever a detail page is present; the centered
+   product card can keep its readable inner spacing without exposing body black. */
+html:has(.detail-modern),
+body:has(.detail-modern),
+main:has(.detail-modern) {
+  background: #ffffff !important;
+}
+
+body:has(.detail-modern) {
+  overflow-x: hidden;
+}
