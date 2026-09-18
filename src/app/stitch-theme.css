@@ -318,3 +318,106 @@ body>header.st-site-header{display:block!important}
   box-shadow:inset 0 0 0 2px rgba(79,70,229,.18)!important;
   border-radius:10px!important;
 }
+
+/* =========================================================
+   SITE-WIDE STITCH THEME — internal tools, database, product
+   and result pages. Homepage remains unchanged above.
+   ========================================================= */
+.modern-page-shell,.generator-page,.detail-modern,.faq-page{
+  --st-ink:#0b1220;--st-muted:#536174;--st-accent:#4f46e5;--st-bg:#f4f7fb;--st-line:#dfe5ef;
+  color:var(--st-ink);font-family:Inter,Arial,sans-serif;
+}
+.modern-page-shell,.generator-page,.faq-page{background:var(--st-bg)!important}
+.modern-page-shell,.generator-shell,.faq-page{max-width:1240px;margin:0 auto}
+.modern-page-shell{padding:44px 28px 70px!important}
+.generator-page{padding:44px 28px 70px!important;min-height:70vh}
+.generator-shell{padding:0!important}
+.modern-page-head,.generator-hero,.faq-hero{margin:0 0 24px!important}
+.modern-page-head h1,.generator-hero h1,.faq-hero h1,.detail-copy h1{
+  color:var(--st-ink)!important;font-weight:800!important;letter-spacing:-.04em!important;line-height:1.02!important
+}
+.modern-page-head h1,.generator-hero h1,.faq-hero h1{font-size:clamp(32px,4vw,52px)!important}
+.modern-page-head p,.generator-hero p,.faq-hero p,.detail-copy p{color:var(--st-muted)!important;font-weight:500!important}
+.section-eyebrow{font-weight:800!important;letter-spacing:.14em!important;color:var(--st-accent)!important}
+.database-toolbar,.generator-toolbar,.database-card,.generator-brand-card,.carrier-card,.faq-item,.faq-side-card,
+.phone-detail-main,.detail-summary,.phone-spec-group,.imei-overview-dashboard,.imei-variant-panel{
+  background:#fff!important;border:1px solid var(--st-line)!important;box-shadow:0 7px 22px rgba(16,24,40,.055)!important
+}
+.database-toolbar,.generator-toolbar{border-radius:14px!important}
+.database-card,.generator-brand-card,.carrier-card,.faq-item,.faq-side-card{border-radius:12px!important}
+.database-card h3,.generator-brand-card strong,.carrier-card h3,.faq-item summary{color:var(--st-ink)!important;font-weight:750!important}
+.database-card p,.carrier-card span,.generator-brand-card span,.faq-answer p{color:var(--st-muted)!important}
+.database-card-link,.generator-brand-card span{color:var(--st-accent)!important;font-weight:700!important}
+.database-search input,.database-sort select{
+  background:#fff!important;color:var(--st-ink)!important;border-color:var(--st-line)!important;font-weight:600!important
+}
+.filter-pills button{font-weight:700!important}
+.filter-pills button.active{background:var(--st-accent)!important;color:#fff!important;border-color:var(--st-accent)!important}
+
+/* Compact product/result presentation: maximum useful content above fold */
+.detail-modern{max-width:1240px!important;margin:0 auto!important;padding:22px 24px 56px!important;background:#fff!important}
+.detail-breadcrumb{margin:0 0 12px!important;color:#667085!important;font-weight:600!important}
+.phone-detail-main{
+  display:grid!important;grid-template-columns:minmax(280px,.78fr) minmax(0,1.55fr)!important;
+  gap:22px!important;padding:20px!important;border-radius:16px!important;align-items:start!important
+}
+.phone-detail-left{display:flex!important;flex-direction:column!important;gap:10px!important}
+.detail-image{min-height:300px!important;height:300px!important;border-radius:12px!important;background:#f7f9fc!important;padding:14px!important}
+.detail-image img{max-height:270px!important;width:100%!important;object-fit:contain!important}
+.phone-detail-right{min-width:0!important}
+.detail-copy{margin-bottom:12px!important}
+.detail-copy h1{font-size:clamp(30px,3.5vw,46px)!important;margin:3px 0 8px!important}
+.detail-meta{gap:8px!important;margin:10px 0!important}
+.detail-tag{background:#f5f3ff!important;color:#4338ca!important;border:1px solid #e5e1ff!important;font-weight:700!important}
+.detail-actions{margin:12px 0!important;gap:8px!important}
+.detail-summary{padding:14px!important;border-radius:12px!important;margin:12px 0!important}
+.phone-spec-tabs{margin-top:16px!important}
+.phone-spec-tab-buttons{background:#fff!important;border:1px solid var(--st-line)!important;border-radius:12px 12px 0 0!important;padding:0 12px!important}
+.phone-spec-tab-buttons button{font-weight:750!important;color:#111827!important}
+.phone-spec-tab-buttons button.active{color:var(--st-accent)!important}
+.phone-spec-tab-content{background:#f8fafc!important;border:1px solid var(--st-line)!important;border-top:0!important;padding:14px!important}
+.spec-grid-modern,.imei-summary-grid{gap:10px!important}
+.spec-modern-card,.imei-summary-card{background:#fff!important;border:1px solid #e4e9f1!important;border-radius:10px!important;padding:12px!important;box-shadow:none!important}
+.spec-modern-label,.imei-variant-label{font-weight:800!important;color:#667085!important}
+.spec-modern-value,.imei-summary-card strong{color:var(--st-ink)!important;font-weight:750!important}
+.imei-overview-dashboard{padding:12px!important;border-radius:12px!important}
+.imei-variant-panel{padding:12px!important;border-radius:12px!important;margin-top:10px!important}
+.imei-device-media,.imei-more-views-section{margin-top:12px!important}
+.imei-media-grid,.imei-view-photo-grid,.imei-color-photo-grid{gap:10px!important}
+.imei-media-card{background:#f8fafc!important;border:1px solid var(--st-line)!important;border-radius:10px!important}
+.imei-valid-strip{border-radius:10px!important;margin:10px 0!important}
+.detail-next-step{
+  max-width:1240px!important;margin:22px auto 0!important;border-radius:14px!important;
+  background:linear-gradient(110deg,#08111f,#0d2340)!important;color:#fff!important;padding:22px 26px!important
+}
+.detail-next-step h2,.detail-next-step p{color:#fff!important}
+.primary-action{background:var(--st-accent)!important;color:#fff!important;font-weight:800!important;border-radius:9px!important}
+.outline-action{font-weight:750!important;border-color:#d9e0ea!important;color:#111827!important;background:#fff!important}
+
+/* Generator */
+.generator-grid{gap:12px!important}
+.generator-brand-card{padding:18px!important;min-height:128px!important}
+.generator-brand-icon,.carrier-logo,.news-icon{background:#eef2ff!important;color:var(--st-accent)!important}
+
+/* Carrier directory */
+.carrier-summary-grid{gap:12px!important}
+.carrier-card{padding:18px!important}
+.carrier-badge{color:#047857!important;background:#ecfdf3!important}
+
+/* FAQ */
+.faq-page{padding:44px 28px 70px!important}
+.faq-layout{gap:18px!important}
+.faq-item{overflow:hidden!important}
+.faq-item summary{padding:17px 18px!important}
+.faq-answer{padding:0 18px 17px!important}
+.faq-side-card{padding:22px!important}
+
+/* Shared responsive behavior */
+@media(max-width:800px){
+ .modern-page-shell,.generator-page,.faq-page{padding:28px 16px 50px!important}
+ .detail-modern{padding:16px 12px 44px!important}
+ .phone-detail-main{grid-template-columns:1fr!important;padding:14px!important}
+ .detail-image{height:260px!important;min-height:260px!important}
+ .detail-image img{max-height:230px!important}
+ .phone-spec-tab-buttons{overflow-x:auto!important;white-space:nowrap!important}
+}
