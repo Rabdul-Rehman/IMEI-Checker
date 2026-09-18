@@ -255,6 +255,66 @@ export default function Home() {
         </div>
       </section>
 
+
+      <section className="st-extra-section">
+        <div className="st-section-head">
+          <span className="st-eyebrow">DEVICE DATA PREVIEW</span>
+          <h2>What an IMEI Check Can Unlock</h2>
+          <p>A mapped TAC can connect an IMEI lookup to structured information already available in this project.</p>
+        </div>
+        <div className="st-preview">
+          <div className="st-preview-tabs"><span>Hardware Specifications</span><span>Carrier &amp; Network</span><span>Device Identity</span><span>Available Media</span></div>
+          <div className="st-preview-grid">
+            {[
+              ["DEVICE IDENTITY","Brand + Model","Resolved from mapped TAC"],
+              ["TAC ALLOCATION","First 8 IMEI digits","Type Allocation Code"],
+              ["DISPLAY","Screen specifications","When catalogued"],
+              ["PLATFORM","Chipset / processor","When catalogued"],
+              ["CAMERA","Main camera details","When catalogued"],
+              ["BATTERY","Capacity information","When catalogued"],
+            ].map(([label,value,note]) => <div className="st-spec" key={label}><small>{label}</small><strong>{value}</strong><small>{note}</small></div>)}
+          </div>
+        </div>
+      </section>
+
+      <section className="st-extra-section st-extra-soft">
+        <div className="st-split-head">
+          <div><span className="st-eyebrow">SPECIALIZED CAPABILITIES</span><h2>Specialized Verification Services</h2></div>
+          <p>Focused device-intelligence tools using the information currently supported by this project.</p>
+        </div>
+        <div className="st-service-grid">
+          {[
+            ["fa-shield-halved","Device Status Information","Review status information when it is available from connected lookup records.","#imei-check"],
+            ["fa-sim-card","Carrier & Network Lookup","Explore carrier and network details available for supported records.","/carriers"],
+            ["fa-cloud","Device Identity Resolution","Resolve an IMEI TAC to its mapped brand and model when a match exists.","#imei-check"],
+            ["fa-microchip","Hardware Spec & TAC Decoder","Connect mapped devices to display, platform, camera and battery information.","/phones"],
+            ["fa-mobile-screen-button","Phone Database","Browse the canonical phone catalogue and its available specifications.","/phones"],
+            ["fa-calculator","IMEI Structure Tools","Learn and work with TAC, serial-number and check-digit structure.","/calculator"],
+          ].map(([icon,title,text,href]) => <Link href={href} className="st-service st-service-link" key={title}><div className="st-service-icon"><i className={"fas "+icon}/></div><h3>{title}</h3><p>{text}</p><span>Explore <i className="fas fa-arrow-right"/></span></Link>)}
+        </div>
+      </section>
+
+      <section className="st-extra-section st-warning-wrap">
+        <div className="st-alert">
+          <div><span className="st-danger-label"><i className="fas fa-triangle-exclamation"/> SECOND-HAND DEVICE CHECK</span><h2>Buying Used? Verify the Device Before You Pay.</h2><p>Compare the returned identity and specifications with the physical phone, seller information and purchase documentation. An IMEI lookup is one useful part of a broader used-device inspection.</p><div className="st-alert-actions"><Link href="#imei-check" className="st-btn st-btn-danger">Run IMEI Check</Link><Link href="/news/check-imei-before-buying-used-phone">Read buyer checklist →</Link></div></div>
+          <div className="st-alert-box"><small>DEVICE IDENTITY REVIEW</small><div className="st-alert-row red">● IDENTITY MISMATCH<br/>Returned model differs from the device</div><div className="st-alert-row green">● CONSISTENT DEVICE DATA<br/>Identity and specifications align</div><small>Verify ownership and physical condition separately.</small></div>
+        </div>
+      </section>
+
+      <section className="st-extra-section">
+        <div className="st-section-head"><span className="st-eyebrow">ANSWERS &amp; VERIFICATION FACTS</span><h2>Frequently Asked Questions</h2><p>Useful answers about IMEI identity, TACs and the lookup tools in this project.</p></div>
+        <div className="st-faq">
+          {[
+            ["What is an IMEI number and why is it unique?","An IMEI is a 15-digit identifier used for mobile equipment. Its first eight digits form the TAC and its final digit is a check digit."],
+            ["How can I find my IMEI if the phone screen is broken?","Depending on the manufacturer, the IMEI may also appear on original packaging, purchase documentation or a device label."],
+            ["Is it safe to share or check my IMEI number online?","Avoid publishing a full IMEI publicly. Share it only with services or people that genuinely need it."],
+            ["What is the difference between an IMEI and a serial number?","They are different identifiers. IMEI identifies cellular equipment while serial numbers are assigned by manufacturers."],
+            ["What does the TAC tell me?","The first eight IMEI digits are the Type Allocation Code and can be used to resolve device allocation information when a matching record is available."],
+            ["How current is the device information?","Results depend on the records currently available in the project's connected databases and can vary by device."],
+          ].map(([q,a],i) => <details key={q} open={i===0}><summary>{q}<i className="fas fa-chevron-down"/></summary><p>{a}</p></details>)}
+        </div>
+      </section>
+
       <section className="final-cta">
         <div>
           <span className="section-eyebrow">READY TO CHECK?</span>
