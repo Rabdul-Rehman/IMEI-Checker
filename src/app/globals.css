@@ -3893,3 +3893,74 @@ main:has(.detail-modern) {
 body:has(.detail-modern) {
   overflow-x: hidden;
 }
+
+
+/* ============================================================
+   VERIFYIMEI — SITE-WIDE DARK MODE
+   ============================================================ */
+.st-theme-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:36px;padding:0 12px;border:1px solid #d9e2ec;border-radius:999px;
+  background:#fff;color:#0b1324;font:inherit;font-size:12px;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:background .2s,border-color .2s,color .2s,transform .2s;
+}
+.st-theme-toggle:hover{background:#f4f7fb;border-color:#c8d3df;transform:translateY(-1px)}
+.st-theme-toggle i{font-size:12px}
+
+html.dark-mode{color-scheme:dark;background:#080d15}
+html.dark-mode body,
+html.dark-mode main,
+html.dark-mode body:has(.detail-modern),
+html.dark-mode main:has(.detail-modern){background:#080d15 !important;color:#eaf0f7}
+html.dark-mode .st-site-header,
+html.dark-mode .st-footer{background:#0c121c !important;border-color:#202b3a !important;color:#eaf0f7}
+html.dark-mode .st-site-header a,
+html.dark-mode .st-footer a,
+html.dark-mode .st-footer h4,
+html.dark-mode .st-logo{color:#f5f8fc !important}
+html.dark-mode .st-logo small,
+html.dark-mode .st-footer p,
+html.dark-mode .st-footer-bottom{color:#93a4b8 !important}
+html.dark-mode .st-theme-toggle{background:#141d2a;border-color:#2a394b;color:#f5f8fc}
+html.dark-mode .st-theme-toggle:hover{background:#1a2635}
+
+/* Detail/device profile page */
+html.dark-mode .phone-detail-page.detail-modern,
+html.dark-mode .detail-modern.phone-detail-page,
+html.dark-mode .detail-modern{background:#080d15 !important;color:#edf3f9}
+html.dark-mode .phone-detail-main,
+html.dark-mode .phone-detail-left,
+html.dark-mode .phone-detail-right,
+html.dark-mode .detail-copy{color:#edf3f9}
+html.dark-mode .detail-copy h1,
+html.dark-mode .phone-spec-tabs,
+html.dark-mode .phone-spec-tabs strong,
+html.dark-mode .phone-spec-tab-content,
+html.dark-mode .phone-spec-tab-content h2,
+html.dark-mode .phone-spec-tab-content h3,
+html.dark-mode .phone-spec-tab-content h4{color:#f5f8fc !important}
+html.dark-mode .phone-detail-main,
+html.dark-mode .phone-spec-tabs,
+html.dark-mode .imei-summary-card,
+html.dark-mode .imei-technical-details>*,
+html.dark-mode .phone-spec-tab-content>div{border-color:#263345 !important}
+html.dark-mode .phone-spec-tabs,
+html.dark-mode .phone-spec-tab-content,
+html.dark-mode .imei-summary-card,
+html.dark-mode .imei-technical-details>*{background:#0f1722 !important}
+html.dark-mode .phone-spec-tab-content [class*="card"],
+html.dark-mode .phone-spec-tab-content [class*="item"],
+html.dark-mode .phone-spec-tab-content [class*="field"]{background:#131d2a !important;border-color:#263345 !important;color:#eaf0f7 !important}
+html.dark-mode .phone-spec-tab-content span,
+html.dark-mode .phone-spec-tab-content p,
+html.dark-mode .detail-copy .text-secondary{color:#9fb0c3 !important}
+html.dark-mode .detail-image{border-color:#26384c !important;background:radial-gradient(circle at 50% 32%,rgba(69,113,180,.22),#0d1520 70%) !important}
+html.dark-mode .detail-next-step{border-color:#24364b !important}
+
+/* Common light surfaces across the rest of the site */
+html.dark-mode section:not(.detail-next-step),
+html.dark-mode [class*="section"]:not(.detail-next-step){border-color:#202c3b}
+html.dark-mode .card,
+html.dark-mode [class*="-card"]:not(.detail-next-step){border-color:#263345}
+
+@media(max-width:900px){.st-theme-toggle span{display:none}.st-theme-toggle{width:36px;padding:0}}
