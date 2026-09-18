@@ -175,10 +175,10 @@ export default function Home() {
 
       <section className="stats-strip st-stats">
         <div className="container-fluid stats-grid">
-          <div><strong><Count value={99094} /></strong><span>Checks today</span></div>
-          <div><strong><Count value={11320145} /></strong><span>Checks this month</span></div>
-          <div><strong><Count value={464113539} /></strong><span>Total checks</span></div>
-          <div><strong><Count value={303159} /></strong><span>TAC records</span></div>
+          <div><strong><Count value={1247} /></strong><span>Checks today</span></div>
+          <div><strong><Count value={28463} /></strong><span>Checks this month</span></div>
+          <div><strong><Count value={186742} /></strong><span>Total checks</span></div>
+          <div><strong><Count value={34563} /></strong><span>TAC records</span></div>
         </div>
       </section>
 
