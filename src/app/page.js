@@ -83,7 +83,7 @@ export default function Home() {
         <div className="container-fluid hero-inner st-container">
           <div className="hero-copy st-copy">
             <div className="hero-kicker"><span /> DEVICE INTELLIGENCE</div>
-            <h1>Check Your Device.<br /><strong>Know Exactly What You&apos;re Buying.</strong></h1>
+            <h1>Check Your Device.<br /><strong>Know Exactly</strong> What<br />You&apos;re Buying.</h1>
             <p className="hero-lead">
               Get fast access to IMEI information, device specifications and
               network details with one simple lookup.
