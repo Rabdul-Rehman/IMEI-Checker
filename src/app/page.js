@@ -33,7 +33,7 @@ export default function Home() {
     try{
       const data=await lookupPublicImei(value);
       if(!data?.success){setError(data?.error||"IMEI lookup failed.");return;}
-      window.location.href=\`/results/\${value}\`;
+      window.location.href = `/results/${value}`;
     }catch(err){console.error(err);setError("Something went wrong.");}
   }
   const services=[
