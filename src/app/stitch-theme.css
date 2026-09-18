@@ -50,3 +50,14 @@ body>header.st-site-header{display:block!important}
 .home-page header,.home-page nav,.home-page .st-site-header,.home-page .st-nav{position:static}
 @media(max-width:900px){.home-page .steps-grid,.home-page .services-grid{grid-template-columns:1fr 1fr!important}.home-page .info-band{grid-template-columns:1fr!important}.home-page .content-section{padding:58px 20px!important}}
 @media(max-width:640px){.home-page .steps-grid,.home-page .services-grid{grid-template-columns:1fr!important}.home-page .split-heading{display:block!important}.home-page .final-cta{margin:45px 16px!important;padding:30px 22px!important}}
+
+/* Complete Stitch composition additions */
+.st-extra-section{padding:78px max(28px,calc((100vw - 1344px)/2));background:#fff;color:#101828}
+.st-extra-soft{background:#f6f8fc}.st-warning-wrap{background:#f6f8fc;padding-top:68px;padding-bottom:68px}
+.st-service-link{text-decoration:none!important;display:block}.st-service-link span{font-size:10px;color:#4f46e5;font-weight:800}
+.st-extra-section .st-section-head{margin-bottom:38px}.st-extra-section .st-preview{max-width:1344px;margin:auto}
+.st-extra-section .st-service-grid{max-width:1344px;margin:auto}.st-extra-section .st-alert{max-width:1344px;margin:auto}
+.st-extra-section .st-faq{max-width:900px;margin:auto}
+.st-extra-section .st-split-head{max-width:1344px;margin:0 auto 30px}
+@media(max-width:900px){.st-extra-section{padding:58px 20px}.st-extra-section .st-service-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.st-extra-section{padding:50px 16px}.st-extra-section .st-service-grid{grid-template-columns:1fr}.st-extra-section .st-preview-tabs{overflow-x:auto}.st-extra-section .st-alert{grid-template-columns:1fr}}
