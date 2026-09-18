@@ -39,6 +39,7 @@ function Count({ value, duration = 1800 }) {
 
 export default function Home() {
   const [imei, setImei] = useState("");
+  const [previewTab, setPreviewTab] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
@@ -278,17 +279,29 @@ export default function Home() {
           <p>A mapped TAC can connect an IMEI lookup to structured information already available in this project.</p>
         </div>
         <div className="st-preview">
-          <div className="st-preview-tabs"><span>Hardware Specifications</span><span>Carrier &amp; Network</span><span>Device Identity</span><span>Available Media</span></div>
-          <div className="st-preview-grid">
-            {[
-              ["DEVICE IDENTITY","Brand + Model","Resolved from mapped TAC"],
-              ["TAC ALLOCATION","First 8 IMEI digits","Type Allocation Code"],
-              ["DISPLAY","Screen specifications","When catalogued"],
-              ["PLATFORM","Chipset / processor","When catalogued"],
-              ["CAMERA","Main camera details","When catalogued"],
-              ["BATTERY","Capacity information","When catalogued"],
-            ].map(([label,value,note]) => <div className="st-spec" key={label}><small>{label}</small><strong>{value}</strong><small>{note}</small></div>)}
-          </div>
+          {(() => {
+            const slides = [
+              { title: "Hardware Specifications", items: [["DEVICE IDENTITY","Brand + Model","Resolved from mapped TAC"],["TAC ALLOCATION","First 8 IMEI digits","Type Allocation Code"],["DISPLAY","Screen specifications","When catalogued"],["PLATFORM","Chipset / processor","When catalogued"],["CAMERA","Main camera details","When catalogued"],["BATTERY","Capacity information","When catalogued"]] },
+              { title: "Carrier & Network", items: [["NETWORK","Carrier information","When available"],["RADIO","Network technology","2G / 3G / 4G / 5G when catalogued"],["REGION","Allocation region","From available records"],["SIM","SIM information","When catalogued"],["CONNECTIVITY","Supported connectivity","From device specifications"],["STATUS","Lookup record","Based on connected data"]] },
+              { title: "Device Identity", items: [["BRAND","Manufacturer","Resolved from TAC mapping"],["MODEL","Device model","Canonical phone record"],["TAC","Type Allocation Code","First 8 IMEI digits"],["IMEI","Device identifier","15-digit structure"],["SNR","Serial portion","Digits 9 through 14"],["CHECK DIGIT","Validation digit","Final IMEI digit"]] },
+              { title: "Available Media", items: [["FRONT","Front view","When available"],["BACK","Rear view","When available"],["COLORS","Color variants","Catalogued options"],["CAMERA","Camera close-up","When available"],["ANGLES","Additional views","When available"],["GALLERY","Device media","Mapped model assets"]] }
+            ];
+            const slide = slides[previewTab];
+            const move = (direction) => setPreviewTab((previewTab + direction + slides.length) % slides.length);
+            return <>
+              <div className="st-preview-tabs">
+                {slides.map((item,index) => <button type="button" key={item.title} className={index === previewTab ? "active" : ""} onClick={() => setPreviewTab(index)}>{item.title}</button>)}
+              </div>
+              <div className="st-carousel-body">
+                <button type="button" className="st-carousel-arrow left" aria-label="Previous preview" onClick={() => move(-1)}><i className="fas fa-chevron-left" /></button>
+                <div className="st-preview-grid" key={slide.title}>
+                  {slide.items.map(([label,value,note]) => <div className="st-spec" key={label}><small>{label}</small><strong>{value}</strong><small>{note}</small></div>)}
+                </div>
+                <button type="button" className="st-carousel-arrow right" aria-label="Next preview" onClick={() => move(1)}><i className="fas fa-chevron-right" /></button>
+              </div>
+              <div className="st-carousel-dots">{slides.map((item,index) => <button type="button" aria-label={"Show "+item.title} key={item.title} className={index === previewTab ? "active" : ""} onClick={() => setPreviewTab(index)} />)}</div>
+            </>;
+          })()}
         </div>
       </section>
 
