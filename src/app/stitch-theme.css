@@ -218,3 +218,58 @@ body>header.st-site-header{display:block!important}
   color:#ffffff!important;
   background:#111b30!important;
 }
+
+/* Popular-device card normalization */
+.home-page .device-grid-modern{
+  align-items:stretch!important;
+}
+.home-page .device-modern-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%!important;
+  min-height:410px!important;
+}
+.home-page .device-modern-photo{
+  height:230px!important;
+  min-height:230px!important;
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  padding:14px!important;
+}
+.home-page .device-modern-photo img{
+  width:100%!important;
+  height:100%!important;
+  max-width:190px!important;
+  max-height:205px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  display:block!important;
+  margin:auto!important;
+}
+.home-page .device-modern-card .device-brand,
+.home-page .device-modern-card>span:first-of-type{
+  min-height:18px!important;
+}
+.home-page .device-modern-card h3{
+  min-height:27px!important;
+  margin-bottom:8px!important;
+}
+.home-page .device-modern-card p{
+  min-height:42px!important;
+  max-height:42px!important;
+  overflow:hidden!important;
+  margin-bottom:12px!important;
+}
+.home-page .device-modern-card>a,
+.home-page .device-modern-card>span:last-child{
+  margin-top:auto!important;
+  align-self:flex-start!important;
+}
+@media(max-width:700px){
+  .home-page .device-modern-card{min-height:380px!important}
+  .home-page .device-modern-photo{height:205px!important;min-height:205px!important}
+  .home-page .device-modern-photo img{max-height:180px!important;max-width:165px!important}
+}
