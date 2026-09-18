@@ -137,3 +137,48 @@ body>header.st-site-header{display:block!important}
 .st-faq summary{font-weight:700!important;color:#111827!important;letter-spacing:-.01em!important}
 .st-preview-tabs span,.st-spec small{font-weight:750!important}
 .st-spec strong{font-weight:750!important;color:#111827!important}
+
+/* Final type-weight pass: match the dense, high-contrast Stitch reference */
+.st-site-header,.st-footer,.home-page,.st-extra-section{
+  color:#0a1020!important;
+  -webkit-font-smoothing:auto!important;
+  -moz-osx-font-smoothing:auto!important;
+  text-rendering:optimizeLegibility!important;
+}
+.st-links a,.st-nav-actions a,.st-live{
+  color:#111827!important;
+  font-weight:700!important;
+  letter-spacing:-.015em!important;
+  opacity:1!important;
+}
+.st-logo>span:last-child{font-weight:800!important;color:#0a1020!important;letter-spacing:-.025em!important}
+.st-logo small{font-weight:700!important;color:#667085!important;opacity:1!important}
+.st-signin{font-weight:700!important}.st-api{font-weight:800!important}
+.home-page h1,.home-page h2,.home-page h3,.st-extra-section h2,.st-extra-section h3{
+  color:#080f1f!important;
+  font-weight:800!important;
+  opacity:1!important;
+}
+.home-page p,.st-extra-section p{
+  color:#475467!important;
+  font-weight:500!important;
+  opacity:1!important;
+}
+.home-page .section-heading p,.st-section-head p,.st-split-head p,
+.home-page .hero-lead{color:#475467!important;font-weight:500!important}
+.home-page .modern-step-card p,.home-page .service-modern-card p,
+.home-page .device-modern-card p,.home-page .news-modern-card p,
+.st-service p,.st-faq p{color:#475467!important;font-weight:500!important}
+.home-page .modern-step-card h3,.home-page .service-modern-card h3,
+.home-page .device-modern-card h3,.home-page .news-modern-card h3,
+.st-service h3,.st-faq summary{color:#0b1220!important;font-weight:700!important}
+.home-page a,.st-extra-section a{font-weight:700!important}
+.home-page .section-eyebrow,.home-page .st-eyebrow,.st-extra-section .st-eyebrow{
+  color:#4f46e5!important;font-weight:800!important;opacity:1!important;
+}
+.st-footer h4{color:#111827!important;font-weight:800!important;letter-spacing:.08em!important;opacity:1!important}
+.st-footer a{color:#344054!important;font-weight:600!important;opacity:1!important}
+.st-footer p,.st-footer-bottom{color:#667085!important;font-weight:500!important;opacity:1!important}
+.st-footer .st-logo>span:last-child{font-weight:800!important;color:#0a1020!important}
+.home-page .stats-grid strong{font-weight:800!important;color:#080f1f!important}
+.home-page .stats-grid>div>span{color:#475467!important;font-weight:700!important}
