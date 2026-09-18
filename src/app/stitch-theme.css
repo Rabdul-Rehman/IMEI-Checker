@@ -273,3 +273,23 @@ body>header.st-site-header{display:block!important}
   .home-page .device-modern-photo{height:205px!important;min-height:205px!important}
   .home-page .device-modern-photo img{max-height:180px!important;max-width:165px!important}
 }
+
+/* Optical normalization: source PNGs have different intrinsic whitespace */
+.home-page .device-modern-photo img{
+  width:auto!important;
+  height:190px!important;
+  max-width:88%!important;
+  max-height:none!important;
+  object-fit:contain!important;
+}
+.home-page .device-photo-iphone-17-pro img{height:190px!important}
+.home-page .device-photo-galaxy-s25-ultra img{height:190px!important}
+.home-page .device-photo-pixel-10-pro img{height:190px!important}
+.home-page .device-photo-xiaomi-15-ultra img{height:190px!important}
+@media(max-width:700px){
+  .home-page .device-modern-photo img,
+  .home-page .device-photo-iphone-17-pro img,
+  .home-page .device-photo-galaxy-s25-ultra img,
+  .home-page .device-photo-pixel-10-pro img,
+  .home-page .device-photo-xiaomi-15-ultra img{height:165px!important}
+}
