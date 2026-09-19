@@ -580,3 +580,59 @@ html.dark-mode .imei-summary-card,
 html.dark-mode .imei-media-card{background:#111a26!important;border-color:#29384b!important;color:#edf3f9!important}
 html.dark-mode .spec-modern-value,
 html.dark-mode .imei-summary-card strong{color:#f5f7fb!important}
+
+
+/* ============================================================
+   DARK MODE — HOMEPAGE (must follow homepage !important rules)
+   ============================================================ */
+html.dark-mode .home-page{background:#080d15!important;color:#edf3f9!important}
+html.dark-mode .home-page .hero-modern,
+html.dark-mode .home-page .content-section,
+html.dark-mode .st-extra-section{background:#080d15!important;color:#edf3f9!important}
+html.dark-mode .home-page .content-section:nth-of-type(even),
+html.dark-mode .home-page .devices-section,
+html.dark-mode .home-page .news-section,
+html.dark-mode .st-extra-soft,
+html.dark-mode .st-warning-wrap{background:#0b121d!important}
+html.dark-mode .home-page .hero-copy h1,
+html.dark-mode .home-page .section-heading h2,
+html.dark-mode .home-page .info-band h2,
+html.dark-mode .st-extra-section h2,
+html.dark-mode .st-extra-section h3{color:#f7f9fc!important}
+html.dark-mode .home-page .hero-lead,
+html.dark-mode .home-page .section-heading p,
+html.dark-mode .home-page .info-band p,
+html.dark-mode .home-page .modern-step-card p,
+html.dark-mode .home-page .service-modern-card p,
+html.dark-mode .home-page .device-modern-card p,
+html.dark-mode .home-page .news-modern-card p{color:#9eacbd!important}
+html.dark-mode .home-page .hero-copy h1 strong,
+html.dark-mode .home-page .section-eyebrow{color:#7770ff!important}
+html.dark-mode .home-page .imei-check-card,
+html.dark-mode .home-page .modern-step-card,
+html.dark-mode .home-page .service-modern-card,
+html.dark-mode .home-page .device-modern-card,
+html.dark-mode .home-page .news-modern-card,
+html.dark-mode .home-page .imei-breakdown>div,
+html.dark-mode .st-extra-section .st-service-card,
+html.dark-mode .st-extra-section .st-preview,
+html.dark-mode .st-extra-section .st-faq details{
+  background:#111a26!important;border-color:#29384b!important;color:#edf3f9!important;
+  box-shadow:0 6px 20px rgba(0,0,0,.2)!important
+}
+html.dark-mode .home-page .modern-step-card h3,
+html.dark-mode .home-page .service-modern-card h3,
+html.dark-mode .home-page .device-modern-card h3,
+html.dark-mode .home-page .news-modern-card h3{color:#f5f7fb!important}
+html.dark-mode .home-page .device-modern-photo{background:#f8fafc!important}
+html.dark-mode .home-page .imei-input,
+html.dark-mode .home-page .imei-input input{background:transparent!important;color:#f5f7fb!important}
+html.dark-mode .home-page .imei-input input::placeholder{color:#7f8da0!important}
+html.dark-mode .home-page .hero-trust{color:#9eacbd!important}
+html.dark-mode .home-page .outline-action{background:#111a26!important;color:#f5f7fb!important;border-color:#344255!important}
+html.dark-mode .home-page .info-band{background:#080d15!important}
+html.dark-mode .home-page .imei-breakdown>div{color:#f5f7fb!important}
+html.dark-mode .home-page .stats-strip,
+html.dark-mode .home-page .stats-grid{background:#0a111b!important;border-color:#263345!important}
+html.dark-mode .home-page .stats-grid strong{color:#7770ff!important}
+html.dark-mode .home-page .stats-grid span{color:#a6b2c2!important}
