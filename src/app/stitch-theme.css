@@ -498,3 +498,85 @@ body>header.st-site-header{display:block!important}
 @media(max-width:480px){
   .detail-modern .phone-spec-table{grid-template-columns:1fr!important}
 }
+
+
+/* ============================================================
+   DARK MODE — light-theme override layer
+   Keep this at the END because Stitch uses !important light rules.
+   ============================================================ */
+html.dark-mode .detail-modern{
+  --st-ink:#f5f7fb;--st-muted:#9eacbd;--st-bg:#080d15;--st-line:#263345;
+  background:#080d15!important;color:#edf3f9!important;
+}
+html.dark-mode .detail-modern .phone-detail-main,
+html.dark-mode .detail-modern .detail-summary,
+html.dark-mode .detail-modern .phone-spec-group{
+  background:#0f1722!important;border-color:#263345!important;
+  box-shadow:0 7px 22px rgba(0,0,0,.22)!important;color:#edf3f9!important;
+}
+html.dark-mode .detail-modern .detail-image{
+  background:radial-gradient(circle at 50% 30%,rgba(79,70,229,.18),transparent 48%),#111a26!important;
+  border-color:#2b3a4d!important;
+}
+html.dark-mode .detail-modern .detail-tag{
+  background:#1a1834!important;color:#a9a4ff!important;border-color:#34305d!important;
+}
+html.dark-mode .detail-modern .outline-action{
+  background:#111a26!important;color:#f4f7fb!important;border-color:#344255!important;
+}
+html.dark-mode .detail-modern .detail-summary>div{
+  background:#090e16!important;border-color:#273447!important;color:#f4f7fb!important;
+}
+html.dark-mode .detail-modern .detail-summary span{color:#8291a4!important}
+html.dark-mode .detail-modern .detail-summary strong{color:#f5f7fb!important}
+html.dark-mode .detail-modern .phone-spec-tabs{background:#0c131d!important;border-color:#263345!important}
+html.dark-mode .detail-modern .phone-spec-tab-buttons{
+  background:#0c131d!important;border-color:#263345!important;
+}
+html.dark-mode .detail-modern .phone-spec-tab-buttons button{color:#c7d0dc!important}
+html.dark-mode .detail-modern .phone-spec-tab-buttons button:hover{color:#fff!important}
+html.dark-mode .detail-modern .phone-spec-tab-buttons button.active{color:#7770ff!important;border-bottom-color:#7770ff!important}
+html.dark-mode .detail-modern .phone-spec-tab-content{
+  background:#0a111b!important;border-color:#263345!important;color:#edf3f9!important;
+}
+html.dark-mode .detail-modern .phone-spec-group-title{
+  color:#f5f7fb!important;border-bottom-color:#273447!important;
+}
+html.dark-mode .detail-modern .phone-spec-row{
+  background:#111a26!important;border-color:#29384b!important;
+}
+html.dark-mode .detail-modern .phone-spec-label{color:#8999ad!important}
+html.dark-mode .detail-modern .phone-spec-value{color:#f3f6fa!important}
+html.dark-mode .detail-modern .detail-copy h1{color:#f8fafc!important}
+html.dark-mode .detail-modern .detail-breadcrumb{color:#91a0b3!important}
+
+/* Shared Stitch pages/cards */
+html.dark-mode .modern-page-shell,
+html.dark-mode .generator-page,
+html.dark-mode .faq-page{--st-ink:#f5f7fb;--st-muted:#9eacbd;--st-bg:#080d15;--st-line:#263345;background:#080d15!important;color:#edf3f9!important}
+html.dark-mode .database-toolbar,
+html.dark-mode .generator-toolbar,
+html.dark-mode .database-card,
+html.dark-mode .generator-brand-card,
+html.dark-mode .carrier-card,
+html.dark-mode .faq-item,
+html.dark-mode .faq-side-card,
+html.dark-mode .imei-overview-dashboard,
+html.dark-mode .imei-variant-panel{
+  background:#0f1722!important;border-color:#263345!important;color:#edf3f9!important;
+  box-shadow:0 7px 22px rgba(0,0,0,.22)!important;
+}
+html.dark-mode .database-card h3,
+html.dark-mode .generator-brand-card strong,
+html.dark-mode .carrier-card h3,
+html.dark-mode .faq-item summary{color:#f5f7fb!important}
+html.dark-mode .database-card p,
+html.dark-mode .carrier-card span,
+html.dark-mode .faq-answer p{color:#9eacbd!important}
+html.dark-mode .database-search input,
+html.dark-mode .database-sort select{background:#111a26!important;color:#f5f7fb!important;border-color:#2b3a4d!important}
+html.dark-mode .spec-modern-card,
+html.dark-mode .imei-summary-card,
+html.dark-mode .imei-media-card{background:#111a26!important;border-color:#29384b!important;color:#edf3f9!important}
+html.dark-mode .spec-modern-value,
+html.dark-mode .imei-summary-card strong{color:#f5f7fb!important}
