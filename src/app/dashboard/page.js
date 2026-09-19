@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getToken, logout } from "../lib/auth";
+import { supabase } from "../lib/supabase";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -12,47 +12,30 @@ export default function Dashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     async function loadUser() {
-      const token = getToken();
-
-      if (!token) {
-        router.replace("/login");
-        return;
-      }
-
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/v1/auth/me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          logout();
+        const { data, error: authError } = await supabase.auth.getUser();
+        if (authError || !data.user) {
           router.replace("/login");
           return;
         }
-
-        setUser(data.user);
+        if (active) setUser(data.user);
       } catch (err) {
         console.error(err);
-        setError("Unable to load dashboard.");
+        if (active) setError("Unable to load dashboard.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
-
     loadUser();
+    return () => { active = false; };
   }, [router]);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await supabase.auth.signOut({ scope: "local" });
     router.replace("/login");
+    router.refresh();
   }
 
   if (loading) {
@@ -116,7 +99,7 @@ export default function Dashboard() {
               </span>
 
               <h1>
-                Welcome back, {user?.name || "User"} <span>👋</span>
+                Welcome back, {user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User"} <span>👋</span>
               </h1>
 
               <p>
@@ -144,7 +127,7 @@ export default function Dashboard() {
             <div className="dashboard-grid">
               <Card
                 title="Name"
-                value={user?.name || "-"}
+                value={user?.user_metadata?.name || user?.user_metadata?.full_name || "-"}
                 icon="fa-user"
               />
 
@@ -212,7 +195,7 @@ export default function Dashboard() {
               <h3>Authentication Active</h3>
 
               <p>
-                Your JWT token is valid and your account is authenticated.
+                Your Supabase session is active and your account is authenticated.
               </p>
             </div>
           </section>
