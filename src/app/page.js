@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { popularDevices } from "./data/devices";
 import DevicePhoto from "./components/DevicePhoto";
@@ -229,7 +228,7 @@ export default function Home() {
         <div className="device-grid-modern">
           {popularDevices.map((device) => (
             <Link href={`/phones/${device.slug}`} key={device.slug} className="device-modern-card">
-              <div className={`device-modern-photo device-photo-${device.slug}`}><Image src={device.image} alt={device.name} width={260} height={260} sizes="(max-width: 700px) 42vw, (max-width: 1100px) 22vw, 190px" quality={68} priority /></div>
+              <div className={`device-modern-photo device-photo-${device.slug}`}><DevicePhoto src={device.image} alt={device.name} priority /></div>
               <span className="device-modern-brand">{device.brand}</span>
               <h3>{device.name}</h3>
               <p>{device.specs}</p>
