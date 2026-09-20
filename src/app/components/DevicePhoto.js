@@ -53,7 +53,7 @@ function getAlphaBounds(image) {
   return pending;
 }
 
-function AdaptiveDevicePhoto({ src, alt, iconClassName }) {
+function AdaptiveDevicePhoto({ src, alt, iconClassName, priority = false }) {
   const frameRef = useRef(null);
   const [bounds, setBounds] = useState(null);
   const [frame, setFrame] = useState({ width: 0, height: 0 });
@@ -90,7 +90,7 @@ function AdaptiveDevicePhoto({ src, alt, iconClassName }) {
   return (
     <span ref={frameRef} className="adaptive-device-photo">
       {!failed && (
-        <img decoding="async" loading="lazy"
+        <img decoding="async" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
           src={src}
           alt={alt}
           style={imageStyle}
@@ -119,14 +119,14 @@ function AdaptiveDevicePhoto({ src, alt, iconClassName }) {
   );
 }
 
-export default function DevicePhoto({ src, alt, iconClassName, adaptive = false }) {
+export default function DevicePhoto({ src, alt, iconClassName, adaptive = false, priority = false }) {
   if (adaptive) {
-    return <AdaptiveDevicePhoto src={src} alt={alt} iconClassName={iconClassName} />;
+    return <AdaptiveDevicePhoto src={src} alt={alt} iconClassName={iconClassName} priority={priority} />;
   }
 
   return (
     <>
-      <img decoding="async" loading="lazy"
+      <img decoding="async" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
         src={src}
         alt={alt}
         onError={(event) => {
