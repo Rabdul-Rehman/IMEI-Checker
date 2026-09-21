@@ -8,6 +8,19 @@ export const popularDevices = [
     image: "/images/devices/iphone-17-pro.png",
     model: "A3256",
     releaseDate: "September 2025",
+    profileSpecs: {
+      General: { brand: "Apple", model_name: "iPhone 17 Pro", model_number: "A3256", release_date: "September 2025", market_status: "Available", availability_status: "Available" },
+      Display: { display_size_inches: 6.3, display_type: "Super Retina XDR OLED", resolution: "2622 × 1206", refresh_rate_hz: 120, pixel_density_ppi: 460, hdr_support: true, always_on_display: true, display_protection: "Ceramic Shield 2", brightness_peak_nits: 3000 },
+      "Body / Design": { dimensions: "150 × 71.9 × 8.75 mm", weight: "204 g", build_material: "Aluminum unibody; Ceramic Shield 2 front; Ceramic Shield back", ip_rating: "IP68", colors_available: ["Silver","Cosmic Orange","Deep Blue"] },
+      Memory: { storage_options: ["256 GB","512 GB","1 TB"], expandable_memory_support: false },
+      Platform: { os: "iOS 26", chipset: "Apple A19 Pro", cpu: "6-core CPU (2 performance + 4 efficiency)", gpu: "6-core GPU with Neural Accelerators" },
+      "Camera (Main)": { rear_camera_count: 3, rear_camera_features: ["48 MP Fusion Main","48 MP Fusion Ultra Wide","48 MP Fusion Telephoto","8x optical-quality zoom"] },
+      Battery: { battery_type: "Built-in rechargeable lithium-ion", charging_wireless_w: 25 },
+      "Connectivity / Communications": { wifi_standards: "Wi-Fi 7", bluetooth_version: "Bluetooth 6", usb_type: "USB-C", nfc: true, gps_support: "GPS, GLONASS, Galileo, QZSS, BeiDou, NavIC" },
+      Sound: { headphone_jack: false, loudspeaker_type: "Stereo speakers" },
+      "Sensors & Features": { face_unlock: true, fingerprint_type: "No", special_features: ["Face ID","Dynamic Island","Apple Intelligence","Emergency SOS via satellite"] },
+      Miscellaneous: { certifications: ["IP68"], additional_notes: ["ProMotion up to 120Hz","Always-On display"] }
+    },
     keySpecs: [
       { label: "Display", value: '6.3" Super Retina XDR', sub: "2622×1206, ProMotion 120Hz" },
       { label: "Processor", value: "A19 Pro", sub: "6-core CPU, 6-core GPU" },
@@ -23,6 +36,20 @@ export const popularDevices = [
     image: "/images/devices/galaxy-s25-ultra.png",
     model: "SM-S938",
     releaseDate: "January 2025",
+    profileSpecs: {
+      General: { brand: "Samsung", model_name: "Galaxy S25 Ultra", model_number: "SM-S938", release_date: "January 2025", market_status: "Available", availability_status: "Available" },
+      Display: { display_size_inches: 6.9, display_type: "Dynamic AMOLED 2X", resolution: "3120 × 1440 (Quad HD+)", refresh_rate_hz: 120, display_protection: "Corning Gorilla Armor 2" },
+      "Body / Design": { dimensions: "162.8 × 77.6 × 8.2 mm", weight: "218 g", build_material: "Titanium frame", ip_rating: "IP68", colors_available: ["Titanium Silverblue","Titanium Gray","Titanium Whitesilver","Titanium Black","Titanium Jetblack","Titanium Jadegreen","Titanium Pinkgold"] },
+      Memory: { ram_options: ["12 GB"], storage_options: ["256 GB","512 GB","1 TB"], expandable_memory_support: false },
+      Platform: { os: "Android", chipset: "Snapdragon 8 Elite for Galaxy", cpu: "Octa-core, up to 4.47 GHz" },
+      "Camera (Main)": { rear_camera_count: 4, rear_camera_features: ["200 MP wide","50 MP ultra-wide","50 MP telephoto","10 MP telephoto","3x and 5x optical zoom","Digital zoom up to 100x"], rear_video_recording: "8K @ 30 fps" },
+      "Camera (Front)": { front_camera_specs: { megapixels: 12 } },
+      Battery: { battery_capacity_mah: 5000, battery_type: "Non-removable", charging_wired_w: 45, endurance_rating: "Up to 31 hours video playback" },
+      "Connectivity / Communications": { wifi_standards: "Wi-Fi 7 (802.11be)", bluetooth_version: "Bluetooth 5.4", usb_type: "USB Type-C", nfc: true },
+      Sound: { headphone_jack: false, loudspeaker_type: "Stereo" },
+      "Sensors & Features": { sensors: ["Accelerometer","Barometer","Fingerprint","Gyroscope","Geomagnetic","Hall","Light","Proximity"], fingerprint_type: "Ultrasonic in-display", stylus_support: true, special_features: ["S Pen","Samsung DeX","SmartThings"] },
+      Miscellaneous: { certifications: ["IP68"], additional_notes: ["Security updates listed by Samsung through January 2032"] }
+    },
     keySpecs: [
       { label: "Display", value: '6.9" AMOLED 2X', sub: "3120×1440, 120Hz" },
       { label: "Processor", value: "Snapdragon 8 Elite", sub: "3nm, octa-core" },
@@ -38,6 +65,19 @@ export const popularDevices = [
     image: "/images/devices/pixel-10-pro.png",
     model: "GXQ96",
     releaseDate: "August 2025",
+    profileSpecs: {
+      General: { brand: "Google", model_name: "Pixel 10 Pro", model_number: "GXQ96", release_date: "August 2025", market_status: "Available", availability_status: "Available" },
+      Display: { display_size_inches: 6.3, display_type: "Super Actua LTPO OLED", resolution: "1280 × 2856", refresh_rate_hz: 120, pixel_density_ppi: 495, hdr_support: true, display_protection: "Corning Gorilla Glass Victus 2", brightness_peak_nits: 3300 },
+      "Body / Design": { dimensions: "6 × 2.8 × 0.3 in", weight: "7.3 oz", build_material: "Gorilla Glass Victus 2 cover glass", colors_available: ["Moonstone","Jade","Porcelain","Obsidian"] },
+      Memory: { ram_options: ["16 GB"], storage_options: ["128 GB","256 GB","512 GB","1 TB"], expandable_memory_support: false },
+      Platform: { os: "Android", chipset: "Google Tensor G5" },
+      "Camera (Main)": { rear_camera_count: 3, rear_camera_features: ["50 MP wide","48 MP ultra-wide","48 MP telephoto","Pro Res Zoom"] },
+      Battery: { battery_capacity_mah: 4870, charging_wired_w: 30, charging_wireless_w: 15, endurance_rating: "24+ hour battery life; up to 100 hours with Extreme Battery Saver" },
+      "Connectivity / Communications": { usb_type: "USB-C", nfc: true },
+      Sound: { headphone_jack: false, loudspeaker_type: "Stereo speakers" },
+      "Sensors & Features": { special_features: ["Gemini","Pixelsnap Qi2 wireless charging"] },
+      Miscellaneous: { additional_notes: ["Smooth Display 1–120Hz","Up to 3300 nits peak brightness"] }
+    },
     keySpecs: [
       { label: "Display", value: '6.3" LTPO OLED', sub: "1280×2856, 120Hz" },
       { label: "Processor", value: "Tensor G5", sub: "3nm, 8-core" },
@@ -53,6 +93,20 @@ export const popularDevices = [
     image: "/images/devices/xiaomi-15-ultra.png",
     model: "25010PN30G",
     releaseDate: "March 2025",
+    profileSpecs: {
+      General: { brand: "Xiaomi", model_name: "Xiaomi 15 Ultra", model_number: "25010PN30G", release_date: "March 2025", market_status: "Available", availability_status: "Available" },
+      Display: { display_size_inches: 6.73, display_type: "WQHD+ AMOLED All Around Liquid Display", resolution: "3200 × 1440", refresh_rate_hz: 120, pixel_density_ppi: 522, hdr_support: true, display_protection: "Xiaomi Shield Glass 2.0", brightness_peak_nits: 3200 },
+      "Body / Design": { dimensions: "161.3 × 75.3 × 9.35 mm (Black/White)", weight: "226 g (Black/White); 229 g (Silver Chrome)", colors_available: ["Black","White","Silver Chrome"] },
+      Memory: { ram_options: ["16 GB LPDDR5X"], storage_options: ["512 GB UFS 4.1"], storage_type: "UFS 4.1", expandable_memory_support: false },
+      Platform: { os: "Xiaomi HyperOS", chipset: "Snapdragon 8 Elite", cpu: "2 Prime cores up to 4.32 GHz + 6 Performance cores up to 3.53 GHz", gpu: "Adreno GPU" },
+      "Camera (Main)": { rear_camera_count: 4, rear_camera_features: ["Leica quad-camera system","200 MP telephoto","50 MP main","50 MP ultra-wide","50 MP telephoto"] },
+      "Camera (Front)": { front_camera_specs: { megapixels: 32 }, front_video_recording: "4K at 30/60 fps" },
+      Battery: { battery_capacity_mah: 5410, charging_wired_w: 90, charging_wireless_w: 80 },
+      "Connectivity / Communications": { usb_type: "USB Type-C", nfc: true },
+      Sound: { headphone_jack: false, loudspeaker_type: "Stereo speakers" },
+      "Sensors & Features": { special_features: ["Xiaomi HyperAI","Circle to Search with Google","Google Gemini"] },
+      Miscellaneous: { additional_notes: ["1–120Hz LTPO display","Dolby Vision","HDR10+"] }
+    },
     keySpecs: [
       { label: "Display", value: '6.73" WQHD+ AMOLED', sub: "3200×1440, 1-120Hz LTPO" },
       { label: "Processor", value: "Snapdragon 8 Elite", sub: "3nm, Oryon CPU" },
