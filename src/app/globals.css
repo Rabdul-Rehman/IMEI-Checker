@@ -4187,3 +4187,51 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
 .detail-modern .spec-readable-row{display:grid !important;grid-template-columns:minmax(90px,30%) minmax(0,1fr) !important;gap:10px !important}
 .detail-modern .spec-readable-key{text-transform:capitalize !important}
 .detail-modern .spec-modern-value{overflow-wrap:normal !important;word-break:normal !important}
+
+
+/* FINAL RESULT PAGE LAYOUT RESET — keep result data readable on desktop */
+@media (min-width: 901px){
+  .detail-modern{width:min(1500px,calc(100% - 56px)) !important}
+  .detail-modern .phone-detail-main{
+    display:grid !important;
+    grid-template-columns:minmax(360px,44%) minmax(520px,56%) !important;
+    gap:30px !important;
+    align-items:start !important;
+  }
+  .detail-modern .phone-detail-left,
+  .detail-modern .phone-detail-right{width:100% !important;min-width:0 !important}
+  .detail-modern .phone-spec-tabs{width:100% !important;min-width:0 !important}
+  .detail-modern .phone-spec-tab-content{
+    width:100% !important;max-width:none !important;
+    padding:16px !important;overflow:visible !important;max-height:none !important;
+  }
+  .detail-modern .imei-overview-dashboard{width:100% !important}
+  .detail-modern .imei-summary-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    width:100% !important;border:0 !important;gap:12px !important;
+    background:transparent !important;overflow:visible !important;
+  }
+  .detail-modern .imei-summary-card{
+    display:grid !important;grid-template-columns:36px minmax(0,1fr) !important;
+    width:auto !important;min-width:0 !important;min-height:110px !important;
+    padding:16px !important;gap:12px !important;
+    border:1px solid var(--line) !important;border-radius:12px !important;
+  }
+  .detail-modern .imei-summary-card strong{
+    display:block !important;max-width:100% !important;
+    font-size:15px !important;line-height:1.35 !important;
+    white-space:normal !important;word-break:normal !important;overflow-wrap:break-word !important;
+  }
+  .detail-modern .imei-variant-panel{
+    display:grid !important;grid-template-columns:1fr 1fr !important;
+    width:100% !important;gap:12px !important;
+  }
+  .detail-modern .phone-spec-group{width:100% !important}
+  .detail-modern .phone-spec-tab-content .spec-grid-modern{
+    width:100% !important;display:grid !important;grid-template-columns:1fr !important;
+  }
+  .detail-modern .phone-spec-tab-content .spec-modern-card{
+    width:100% !important;grid-template-columns:minmax(135px,28%) minmax(0,72%) !important;
+  }
+}
