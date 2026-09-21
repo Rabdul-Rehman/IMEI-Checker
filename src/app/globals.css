@@ -4434,3 +4434,21 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
 .imei-result-page .spec-readable-key,.imei-result-page .spec-readable-text{min-width:0}
 @media (min-width:901px) and (max-width:1180px){.imei-result-page .phone-spec-tab-content{grid-template-columns:1fr !important}.imei-result-page .imei-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
 @media (max-width:620px){.imei-result-page .imei-summary-grid,.imei-result-page .imei-variant-panel{grid-template-columns:1fr !important}.imei-result-page .spec-modern-card{grid-template-columns:1fr !important;gap:5px !important}.imei-result-page .spec-readable-row{grid-template-columns:1fr !important;gap:3px !important}}
+
+
+/* IMEI RESULT — EXPANDED DETAIL TABS */
+@media (min-width:901px){
+  .imei-result-page .phone-detail-main:has(.phone-spec-tabs-expanded){display:block !important}
+  .imei-result-page .phone-detail-main:has(.phone-spec-tabs-expanded) .phone-detail-left{display:none !important}
+  .imei-result-page .phone-detail-main:has(.phone-spec-tabs-expanded) .phone-detail-right{width:100% !important;max-width:none !important}
+  .imei-result-page .phone-spec-tabs-expanded{margin-top:22px !important}
+  .imei-result-page .phone-spec-tabs-expanded .phone-spec-tab-content{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:16px !important;padding:18px !important}
+  .imei-result-page .phone-spec-tabs-expanded .phone-spec-group{break-inside:avoid;align-self:start}
+  .imei-result-page .phone-spec-tabs-expanded .spec-modern-card{grid-template-columns:minmax(150px,26%) minmax(0,74%) !important}
+}
+@media (min-width:1250px){
+  .imei-result-page .phone-spec-tabs-expanded .phone-spec-tab-content{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+}
+@media (max-width:900px){
+  .imei-result-page .phone-spec-tabs-expanded .phone-spec-tab-content{display:block !important}
+}
