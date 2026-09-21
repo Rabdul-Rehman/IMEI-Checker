@@ -4149,3 +4149,41 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
   .detail-modern .imei-summary-grid,
   .detail-modern .imei-variant-panel{grid-template-columns:1fr !important}
 }
+
+
+/* IMEI result final desktop geometry — result page only */
+@media (min-width:901px){
+  .detail-modern .phone-detail-main{
+    display:grid !important;
+    grid-template-columns:minmax(320px,40%) minmax(0,60%) !important;
+    gap:24px !important;
+  }
+  .detail-modern .phone-detail-left,
+  .detail-modern .phone-detail-right{min-width:0 !important;width:auto !important}
+  .detail-modern .phone-spec-tab-content{display:block !important;padding:16px !important}
+  .detail-modern .imei-summary-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    width:100% !important;
+  }
+  .detail-modern .imei-summary-card{
+    width:auto !important;max-width:none !important;min-height:112px !important;
+    padding:16px !important;
+  }
+  .detail-modern .imei-summary-card strong{
+    font-size:14px !important;line-height:1.35 !important;
+    overflow-wrap:normal !important;word-break:normal !important;
+  }
+  .detail-modern .imei-variant-panel{
+    display:grid !important;grid-template-columns:1fr 1fr !important;width:100% !important;
+  }
+  .detail-modern .phone-spec-tab-content>.phone-spec-group,
+  .detail-modern .phone-spec-group{width:100% !important;max-width:none !important}
+  .detail-modern .phone-spec-tab-content .spec-grid-modern{
+    width:100% !important;max-width:none !important;
+  }
+}
+.detail-modern .spec-readable-object{gap:5px !important}
+.detail-modern .spec-readable-row{display:grid !important;grid-template-columns:minmax(90px,30%) minmax(0,1fr) !important;gap:10px !important}
+.detail-modern .spec-readable-key{text-transform:capitalize !important}
+.detail-modern .spec-modern-value{overflow-wrap:normal !important;word-break:normal !important}
