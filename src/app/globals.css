@@ -4067,3 +4067,10 @@ html.dark-mode .news-page .news-page-hero p{
   color:#9fb0c3 !important;
   -webkit-text-fill-color:#9fb0c3 !important;
 }
+
+
+/* Guides heading typography: match Phone/Carrier/Generator directory titles */
+.news-page .news-page-hero h1{
+  font-weight:800 !important;
+  letter-spacing:-0.045em !important;
+}
