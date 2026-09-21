@@ -102,6 +102,62 @@ SET reported_year = NULL, updated_at = now()
 WHERE reported_year IS NOT NULL
   AND (reported_year < 1980 OR reported_year > extract(year FROM CURRENT_DATE)::int + 1);
 
+-- Additional conservative pass: exact model-number identity.
+-- Model numbers are often stronger identifiers than marketing names, but only
+-- map when the normalized identifier points to exactly one catalog phone and
+-- any available brand evidence is compatible.
+CREATE TEMP TABLE _model_number_candidates ON COMMIT DROP AS
+SELECT
+  t.tac_id,
+  min(p.phone_id) AS phone_id,
+  min(p.brand_id) AS brand_id,
+  count(DISTINCT p.phone_id) AS candidate_count
+FROM public.tac_allocations t
+JOIN public.phones p
+  ON nullif(public.normalize_device_identity(t.reported_model_number), '') IS NOT NULL
+ AND (
+   public.normalize_device_identity(p.model_name) =
+     public.normalize_device_identity(t.reported_model_number)
+   OR public.normalize_device_identity(coalesce(p.specs_json->'General'->>'model_number','')) =
+     public.normalize_device_identity(t.reported_model_number)
+   OR public.normalize_device_identity(coalesce(p.specs_json->'general'->>'model_number','')) =
+     public.normalize_device_identity(t.reported_model_number)
+ )
+LEFT JOIN public.brands pb ON pb.brand_id = p.brand_id
+WHERE t.phone_id IS NULL
+  AND (
+    nullif(public.normalize_device_identity(t.reported_brand), '') IS NULL
+    OR public.normalize_device_identity(t.reported_brand) = public.normalize_device_identity(pb.name)
+    OR EXISTS (
+      SELECT 1 FROM _brand_alias a
+      WHERE a.alias_norm = public.normalize_device_identity(t.reported_brand)
+        AND a.canonical_norm = public.normalize_device_identity(pb.name)
+    )
+  )
+GROUP BY t.tac_id;
+CREATE INDEX ON _model_number_candidates(tac_id);
+
+INSERT INTO public.tac_mapping_audit
+  (tac_id, tac, old_phone_id, new_phone_id, old_brand_id, new_brand_id,
+   mapping_method, previous_status, previous_confidence)
+SELECT t.tac_id, t.tac, t.phone_id, c.phone_id, t.brand_id, c.brand_id,
+       'unique_exact_model_number', t.match_status, t.match_confidence
+FROM public.tac_allocations t
+JOIN _model_number_candidates c ON c.tac_id = t.tac_id
+WHERE t.phone_id IS NULL AND c.candidate_count = 1
+ON CONFLICT DO NOTHING;
+
+UPDATE public.tac_allocations t
+SET phone_id = c.phone_id,
+    brand_id = coalesce(t.brand_id, c.brand_id),
+    match_status = 'auto_matched',
+    match_confidence = GREATEST(coalesce(t.match_confidence, 0), 0.97),
+    updated_at = now()
+FROM _model_number_candidates c
+WHERE t.tac_id = c.tac_id
+  AND t.phone_id IS NULL
+  AND c.candidate_count = 1;
+
 -- Second conservative pass: exact normalized reported model where the model
 -- exists exactly once in the catalog. Brand evidence must either agree or be absent.
 CREATE TEMP TABLE _global_exact_candidates ON COMMIT DROP AS
@@ -166,3 +222,22 @@ SELECT mapping_method, count(*) AS newly_mapped
 FROM public.tac_mapping_audit
 GROUP BY mapping_method
 ORDER BY newly_mapped DESC;
+
+
+-- Diagnostic queries for the next mapping pass (read-only).
+-- Run these separately if your SQL editor only displays the final result set.
+SELECT
+  count(*) AS total_tacs,
+  count(*) FILTER (WHERE phone_id IS NOT NULL) AS mapped_tacs,
+  count(*) FILTER (WHERE phone_id IS NULL) AS unmapped_tacs,
+  round(100.0 * count(*) FILTER (WHERE phone_id IS NOT NULL) / nullif(count(*),0), 2) AS mapped_percent
+FROM public.tac_allocations;
+
+SELECT
+  count(*) FILTER (WHERE phone_id IS NULL) AS unmapped_total,
+  count(*) FILTER (WHERE phone_id IS NULL AND nullif(trim(reported_brand),'') IS NOT NULL) AS with_brand,
+  count(*) FILTER (WHERE phone_id IS NULL AND nullif(trim(reported_model_name),'') IS NOT NULL) AS with_model_name,
+  count(*) FILTER (WHERE phone_id IS NULL AND nullif(trim(reported_model_number),'') IS NOT NULL) AS with_model_number,
+  count(*) FILTER (WHERE phone_id IS NULL AND nullif(trim(reported_brand),'') IS NOT NULL AND nullif(trim(reported_model_name),'') IS NOT NULL) AS with_brand_and_model,
+  count(*) FILTER (WHERE phone_id IS NULL AND nullif(trim(reported_model_name),'') IS NULL AND nullif(trim(reported_model_number),'') IS NULL) AS no_model_identity
+FROM public.tac_allocations;
