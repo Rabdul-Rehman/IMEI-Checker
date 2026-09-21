@@ -4088,3 +4088,64 @@ html:not(.dark-mode) .auth-form input::placeholder{color:#98a2b3 !important}
 html:not(.dark-mode) .auth-submit{background:#0b1220 !important;color:#fff !important}
 html:not(.dark-mode) .auth-icon{background:#eef6ff !important;border-color:#cfe4fb !important;color:#2388f2 !important}
 html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
+
+
+/* ============================================================
+   IMEI RESULT — EMERGENCY RESPONSIVE FIX
+   Prevent narrow columns / clipped overview content on desktop.
+   ============================================================ */
+.detail-modern .phone-detail-main{
+  align-items:start !important;
+}
+.detail-modern .phone-detail-right{
+  min-width:0 !important;
+}
+.detail-modern .phone-spec-tabs,
+.detail-modern .phone-spec-tab-content,
+.detail-modern .imei-overview-dashboard,
+.detail-modern .imei-summary-grid,
+.detail-modern .imei-variant-panel{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+.detail-modern .imei-summary-grid{
+  grid-template-columns:repeat(2,minmax(220px,1fr)) !important;
+}
+.detail-modern .imei-summary-card{
+  min-width:0 !important;
+  grid-template-columns:38px minmax(0,1fr) !important;
+}
+.detail-modern .imei-summary-card>div{
+  min-width:0 !important;
+}
+.detail-modern .imei-summary-card strong,
+.detail-modern .imei-summary-card small{
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+}
+.detail-modern .phone-spec-tab-buttons{
+  display:flex !important;
+  width:100% !important;
+  overflow-x:auto !important;
+}
+.detail-modern .phone-spec-tab-buttons button{
+  flex:1 0 auto !important;
+  white-space:nowrap !important;
+}
+@media(max-width:1100px){
+  .detail-modern .phone-detail-main{
+    grid-template-columns:minmax(300px,38%) minmax(0,1fr) !important;
+  }
+  .detail-modern .imei-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+@media(max-width:900px){
+  .detail-modern .phone-detail-main{grid-template-columns:1fr !important}
+}
+@media(max-width:620px){
+  .detail-modern .imei-summary-grid,
+  .detail-modern .imei-variant-panel{grid-template-columns:1fr !important}
+}
