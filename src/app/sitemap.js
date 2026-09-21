@@ -1,0 +1,1 @@
+export default function sitemap(){const base=process.env.NEXT_PUBLIC_SITE_URL||"https://verifyimei.example";const routes=["","/phones","/carriers","/imei-generator","/calculator","/compare","/news","/faq","/login","/register"];return routes.map((path)=>({url:`${base}${path}`,lastModified:new Date(),changeFrequency:path===""?"daily":"weekly",priority:path===""?1:0.7}));}
