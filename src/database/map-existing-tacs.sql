@@ -102,6 +102,54 @@ SET reported_year = NULL, updated_at = now()
 WHERE reported_year IS NOT NULL
   AND (reported_year < 1980 OR reported_year > extract(year FROM CURRENT_DATE)::int + 1);
 
+-- Second conservative pass: exact normalized reported model where the model
+-- exists exactly once in the catalog. Brand evidence must either agree or be absent.
+CREATE TEMP TABLE _global_exact_candidates ON COMMIT DROP AS
+SELECT
+  t.tac_id,
+  min(p.phone_id) AS phone_id,
+  min(p.brand_id) AS brand_id,
+  count(DISTINCT p.phone_id) AS candidate_count
+FROM public.tac_allocations t
+JOIN public.phones p
+  ON public.normalize_device_identity(p.model_name) =
+     public.normalize_device_identity(t.reported_model_name)
+LEFT JOIN public.brands pb ON pb.brand_id = p.brand_id
+WHERE t.phone_id IS NULL
+  AND nullif(public.normalize_device_identity(t.reported_model_name), '') IS NOT NULL
+  AND (
+    nullif(public.normalize_device_identity(t.reported_brand), '') IS NULL
+    OR public.normalize_device_identity(t.reported_brand) = public.normalize_device_identity(pb.name)
+    OR EXISTS (
+      SELECT 1 FROM _brand_alias a
+      WHERE a.alias_norm = public.normalize_device_identity(t.reported_brand)
+        AND a.canonical_norm = public.normalize_device_identity(pb.name)
+    )
+  )
+GROUP BY t.tac_id;
+CREATE INDEX ON _global_exact_candidates(tac_id);
+
+INSERT INTO public.tac_mapping_audit
+  (tac_id, tac, old_phone_id, new_phone_id, old_brand_id, new_brand_id,
+   mapping_method, previous_status, previous_confidence)
+SELECT t.tac_id, t.tac, t.phone_id, c.phone_id, t.brand_id, c.brand_id,
+       'unique_exact_model_identity', t.match_status, t.match_confidence
+FROM public.tac_allocations t
+JOIN _global_exact_candidates c ON c.tac_id = t.tac_id
+WHERE t.phone_id IS NULL AND c.candidate_count = 1
+ON CONFLICT DO NOTHING;
+
+UPDATE public.tac_allocations t
+SET phone_id = c.phone_id,
+    brand_id = coalesce(t.brand_id, c.brand_id),
+    match_status = 'auto_matched',
+    match_confidence = GREATEST(coalesce(t.match_confidence, 0), 0.90),
+    updated_at = now()
+FROM _global_exact_candidates c
+WHERE t.tac_id = c.tac_id
+  AND t.phone_id IS NULL
+  AND c.candidate_count = 1;
+
 COMMIT;
 
 SELECT
