@@ -17,6 +17,12 @@ const CURATED_PHONE_MEDIA = Object.freeze({
     hero: "https://ardes.bg/uploads/original/apple-iphone-12-pro-295645.jpg",
     colors: ["Graphite", "Silver", "Gold", "Pacific Blue"],
     images: []
+  },
+  "apple|iphone 12 pro max": {
+    hero: "https://www.apple.com/newsroom/images/product/availability/Apple_iphone12mini-iphone12max-homepodmini-availability_iphone12promax-us_110520_inline.jpg.large.jpg",
+    colors: ["Graphite", "Silver", "Gold", "Pacific Blue"],
+    storage: ["128GB", "256GB", "512GB"],
+    images: []
   }
 });
 
