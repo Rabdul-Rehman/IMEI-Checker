@@ -4424,3 +4424,13 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
   }
   .imei-result-page .phone-spec-group{margin-bottom:16px !important}
 }
+
+
+/* IMEI RESULT — CROSS-MODEL HARDENING */
+.imei-result-page .spec-modern-card,.imei-result-page .imei-summary-card{min-width:0;overflow:hidden}
+.imei-result-page .spec-modern-value,.imei-result-page .spec-readable-text,.imei-result-page .imei-summary-card strong{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.imei-result-page .spec-readable-chip{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.imei-result-page .spec-readable-row{min-width:0}
+.imei-result-page .spec-readable-key,.imei-result-page .spec-readable-text{min-width:0}
+@media (min-width:901px) and (max-width:1180px){.imei-result-page .phone-spec-tab-content{grid-template-columns:1fr !important}.imei-result-page .imei-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+@media (max-width:620px){.imei-result-page .imei-summary-grid,.imei-result-page .imei-variant-panel{grid-template-columns:1fr !important}.imei-result-page .spec-modern-card{grid-template-columns:1fr !important;gap:5px !important}.imei-result-page .spec-readable-row{grid-template-columns:1fr !important;gap:3px !important}}
