@@ -8,6 +8,20 @@ function getSupabase() {
   return createClient(url, key);
 }
 
+function isValidImei(imei) {
+  if (!/^\d{15}$/.test(imei)) return false;
+  let sum = 0;
+  for (let i = 0; i < imei.length; i += 1) {
+    let digit = Number(imei[i]);
+    if (i % 2 === 1) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+  }
+  return sum % 10 === 0;
+}
+
 function json(data, status = 200) {
   return Response.json(data, { status });
 }
@@ -378,6 +392,9 @@ export async function GET(request, { params }) {
 
     if (!/^\d{15}$/.test(imei)) {
       return json({ success: false, error: "Invalid IMEI. IMEI must contain exactly 15 digits." }, 400);
+    }
+    if (!isValidImei(imei)) {
+      return json({ success: false, error: "Invalid IMEI check digit. Please verify the 15-digit IMEI and try again." }, 400);
     }
 
     const tac = imei.slice(0, 8);
