@@ -4288,3 +4288,139 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
   .detail-modern .spec-readable-object{width:100% !important}
   .detail-modern .spec-readable-row{display:grid !important;grid-template-columns:minmax(90px,30%) minmax(0,70%) !important}
 }
+
+
+/* ============================================================
+   IMEI RESULT — DEFINITIVE LAYOUT (scoped, final override)
+   ============================================================ */
+@media (min-width: 901px){
+  .imei-result-page.detail-modern{
+    width:calc(100% - 56px) !important;
+    max-width:1500px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+  }
+  .imei-result-page .phone-detail-main{
+    display:grid !important;
+    grid-template-columns:minmax(360px,44%) minmax(0,56%) !important;
+    gap:30px !important;
+    align-items:start !important;
+  }
+  .imei-result-page .phone-detail-left,
+  .imei-result-page .phone-detail-right,
+  .imei-result-page .phone-spec-tabs,
+  .imei-result-page .phone-spec-tab-content{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+
+  /* Overview: stable 2 x 2 cards, never four squeezed columns */
+  .imei-result-page .imei-summary-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px !important;
+    width:100% !important;
+    border:0 !important;
+    background:transparent !important;
+    overflow:visible !important;
+  }
+  .imei-result-page .imei-summary-card{
+    display:grid !important;
+    grid-template-columns:36px minmax(0,1fr) !important;
+    align-items:start !important;
+    width:auto !important;
+    min-width:0 !important;
+    min-height:112px !important;
+    padding:16px !important;
+    gap:12px !important;
+    border:1px solid var(--line) !important;
+    border-radius:12px !important;
+  }
+  .imei-result-page .imei-summary-card strong,
+  .imei-result-page .imei-summary-card small{
+    white-space:normal !important;
+    word-break:normal !important;
+    overflow-wrap:break-word !important;
+  }
+  .imei-result-page .imei-variant-panel{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:12px !important;
+    width:100% !important;
+  }
+
+  /* Hardware / Camera / Connectivity: groups form columns;
+     rows inside each group always stay full width. */
+  .imei-result-page .phone-spec-tab-content{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:14px !important;
+    padding:16px !important;
+    overflow:visible !important;
+    max-height:none !important;
+    align-items:start !important;
+  }
+  .imei-result-page .phone-spec-tab-content > .imei-overview-dashboard{
+    grid-column:1 / -1 !important;
+  }
+  .imei-result-page .phone-spec-group{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+  }
+  .imei-result-page .phone-spec-tab-content .spec-grid-modern{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    width:100% !important;
+    min-width:0 !important;
+    border:0 !important;
+    background:transparent !important;
+    overflow:visible !important;
+  }
+  .imei-result-page .phone-spec-tab-content .spec-modern-card{
+    display:grid !important;
+    grid-template-columns:minmax(120px,34%) minmax(0,66%) !important;
+    align-items:center !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:48px !important;
+    height:auto !important;
+    padding:11px 13px !important;
+    border:1px solid var(--line) !important;
+    border-radius:10px !important;
+    box-sizing:border-box !important;
+  }
+  .imei-result-page .spec-modern-label,
+  .imei-result-page .spec-modern-value,
+  .imei-result-page .spec-readable-text{
+    width:auto !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    white-space:normal !important;
+    word-break:normal !important;
+    overflow-wrap:break-word !important;
+  }
+  .imei-result-page .spec-readable-object{width:100% !important}
+  .imei-result-page .spec-readable-row{
+    display:grid !important;
+    grid-template-columns:minmax(90px,32%) minmax(0,68%) !important;
+    gap:8px !important;
+    align-items:start !important;
+  }
+  .imei-result-page .spec-readable-list{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:6px !important;
+  }
+}
+@media (max-width: 900px){
+  .imei-result-page .phone-spec-tab-content{
+    display:block !important;
+  }
+  .imei-result-page .phone-spec-group{margin-bottom:16px !important}
+}
