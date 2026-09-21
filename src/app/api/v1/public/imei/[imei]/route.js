@@ -22,7 +22,7 @@ function isValidImei(imei) {
   return sum % 10 === 0;
 }
 
-function json(data, status = 200) {
+const RATE_WINDOW_MS = 60_000;\nconst RATE_MAX_REQUESTS = 30;\nconst rateBuckets = globalThis.__verifyImeiRateBuckets || (globalThis.__verifyImeiRateBuckets = new Map());\nfunction clientIp(request){return request.headers.get("cf-connecting-ip")||request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown";}\nfunction isRateLimited(request){const now=Date.now(),key=clientIp(request);const bucket=rateBuckets.get(key);if(!bucket||now-bucket.started>=RATE_WINDOW_MS){rateBuckets.set(key,{started:now,count:1});return false;}bucket.count+=1;return bucket.count>RATE_MAX_REQUESTS;}\n\nfunction json(data, status = 200) {
   return Response.json(data, { status });
 }
 
