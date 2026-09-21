@@ -29,7 +29,7 @@ export default async function PhoneDetailPage({ params }) {
       slug: featured.slug,
       images: [featured.image],
       brands: { name: featured.brand },
-      specs_json: {
+      specs_json: featured.profileSpecs || {
         General: {
           brand: featured.brand,
           model_name: featured.name,
