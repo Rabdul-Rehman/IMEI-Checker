@@ -4048,3 +4048,22 @@ html.dark-mode [class*="-card"]:not(.detail-next-step){border-color:#263345}
   background:var(--page-bg,#f4f7fb) !important;
   color:var(--text,#0b1220);
 }
+
+
+/* Guides: explicit light/dark heading colors (do not rely on legacy --text token) */
+html:not(.dark-mode) .news-page .news-page-hero h1{
+  color:#0b1220 !important;
+  -webkit-text-fill-color:#0b1220 !important;
+}
+html:not(.dark-mode) .news-page .news-page-hero p{
+  color:#667085 !important;
+  -webkit-text-fill-color:#667085 !important;
+}
+html.dark-mode .news-page .news-page-hero h1{
+  color:#f5f8fc !important;
+  -webkit-text-fill-color:#f5f8fc !important;
+}
+html.dark-mode .news-page .news-page-hero p{
+  color:#9fb0c3 !important;
+  -webkit-text-fill-color:#9fb0c3 !important;
+}
