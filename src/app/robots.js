@@ -1,0 +1,1 @@
+export default function robots(){const base=process.env.NEXT_PUBLIC_SITE_URL||"https://verifyimei.example";return{rules:[{userAgent:"*",allow:"/",disallow:["/dashboard","/admin","/results/"]}],sitemap:`${base}/sitemap.xml`};}
