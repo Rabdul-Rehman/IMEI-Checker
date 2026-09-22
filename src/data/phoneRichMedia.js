@@ -3,7 +3,7 @@ import generatedMedia from "./phoneRichMedia.generated.json";
 
 function normalize(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();}
 function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(b&&m.startsWith(b+" "))m=m.slice(b.length+1).trim();return b+"|"+m;}
-function validUrl(value){return typeof value==="string"&&/^(https?:\\/\\/|\\/)/.test(value.trim());}
+function validUrl(value){return typeof value==="string"&&/^(https?:\/\/|\/)/.test(value.trim());}
 function finishMedia(hero,finishes){
   if(!validUrl(hero)||!Array.isArray(finishes))return [];
   // Every database iPhone finish is an interactive option. Families that do not
