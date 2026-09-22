@@ -4458,3 +4458,18 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
 .imei-media-card-button{appearance:none;font:inherit;cursor:pointer;text-align:center}
 .imei-media-card-button.active{outline:2px solid #2ea8ff;outline-offset:2px}
 .imei-media-card-button:focus-visible{outline:3px solid #2ea8ff;outline-offset:3px}
+
+
+/* Result media labels: strong contrast in deployed light/dark themes */
+.imei-result-page .imei-media-card span,
+.imei-result-page .imei-media-card-button span {
+  color: #172033 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+}
+[data-theme="dark"] .imei-result-page .imei-media-card span,
+[data-theme="dark"] .imei-result-page .imei-media-card-button span,
+.dark .imei-result-page .imei-media-card span,
+.dark .imei-result-page .imei-media-card-button span {
+  color: #f3f7ff !important;
+}
