@@ -4927,3 +4927,173 @@ html.dark-mode .st-mobile-menu-links a.active{background:#102a3e;border-color:#2
     margin-top:18px !important;
   }
 }
+
+
+/* IMEI MOBILE RESULT POLISH v4 */
+@media screen and (max-width:600px){
+  /* Let the result card use the full phone width cleanly. */
+  body .imei-result-page{
+    padding-left:8px !important;
+    padding-right:8px !important;
+  }
+
+  body .imei-result-page .phone-detail-main{
+    padding:14px !important;
+    border-radius:18px !important;
+    gap:14px !important;
+    overflow:hidden !important;
+  }
+
+  /* Hero: compact, centered, no desktop-scale whitespace. */
+  body .imei-result-page .phone-detail-left,
+  body .imei-result-page .phone-detail-left > .detail-image{
+    height:215px !important;
+    min-height:215px !important;
+    max-height:215px !important;
+  }
+  body .imei-result-page .phone-detail-left > .detail-image{
+    padding:48px 10px 10px !important;
+  }
+  body .imei-result-page .phone-detail-left > .detail-image > img{
+    width:100% !important;
+    height:150px !important;
+    max-height:150px !important;
+    object-fit:contain !important;
+    object-position:center !important;
+  }
+
+  /* Headline/meta: prevent ugly wrapping and oversized controls. */
+  body .imei-result-page .detail-copy{
+    padding:2px 2px 4px !important;
+  }
+  body .imei-result-page .detail-copy h1{
+    font-size:22px !important;
+    line-height:1.08 !important;
+    overflow-wrap:anywhere !important;
+  }
+  body .imei-result-page .detail-copy .text-secondary{
+    font-size:14px !important;
+    line-height:1.35 !important;
+  }
+  body .imei-result-page .detail-meta{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:6px !important;
+  }
+  body .imei-result-page .detail-tag{
+    font-size:9px !important;
+    white-space:nowrap !important;
+  }
+  body .imei-result-page .detail-actions{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:7px !important;
+  }
+  body .imei-result-page .detail-actions a{
+    width:100% !important;
+    min-height:36px !important;
+    justify-content:center !important;
+    box-sizing:border-box !important;
+  }
+
+  /* Tabs: horizontally scroll labels, but content itself must be full width. */
+  body .imei-result-page .phone-spec-tabs{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  body .imei-result-page .phone-spec-tab-buttons{
+    display:flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:none !important;
+    -webkit-overflow-scrolling:touch !important;
+  }
+  body .imei-result-page .phone-spec-tab-buttons::-webkit-scrollbar{display:none !important}
+  body .imei-result-page .phone-spec-tab-buttons button{
+    flex:0 0 auto !important;
+    min-width:max-content !important;
+    padding:12px 14px !important;
+    font-size:11px !important;
+  }
+  body .imei-result-page .phone-spec-tab-content{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    padding:10px !important;
+    overflow:hidden !important;
+  }
+
+  /* CRITICAL: desktop two-column summary cards were being squeezed into ~70px.
+     Stack them into one clean column on phones. */
+  body .imei-result-page .imei-summary-grid{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  body .imei-result-page .imei-summary-card{
+    display:flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:82px !important;
+    height:auto !important;
+    box-sizing:border-box !important;
+    padding:12px !important;
+    gap:12px !important;
+    align-items:flex-start !important;
+    overflow:hidden !important;
+  }
+  body .imei-result-page .imei-summary-card > div{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+  }
+  body .imei-result-page .imei-summary-card span,
+  body .imei-result-page .imei-summary-card strong,
+  body .imei-result-page .imei-summary-card small{
+    writing-mode:horizontal-tb !important;
+    word-break:normal !important;
+    overflow-wrap:anywhere !important;
+    white-space:normal !important;
+    max-width:100% !important;
+  }
+  body .imei-result-page .imei-summary-card strong{
+    display:block !important;
+    font-size:14px !important;
+    line-height:1.3 !important;
+  }
+  body .imei-result-page .imei-summary-card small{
+    display:block !important;
+    font-size:10px !important;
+    line-height:1.35 !important;
+    margin-top:3px !important;
+  }
+
+  /* Storage + colors should also stack instead of being squeezed. */
+  body .imei-result-page .imei-variant-panel{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  body .imei-result-page .imei-variant-block{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  /* Keep next-step card comfortable on narrow screens. */
+  body .imei-result-page .detail-next-step{
+    padding:24px 20px !important;
+    gap:16px !important;
+  }
+  body .imei-result-page .detail-next-step h2{
+    font-size:20px !important;
+    line-height:1.15 !important;
+  }
+}
