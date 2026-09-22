@@ -4575,3 +4575,136 @@ html.dark-mode .st-mobile-menu-head strong{color:#fff}
 html.dark-mode .st-mobile-menu-head button{background:#172638;color:#fff}
 html.dark-mode .st-mobile-menu-links a{background:#101e2d;border-color:#26384b;color:#f4f7fb}
 html.dark-mode .st-mobile-menu-links a.active{background:#102a3e;border-color:#2ea8ff}
+
+
+/* IMEI RESULT — MOBILE LAYOUT FIX (scoped; navbar untouched) */
+@media (max-width:900px){
+  .imei-result-page.detail-modern{
+    width:100% !important;max-width:100% !important;
+    margin:0 !important;padding:16px 10px 28px !important;
+    overflow-x:hidden !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .detail-breadcrumb{display:none !important}
+  .imei-result-page .phone-detail-main{
+    display:flex !important;flex-direction:column !important;
+    width:100% !important;min-width:0 !important;gap:18px !important;
+  }
+  .imei-result-page .phone-detail-left,
+  .imei-result-page .phone-detail-right{
+    display:block !important;width:100% !important;max-width:100% !important;
+    min-width:0 !important;margin:0 !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .detail-image{
+    position:relative !important;width:100% !important;max-width:100% !important;
+    height:auto !important;min-height:330px !important;
+    padding:54px 18px 20px !important;margin:0 !important;
+    display:flex !important;align-items:center !important;justify-content:center !important;
+    overflow:hidden !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .detail-image > img{
+    display:block !important;width:auto !important;height:auto !important;
+    max-width:78% !important;max-height:245px !important;
+    object-fit:contain !important;object-position:center !important;
+    margin:auto !important;position:static !important;transform:none !important;
+  }
+  .imei-result-page .detail-image .device-icon-fallback{
+    position:static !important;margin:auto !important;transform:none !important;
+  }
+  .imei-result-page .detail-image-badge{top:16px !important;left:16px !important}
+  .imei-result-page .imei-valid-strip{
+    position:absolute !important;left:14px !important;right:14px !important;bottom:12px !important;
+    width:auto !important;max-width:none !important;display:flex !important;
+    justify-content:center !important;gap:8px !important;flex-wrap:wrap !important;
+  }
+
+  /* On mobile, identity/details follow the phone immediately. */
+  .imei-result-page .phone-detail-right{
+    display:flex !important;flex-direction:column !important;
+  }
+  .imei-result-page .detail-copy{
+    order:1 !important;width:100% !important;padding:4px 2px 2px !important;
+    box-sizing:border-box !important;
+  }
+  .imei-result-page .detail-copy h1{
+    font-size:27px !important;line-height:1.08 !important;
+    overflow-wrap:anywhere !important;margin-top:7px !important;
+  }
+  .imei-result-page .detail-copy .text-secondary{
+    font-size:14px !important;line-height:1.45 !important;overflow-wrap:anywhere !important;
+  }
+  .imei-result-page .detail-meta{display:flex !important;flex-wrap:wrap !important;gap:7px !important}
+  .imei-result-page .detail-actions{
+    display:grid !important;grid-template-columns:1fr !important;gap:8px !important;width:100% !important;
+  }
+  .imei-result-page .detail-actions a{width:100% !important;box-sizing:border-box !important;justify-content:center !important}
+
+  .imei-result-page .phone-spec-tabs{
+    order:2 !important;width:100% !important;max-width:100% !important;min-width:0 !important;
+    margin-top:12px !important;overflow:hidden !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .phone-spec-tab-buttons{
+    width:100% !important;display:flex !important;overflow-x:auto !important;
+    scrollbar-width:none !important;-webkit-overflow-scrolling:touch !important;
+  }
+  .imei-result-page .phone-spec-tab-buttons::-webkit-scrollbar{display:none !important}
+  .imei-result-page .phone-spec-tab-buttons button{
+    flex:0 0 auto !important;min-width:max-content !important;padding:13px 14px !important;font-size:11px !important;
+  }
+  .imei-result-page .phone-spec-tab-content{
+    display:block !important;width:100% !important;max-width:100% !important;
+    min-width:0 !important;padding:12px !important;box-sizing:border-box !important;
+    overflow:visible !important;max-height:none !important;
+  }
+  .imei-result-page .imei-overview-dashboard,
+  .imei-result-page .imei-summary-grid,
+  .imei-result-page .imei-variant-panel{
+    width:100% !important;max-width:100% !important;min-width:0 !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .imei-summary-grid{
+    display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px !important;
+  }
+  .imei-result-page .imei-summary-card{
+    width:auto !important;min-width:0 !important;min-height:104px !important;
+    padding:12px !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .imei-variant-panel{
+    display:grid !important;grid-template-columns:1fr !important;gap:9px !important;
+  }
+
+  /* Media becomes a compact section after the main specs instead of stretching the hero. */
+  .imei-result-page .imei-device-media{
+    width:100% !important;max-width:100% !important;margin:16px 0 0 !important;
+    padding:0 !important;box-sizing:border-box !important;overflow:hidden !important;
+  }
+  .imei-result-page .imei-media-grid{
+    display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:9px !important;width:100% !important;
+  }
+  .imei-result-page .imei-media-card,
+  .imei-result-page .imei-media-card-button{
+    width:100% !important;min-width:0 !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .imei-media-card img,
+  .imei-result-page .imei-media-card-button img{
+    display:block !important;width:100% !important;height:120px !important;
+    object-fit:contain !important;margin:auto !important;
+  }
+  .imei-result-page .imei-media-colors{
+    display:flex !important;flex-wrap:wrap !important;gap:8px !important;width:100% !important;
+  }
+  .imei-result-page .detail-summary-left{
+    width:100% !important;max-width:100% !important;margin-top:16px !important;
+    grid-template-columns:1fr 1fr !important;box-sizing:border-box !important;
+  }
+  .imei-result-page .detail-next-step{
+    width:100% !important;max-width:100% !important;margin-top:20px !important;
+    box-sizing:border-box !important;gap:14px !important;
+  }
+}
+@media (max-width:520px){
+  .imei-result-page .detail-image{min-height:300px !important;padding:50px 14px 18px !important}
+  .imei-result-page .detail-image > img{max-width:82% !important;max-height:215px !important}
+  .imei-result-page .imei-summary-grid{grid-template-columns:1fr !important}
+  .imei-result-page .detail-summary-left{grid-template-columns:1fr !important}
+  .imei-result-page .detail-copy h1{font-size:24px !important}
+}
