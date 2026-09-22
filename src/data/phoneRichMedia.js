@@ -3,7 +3,14 @@ import generatedMedia from "./phoneRichMedia.generated.json";
 
 function normalize(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();}
 function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(b&&m.startsWith(b+" "))m=m.slice(b.length+1).trim();return b+"|"+m;}
-function validUrl(value){return typeof value==="string"&&/^(https?:\/\/|\/)/.test(value.trim());}
+function validUrl(value){return typeof value==="string"&&/^(https?:\\/\\/|\\/)/.test(value.trim());}
+function finishMedia(hero,finishes){
+  if(!validUrl(hero)||!Array.isArray(finishes))return [];
+  // Every database iPhone finish is an interactive option. Families that do not
+  // yet have a separately curated photograph safely use the canonical exact-
+  // model artwork rather than a wrong phone/model image.
+  return finishes.filter(Boolean).map(name=>({name,src:hero}));
+}
 function cleanMedia(media){if(!media||typeof media!=="object")return null;return {...media,hero:validUrl(media.hero)?media.hero:null,colors:(media.colors||[]).filter(x=>x?.name&&validUrl(x?.src)),views:(media.views||[]).filter(x=>x?.name&&validUrl(x?.src)),finishes:Array.isArray(media.finishes)?media.finishes:[],storage:Array.isArray(media.storage)?media.storage:[]};}
 
 // Curated entries take precedence over generated batches. Labels are semantic:
@@ -93,7 +100,11 @@ function appleFamilyMedia(brand,model){
   const family=appleIphoneFamily(model);if(!family)return null;
   const base=APPLE_IPHONE_FAMILY_MEDIA[family];
   const exact=PHONE_RICH_MEDIA["apple|"+family];
-  return cleanMedia({...base,...(exact||{}),hero:exact?.hero||base.hero,finishes:exact?.finishes||base.finishes||[],source:"Canonical Apple iPhone family media"});
+  const hero=exact?.hero||base.hero;
+  const finishes=exact?.finishes||base.finishes||[];
+  const colors=(exact?.colors&&exact.colors.length)?exact.colors:finishMedia(hero,finishes);
+  return cleanMedia({...base,...(exact||{}),hero,colors,finishes,source:"Canonical Apple iPhone family media"});
+
 }
 
 export function getPhoneRichMedia(brand,model){
