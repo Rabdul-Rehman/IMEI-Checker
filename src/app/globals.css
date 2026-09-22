@@ -4805,3 +4805,125 @@ html.dark-mode .st-mobile-menu-links a.active{background:#102a3e;border-color:#2
   }
   .imei-result-page .detail-next-step{margin-top:18px !important}
 }
+
+
+/* IMEI MOBILE EMERGENCY FIX v3
+   Override older mobile rules that were leaving the left result column at
+   desktop height and pushing the actual device details off-screen. */
+@media screen and (max-width:600px){
+  body .imei-result-page .phone-detail-main{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:auto auto !important;
+    align-items:start !important;
+    gap:14px !important;
+    height:auto !important;
+    min-height:0 !important;
+  }
+
+  body .imei-result-page .phone-detail-left{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:270px !important;
+    gap:0 !important;
+    width:100% !important;
+    height:270px !important;
+    min-height:270px !important;
+    max-height:270px !important;
+    overflow:hidden !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  body .imei-result-page .phone-detail-left > .detail-image{
+    grid-row:1 !important;
+    display:flex !important;
+    width:100% !important;
+    height:270px !important;
+    min-height:270px !important;
+    max-height:270px !important;
+    margin:0 !important;
+    padding:48px 12px 14px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  body .imei-result-page .phone-detail-left > .detail-image > img{
+    position:static !important;
+    inset:auto !important;
+    display:block !important;
+    width:100% !important;
+    height:190px !important;
+    max-width:100% !important;
+    max-height:190px !important;
+    object-fit:contain !important;
+    object-position:center !important;
+    margin:auto !important;
+    padding:0 !important;
+    transform:none !important;
+  }
+
+  body .imei-result-page .phone-detail-left > .imei-device-media,
+  body .imei-result-page .phone-detail-left > .detail-summary,
+  body .imei-result-page .phone-detail-left > .imei-technical-details{
+    display:none !important;
+    height:0 !important;
+    min-height:0 !important;
+    max-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+  }
+
+  body .imei-result-page .phone-detail-right{
+    display:flex !important;
+    position:static !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    flex-direction:column !important;
+    gap:12px !important;
+  }
+
+  body .imei-result-page .detail-copy,
+  body .imei-result-page .phone-spec-tabs{
+    display:block !important;
+    position:static !important;
+    width:100% !important;
+    height:auto !important;
+    max-height:none !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    overflow:visible !important;
+  }
+
+  body .imei-result-page .detail-copy{
+    padding:8px 4px 4px !important;
+  }
+
+  body .imei-result-page .detail-copy h1{
+    font-size:24px !important;
+    line-height:1.12 !important;
+    margin:6px 0 7px !important;
+  }
+
+  body .imei-result-page .detail-copy .detail-actions{
+    display:flex !important;
+    margin-top:12px !important;
+  }
+
+  body .imei-result-page .phone-spec-tab-buttons{
+    overflow-x:auto !important;
+    justify-content:flex-start !important;
+  }
+
+  body .imei-result-page .detail-next-step{
+    margin-top:18px !important;
+  }
+}
