@@ -4452,3 +4452,9 @@ html:not(.dark-mode) .auth-switch a{color:#3157e8 !important}
 @media (max-width:900px){
   .imei-result-page .phone-spec-tabs-expanded .phone-spec-tab-content{display:block !important}
 }
+
+
+/* Interactive exact-model iPhone media */
+.imei-media-card-button{appearance:none;font:inherit;cursor:pointer;text-align:center}
+.imei-media-card-button.active{outline:2px solid #2ea8ff;outline-offset:2px}
+.imei-media-card-button:focus-visible{outline:3px solid #2ea8ff;outline-offset:3px}
