@@ -70,3 +70,37 @@
  .detail-modern .imei-device-media{order:2}
  .detail-modern .detail-copy h1{font-size:36px!important}
 }
+
+
+/* Result polish: clean light-mode device presentation */
+html:not([data-theme="dark"]) .detail-modern .detail-image,
+body:not(.dark) .detail-modern .detail-image{
+  background:#fff!important;
+  border-color:#d9e2ec!important;
+  box-shadow:0 12px 34px rgba(15,23,42,.06)!important;
+}
+html:not([data-theme="dark"]) .detail-modern .detail-image>img,
+body:not(.dark) .detail-modern .detail-image>img{
+  background:#fff!important;
+}
+html:not([data-theme="dark"]) .detail-modern .imei-media-heading,
+body:not(.dark) .detail-modern .imei-media-heading{
+  color:#0b1521!important;
+  font-weight:800!important;
+}
+html:not([data-theme="dark"]) .detail-modern .imei-media-color,
+body:not(.dark) .detail-modern .imei-media-color{
+  background:#fff!important;
+  border-color:#cbd7e4!important;
+  color:#132238!important;
+}
+html:not([data-theme="dark"]) .detail-modern .imei-media-card,
+body:not(.dark) .detail-modern .imei-media-card{
+  background:#fff!important;
+  border-color:#d6e0ea!important;
+  color:#132238!important;
+}
+html:not([data-theme="dark"]) .detail-modern .imei-media-card img,
+body:not(.dark) .detail-modern .imei-media-card img{
+  background:#fff!important;
+}
