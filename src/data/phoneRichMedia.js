@@ -5,17 +5,37 @@ function normalize(value){return String(value||"").toLowerCase().replace(/[^a-z0
 function keyFor(brand,model){const b=normalize(brand);let m=normalize(model);if(b&&m.startsWith(b+" "))m=m.slice(b.length+1).trim();return b+"|"+m;}
 function validUrl(value){return typeof value==="string"&&/^(https?:\/\/|\/)/.test(value.trim());}
 function finishMedia(hero,finishes){
-  if(!validUrl(hero)||!Array.isArray(finishes))return [];
-  // Every database iPhone finish is an interactive option. Families that do not
-  // yet have a separately curated photograph safely use the canonical exact-
-  // model artwork rather than a wrong phone/model image.
-  return finishes.filter(Boolean).map(name=>({name,src:hero}));
+  // A finish is clickable only when it has a distinct verified image.
+  // Never duplicate the canonical hero across different color labels.
+  return [];
 }
 function cleanMedia(media){if(!media||typeof media!=="object")return null;return {...media,hero:validUrl(media.hero)?media.hero:null,colors:(media.colors||[]).filter(x=>x?.name&&validUrl(x?.src)),views:(media.views||[]).filter(x=>x?.name&&validUrl(x?.src)),finishes:Array.isArray(media.finishes)?media.finishes:[],storage:Array.isArray(media.storage)?media.storage:[]};}
 
 // Curated entries take precedence over generated batches. Labels are semantic:
 // never label a generic photo as a color or device angle.
 const PHONE_RICH_MEDIA=Object.freeze({
+  "apple|iphone 12":{
+    colors:[
+      {name:"Black",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-black-select-2020?wid=470&hei=556&fmt=png-alpha"},
+      {name:"White",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-white-select-2020?wid=470&hei=556&fmt=png-alpha"},
+      {name:"(PRODUCT)RED",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-red-select-2020?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Green",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-green-select-2020?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Blue",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-blue-select-2020?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Purple",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-purple-select-2021?wid=470&hei=556&fmt=png-alpha"}
+    ],
+    finishes:["Black","White","(PRODUCT)RED","Green","Blue","Purple"]
+  },
+  "apple|iphone 14 plus":{
+    colors:[
+      {name:"Midnight",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-midnight-select-202209?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Blue",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-blue-select-202209?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Starlight",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-starlight-select-202209?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Purple",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-purple-select-202209?wid=470&hei=556&fmt=png-alpha"},
+      {name:"(PRODUCT)RED",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-product-red-select-202209?wid=470&hei=556&fmt=png-alpha"},
+      {name:"Yellow",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-yellow-select-202303?wid=470&hei=556&fmt=png-alpha"}
+    ],
+    finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED","Yellow"]
+  },
   "apple|iphone 11":{
     colors:[
       {name:"Black",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone11-black-select-2019?wid=940&hei=1112&fmt=png-alpha"},
