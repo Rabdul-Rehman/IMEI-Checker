@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { popularDevices } from "./data/devices";
 import DevicePhoto from "./components/DevicePhoto";
 import { lookupPublicImei } from "./lib/api";
@@ -42,6 +42,15 @@ export default function Home() {
   const [previewTab, setPreviewTab] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const imeiInputRef = useRef(null);
+
+  useEffect(() => {
+    // Make the site's primary action immediately obvious on phone-sized screens.
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      const timer = window.setTimeout(() => imeiInputRef.current?.focus({ preventScroll: true }), 350);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
 
 
   async function checkImei(e) {
@@ -94,6 +103,8 @@ export default function Home() {
               <div className="imei-input-wrap">
                 <i className="fas fa-mobile-screen-button" />
                 <input
+                  ref={imeiInputRef}
+                  autoComplete="off"
                   value={imei}
                   onChange={(e) => setImei(e.target.value.replace(/\D/g, "").slice(0, 15))}
                   inputMode="numeric"
@@ -106,6 +117,7 @@ export default function Home() {
               <button type="submit" className="primary-action">
                 Check IMEI <i className="fas fa-arrow-right" />
               </button>
+              <p className="imei-mobile-hint"><i className="fas fa-circle-info" /> Dial <strong>*#06#</strong> to find your IMEI</p>
             </form>
             {error && <p className="form-error">
               <i className="fas fa-circle-exclamation" /> {error}
