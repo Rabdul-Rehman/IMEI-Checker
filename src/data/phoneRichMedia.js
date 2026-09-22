@@ -36,7 +36,63 @@ const PHONE_RICH_MEDIA=Object.freeze({
   "apple|iphone 15 pro max":{hero:null,colors:[],views:[],finishes:["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"]}
 });
 
+
+// Canonical Apple-family media resolver. TAC/catalog names often include model
+// numbers, region/network suffixes and storage (for example:
+// "iPhone 12 Pro 5G A2407 Global Dual SIM TD-LTE 512GB").  Those are the
+// same physical phone and must use the canonical iPhone model artwork rather
+// than a variant-specific catalog thumbnail.
+const APPLE_IPHONE_FAMILY_MEDIA=Object.freeze({
+  "iphone 11":{hero:"/phone-images/group-1259.webp"},
+  "iphone 11 pro":{hero:"/phone-images/group-1261.webp"},
+  "iphone 11 pro max":{hero:"/phone-images/group-1263.webp"},
+  "iphone 12":{hero:"/phone-images/group-1265.webp"},
+  "iphone 12 mini":{hero:"/phone-images/group-1266.webp"},
+  "iphone 12 pro":{hero:"https://static-01.daraz.pk/p/f229cd3c48bf44292569c59eb3a75fb0.png",finishes:["Graphite","Silver","Gold","Pacific Blue"]},
+  "iphone 12 pro max":{hero:"https://www.apple.com/newsroom/images/product/availability/Apple_iphone12mini-iphone12max-homepodmini-availability_iphone12promax-us_110520_inline.jpg.large.jpg",finishes:["Graphite","Silver","Gold","Pacific Blue"]},
+  "iphone 13":{hero:"/phone-images/group-1230.webp"},
+  "iphone 13 mini":{hero:"/phone-images/group-1268.webp"},
+  "iphone 13 pro":{hero:"/phone-images/group-1269.webp",finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
+  "iphone 13 pro max":{hero:"/phone-images/group-1270.webp",finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
+  "iphone 14":{hero:"/phone-images/group-1231.webp",finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"]},
+  "iphone 14 plus":{hero:"/phone-images/group-1271.webp",finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"]},
+  "iphone 14 pro":{hero:"/phone-images/group-1272.webp",finishes:["Space Black","Silver","Gold","Deep Purple"]},
+  "iphone 14 pro max":{hero:"/phone-images/group-1273.webp",finishes:["Space Black","Silver","Gold","Deep Purple"]},
+  "iphone 15":{hero:"/phone-images/group-1232.webp"},
+  "iphone 15 plus":{hero:"/phone-images/group-1233.webp"},
+  "iphone 15 pro":{hero:"/phone-images/group-1234.webp",finishes:["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"]},
+  "iphone 15 pro max":{hero:"/phone-images/group-1235.webp",finishes:["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"]},
+  "iphone 16":{hero:"/phone-images/group-1236.webp"},
+  "iphone 16 plus":{hero:"/phone-images/group-1237.webp"},
+  "iphone 16 pro":{hero:"/phone-images/group-1238.webp"},
+  "iphone 16 pro max":{hero:"/phone-images/group-1239.webp"},
+  "iphone 16e":{hero:"/phone-images/group-1240.webp"},
+  "iphone 17":{hero:"/phone-images/group-1241.webp"},
+  "iphone 17 plus":{hero:"/phone-images/group-1242.webp"},
+  "iphone 17 pro":{hero:"/images/devices/iphone-17-pro.png"},
+  "iphone 17 pro max":{hero:"/phone-images/group-1244.webp"},
+  "iphone 17e":{hero:"/phone-images/group-1245.webp"},
+  "iphone se 2020":{hero:"/phone-images/group-1276.webp"},
+  "iphone se 5g 2022":{hero:"/phone-images/group-1280.webp"},
+  "iphone xr":{hero:"/phone-images/group-1281.webp"},
+  "iphone xs":{hero:"/phone-images/group-1283.webp"},
+  "iphone xs max":{hero:"/phone-images/group-1285.webp"}
+});
+const APPLE_IPHONE_FAMILIES=Object.keys(APPLE_IPHONE_FAMILY_MEDIA).sort((a,b)=>b.length-a.length);
+function appleIphoneFamily(model){
+  const m=normalize(model).replace(/^apple\s+/,"");
+  return APPLE_IPHONE_FAMILIES.find(f=>m===f||m.startsWith(f+" "))||null;
+}
+function appleFamilyMedia(brand,model){
+  if(normalize(brand)!=="apple")return null;
+  const family=appleIphoneFamily(model);if(!family)return null;
+  const base=APPLE_IPHONE_FAMILY_MEDIA[family];
+  const exact=PHONE_RICH_MEDIA["apple|"+family];
+  return cleanMedia({...base,...(exact||{}),hero:exact?.hero||base.hero,finishes:exact?.finishes||base.finishes||[],source:"Canonical Apple iPhone family media"});
+}
+
 export function getPhoneRichMedia(brand,model){
+  const apple=appleFamilyMedia(brand,model);if(apple&&(apple.hero||apple.colors.length||apple.views.length))return apple;
   const key=keyFor(brand,model);
   const curated=cleanMedia(PHONE_RICH_MEDIA[key]);
   if(curated&&(curated.hero||curated.colors.length||curated.views.length))return curated;
