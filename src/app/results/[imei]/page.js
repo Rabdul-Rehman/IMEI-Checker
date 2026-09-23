@@ -65,6 +65,8 @@ export default function ResultsPage(){
   {re:/galaxy\\s+s23\\s*(?:plus|\\+)/i,storage:["256GB","512GB"],colors:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
   {re:/galaxy\\s+s23(?!\\s*(?:ultra|plus|\\+))/i,storage:["128GB","256GB"],colors:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
   {re:/galaxy\\s+s22\\s+ultra/i,storage:["128GB","256GB","512GB","1TB"],colors:["Burgundy","Phantom Black","Phantom White","Green"]},
+  {re:/galaxy\\s+s22\\s*(?:plus|\\+)/i,storage:["128GB","256GB"],colors:["Phantom White","Phantom Black","Green","Pink Gold","Graphite","Cream","Sky Blue","Violet"]},
+  {re:/galaxy\\s+s22(?:\\s+5g)?(?!\\s*(?:ultra|plus|\\+))/i,storage:["128GB","256GB"],colors:["Phantom White","Phantom Black","Green","Pink Gold","Graphite","Cream","Sky Blue","Violet"]},
   {re:/galaxy\\s+z\\s*fold5/i,storage:["256GB","512GB","1TB"],colors:["Icy Blue","Phantom Black","Cream","Gray","Blue"]},
   {re:/galaxy\\s+z\\s*flip5/i,storage:["256GB","512GB"],colors:["Mint","Graphite","Cream","Lavender","Gray","Blue","Green","Yellow"]}
  ];
