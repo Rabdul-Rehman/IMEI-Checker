@@ -201,7 +201,7 @@ function samsungGalaxyFamily(model){
   return SAMSUNG_GALAXY_FAMILIES.find(f=>m===f||m.startsWith(f+" "))||null;
 }
 function samsungFamilyMedia(brand,model){
-  if(normalize(brand)!=="samsung")return null;
+  if(!normalize(brand).includes("samsung"))return null;
   const family=samsungGalaxyFamily(model);if(!family)return null;
   const exact=PHONE_RICH_MEDIA["samsung|"+family];
   const hero=exact?.hero||(exact?.colors||[])[0]?.src||getMappedPhoneImageByIdentity(brand,model)||null;
