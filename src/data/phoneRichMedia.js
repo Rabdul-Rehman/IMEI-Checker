@@ -9,6 +9,9 @@ function finishMedia(hero,finishes){
   // Never duplicate the canonical hero across different color labels.
   return [];
 }
+function appleStoreColorMedia(prefix,finishes,suffix=""){
+  return finishes.map(({name,slug})=>({name,src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/"+prefix+slug+suffix+"?wid=470&hei=556&fmt=png-alpha"}));
+}
 function cleanMedia(media){if(!media||typeof media!=="object")return null;return {...media,hero:validUrl(media.hero)?media.hero:null,colors:(media.colors||[]).filter(x=>x?.name&&validUrl(x?.src)),views:(media.views||[]).filter(x=>x?.name&&validUrl(x?.src)),finishes:Array.isArray(media.finishes)?media.finishes:[],storage:Array.isArray(media.storage)?media.storage:[]};}
 
 // Curated entries take precedence over generated batches. Labels are semantic:
@@ -75,12 +78,14 @@ const PHONE_RICH_MEDIA=Object.freeze({
     finishes:["Graphite","Silver","Gold","Pacific Blue"],
     source:"Exact-model product media"
   },
-  "apple|iphone 13 pro":{hero:null,colors:[],views:[],finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
-  "apple|iphone 13 pro max":{hero:null,colors:[],views:[],finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
-  "apple|iphone 14":{hero:null,colors:[],views:[],finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"]},
-  "apple|iphone 14 plus":{hero:null,colors:[],views:[],finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED"]},
-  "apple|iphone 14 pro":{hero:null,colors:[],views:[],finishes:["Space Black","Silver","Gold","Deep Purple"]},
-  "apple|iphone 14 pro max":{hero:null,colors:[],views:[],finishes:["Space Black","Silver","Gold","Deep Purple"]},
+  "apple|iphone 12 mini":{hero:null,colors:appleStoreColorMedia("iphone-12-mini-",[{name:"Black",slug:"black"},{name:"White",slug:"white"},{name:"(PRODUCT)RED",slug:"red"},{name:"Green",slug:"green"},{name:"Blue",slug:"blue"},{name:"Purple",slug:"purple"}],"-select-2020"),views:[],finishes:["Black","White","(PRODUCT)RED","Green","Blue","Purple"]},
+  "apple|iphone 12 pro max":{hero:null,colors:appleStoreColorMedia("iphone-12-pro-max-",[{name:"Graphite",slug:"graphite"},{name:"Silver",slug:"silver"},{name:"Gold",slug:"gold"},{name:"Pacific Blue",slug:"blue"}],"-select-2020"),views:[],finishes:["Graphite","Silver","Gold","Pacific Blue"]},
+  "apple|iphone 13 mini":{hero:null,colors:appleStoreColorMedia("iphone-13-mini-",[{name:"Pink",slug:"pink"},{name:"Blue",slug:"blue"},{name:"Midnight",slug:"midnight"},{name:"Starlight",slug:"starlight"},{name:"(PRODUCT)RED",slug:"product-red"},{name:"Green",slug:"green"}],"-select-2021"),views:[],finishes:["Pink","Blue","Midnight","Starlight","(PRODUCT)RED","Green"]},
+  "apple|iphone 13 pro":{hero:null,colors:appleStoreColorMedia("iphone-13-pro-",[{name:"Sierra Blue",slug:"sierra-blue"},{name:"Graphite",slug:"graphite"},{name:"Gold",slug:"gold"},{name:"Silver",slug:"silver"},{name:"Alpine Green",slug:"alpine-green"}],"-select"),views:[],finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
+  "apple|iphone 13 pro max":{hero:null,colors:appleStoreColorMedia("iphone-13-pro-max-",[{name:"Sierra Blue",slug:"sierra-blue"},{name:"Graphite",slug:"graphite"},{name:"Gold",slug:"gold"},{name:"Silver",slug:"silver"},{name:"Alpine Green",slug:"alpine-green"}],"-select"),views:[],finishes:["Sierra Blue","Graphite","Gold","Silver","Alpine Green"]},
+  "apple|iphone 14":{hero:null,colors:appleStoreColorMedia("iphone-14-",[{name:"Midnight",slug:"midnight"},{name:"Blue",slug:"blue"},{name:"Starlight",slug:"starlight"},{name:"Purple",slug:"purple"},{name:"(PRODUCT)RED",slug:"product-red"},{name:"Yellow",slug:"yellow"}],"-select-202209"),views:[],finishes:["Midnight","Blue","Starlight","Purple","(PRODUCT)RED","Yellow"]},
+  "apple|iphone 14 pro":{hero:null,colors:appleStoreColorMedia("iphone-14-pro-",[{name:"Space Black",slug:"spaceblack"},{name:"Silver",slug:"silver"},{name:"Gold",slug:"gold"},{name:"Deep Purple",slug:"deeppurple"}],"-select-202209"),views:[],finishes:["Space Black","Silver","Gold","Deep Purple"]},
+  "apple|iphone 14 pro max":{hero:null,colors:appleStoreColorMedia("iphone-14-pro-max-",[{name:"Space Black",slug:"spaceblack"},{name:"Silver",slug:"silver"},{name:"Gold",slug:"gold"},{name:"Deep Purple",slug:"deeppurple"}],"-select-202209"),views:[],finishes:["Space Black","Silver","Gold","Deep Purple"]},
   "apple|iphone 15 pro":{hero:null,colors:[
     {name:"Black Titanium",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-blacktitanium?wid=512&hei=512&fmt=png-alpha"},
     {name:"White Titanium",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-whitetitanium?wid=512&hei=512&fmt=png-alpha"},
@@ -93,6 +98,13 @@ const PHONE_RICH_MEDIA=Object.freeze({
     {name:"Blue Titanium",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-bluetitanium?wid=512&hei=512&fmt=png-alpha"},
     {name:"Natural Titanium",src:"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-naturaltitanium?wid=512&hei=512&fmt=png-alpha"}
   ],views:[],finishes:["Black Titanium","White Titanium","Blue Titanium","Natural Titanium"]}
+  ,"apple|iphone 15":{hero:null,colors:appleStoreColorMedia("iphone-15-finish-select-202309-6-1inch-",[{name:"Black",slug:"black"},{name:"Blue",slug:"blue"},{name:"Green",slug:"green"},{name:"Yellow",slug:"yellow"},{name:"Pink",slug:"pink"}]),views:[],finishes:["Black","Blue","Green","Yellow","Pink"]}
+  ,"apple|iphone 15 plus":{hero:null,colors:appleStoreColorMedia("iphone-15-finish-select-202309-6-7inch-",[{name:"Black",slug:"black"},{name:"Blue",slug:"blue"},{name:"Green",slug:"green"},{name:"Yellow",slug:"yellow"},{name:"Pink",slug:"pink"}]),views:[],finishes:["Black","Blue","Green","Yellow","Pink"]}
+  ,"apple|iphone 16":{hero:null,colors:appleStoreColorMedia("iphone-16-finish-select-202409-6-1inch-",[{name:"Black",slug:"black"},{name:"White",slug:"white"},{name:"Pink",slug:"pink"},{name:"Teal",slug:"teal"},{name:"Ultramarine",slug:"ultramarine"}]),views:[],finishes:["Black","White","Pink","Teal","Ultramarine"]}
+  ,"apple|iphone 16 plus":{hero:null,colors:appleStoreColorMedia("iphone-16-finish-select-202409-6-7inch-",[{name:"Black",slug:"black"},{name:"White",slug:"white"},{name:"Pink",slug:"pink"},{name:"Teal",slug:"teal"},{name:"Ultramarine",slug:"ultramarine"}]),views:[],finishes:["Black","White","Pink","Teal","Ultramarine"]}
+  ,"apple|iphone 16 pro":{hero:null,colors:appleStoreColorMedia("iphone-16-pro-finish-select-202409-6-3inch-",[{name:"Black Titanium",slug:"blacktitanium"},{name:"White Titanium",slug:"whitetitanium"},{name:"Natural Titanium",slug:"naturaltitanium"},{name:"Desert Titanium",slug:"deserttitanium"}]),views:[],finishes:["Black Titanium","White Titanium","Natural Titanium","Desert Titanium"]}
+  ,"apple|iphone 16 pro max":{hero:null,colors:appleStoreColorMedia("iphone-16-pro-finish-select-202409-6-9inch-",[{name:"Black Titanium",slug:"blacktitanium"},{name:"White Titanium",slug:"whitetitanium"},{name:"Natural Titanium",slug:"naturaltitanium"},{name:"Desert Titanium",slug:"deserttitanium"}]),views:[],finishes:["Black Titanium","White Titanium","Natural Titanium","Desert Titanium"]}
+
 });
 
 
