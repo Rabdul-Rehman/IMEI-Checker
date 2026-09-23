@@ -5248,3 +5248,63 @@ html.dark-mode .news-article-page .news-back-link,
 html.dark-mode .news-article-page .news-article-header time{
   color:#93a4b8 !important;
 }
+
+
+/* ============================================================
+   IMEI IPHONE MEDIA — CONSISTENT PRODUCT-SCALE LAYOUT
+   Prevent source images with large transparent canvases from
+   looking tiny/zoomed-out. Applies to every iPhone result.
+   ============================================================ */
+.imei-result-page .phone-detail-left > .detail-image{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  overflow:hidden !important;
+}
+.imei-result-page .phone-detail-left > .detail-image > img{
+  width:min(82%,420px) !important;
+  height:min(82%,420px) !important;
+  max-width:420px !important;
+  max-height:420px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:scale(1.32) !important;
+  transform-origin:center !important;
+}
+.imei-result-page .imei-media-card,
+.imei-result-page .imei-media-card-button{
+  overflow:hidden !important;
+}
+.imei-result-page .imei-media-card img,
+.imei-result-page .imei-media-card-button img{
+  width:100% !important;
+  height:132px !important;
+  max-height:132px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:scale(1.28) !important;
+  transform-origin:center !important;
+}
+
+/* iPhone product PNGs often contain generous transparent padding.
+   Give them a consistent visual footprint without cropping the phone. */
+@media (min-width:901px){
+  .imei-result-page .phone-detail-left > .detail-image{
+    min-height:470px !important;
+  }
+}
+@media (max-width:900px){
+  body .imei-result-page .phone-detail-left > .detail-image > img{
+    width:88% !important;
+    height:88% !important;
+    max-width:300px !important;
+    max-height:190px !important;
+    transform:scale(1.18) !important;
+  }
+  body .imei-result-page .imei-media-card img,
+  body .imei-result-page .imei-media-card-button img{
+    height:108px !important;
+    max-height:108px !important;
+    transform:scale(1.18) !important;
+  }
+}
