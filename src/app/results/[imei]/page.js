@@ -79,6 +79,31 @@ export default function ResultsPage(){
   {re:/galaxy\\s+z\\s*fold5/i,storage:["256GB","512GB","1TB"],colors:["Icy Blue","Phantom Black","Cream","Gray","Blue"]},
   {re:/galaxy\\s+z\\s*flip5/i,storage:["256GB","512GB"],colors:["Mint","Graphite","Cream","Lavender","Gray","Blue","Green","Yellow"]}
  ];
+ const fold5=/galaxy\s+z\s*fold5/i.test(String(model||""));
+ const samsungFold5Media=fold5?{hero:"https://images.samsung.com/mm/smartphones/galaxy-z-fold5/buy/nonshop_icyBlue.jpg",colors:[
+  {name:"Icy Blue",src:"https://images.samsung.com/mm/smartphones/galaxy-z-fold5/buy/nonshop_icyBlue.jpg"},
+  {name:"Phantom Black",src:"https://images.samsung.com/mm/smartphones/galaxy-z-fold5/buy/nonshop_phantomBlack.jpg"},
+  {name:"Cream",src:"https://images.samsung.com/mm/smartphones/galaxy-z-fold5/buy/nonshop_cream.jpg"}
+ ],finishes:["Icy Blue","Phantom Black","Cream"],storage:["256GB","512GB"],views:[]}:null;
+ const flip5=/galaxy\s+z\s*flip5/i.test(String(model||""));
+ const samsungFlip5Media=flip5?{hero:"https://images.samsung.com/mm/smartphones/galaxy-z-flip5/buy/nonshop_mint.jpg",colors:[
+  {name:"Mint",src:"https://images.samsung.com/mm/smartphones/galaxy-z-flip5/buy/nonshop_mint.jpg"},
+  {name:"Graphite",src:"https://images.samsung.com/mm/smartphones/galaxy-z-flip5/buy/nonshop_graphite.jpg"},
+  {name:"Lavender",src:"https://images.samsung.com/mm/smartphones/galaxy-z-flip5/buy/nonshop_lavender.jpg"},
+  {name:"Cream",src:"https://images.samsung.com/mm/smartphones/galaxy-z-flip5/buy/nonshop_cream.jpg"}
+ ],finishes:["Mint","Graphite","Lavender","Cream"],storage:["256GB","512GB"],views:[]}:null;
+ const note20u=/galaxy\s+note\s*20\s+ultra/i.test(String(model||""));
+ const samsungNote20UltraMedia=note20u?{hero:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Bronze-Note-20-Ultra.jpeg?$LazyLoad_Home_JPG$=",colors:[
+  {name:"Mystic Bronze",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Bronze-Note-20-Ultra.jpeg?$LazyLoad_Home_JPG$="},
+  {name:"Mystic White",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-White-Note-20-Ultra.jpeg?$LazyLoad_Home_JPG$="},
+  {name:"Mystic Black",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic_Black_Note_20_Ultra.jpeg?$LazyLoad_Home_JPG$="}
+ ],finishes:["Mystic Bronze","Mystic White","Mystic Black"],storage:["256GB","512GB"],views:[]}:null;
+ const note20=/galaxy\s+note\s*20(?!\s+ultra)/i.test(String(model||""));
+ const samsungNote20Media=note20?{hero:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Bronze_Note-20.jpeg?$LazyLoad_Home_JPG$=",colors:[
+  {name:"Mystic Bronze",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Bronze_Note-20.jpeg?$LazyLoad_Home_JPG$="},
+  {name:"Mystic Green",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Green-Note-20.jpeg?$LazyLoad_Home_JPG$="},
+  {name:"Mystic Grey",src:"https://images.samsung.com/is/image/samsung/assets/ie/smartphones/galaxy-note20/specs/Mystic-Grey-Note-20.jpeg?$LazyLoad_Home_JPG$="}
+ ],finishes:["Mystic Bronze","Mystic Green","Mystic Grey"],storage:["256GB"],views:[]}:null;
  const s21base=/galaxy\s+s21(?:\s+5g)?(?!\s*(?:ultra|plus|\+|fe))/i.test(String(model||""));
  const samsungS21Media=s21base?{
    hero:"https://images.samsung.com/is/image/samsung/p6pim/levant/sm-g991bzvdmea/gallery/levant-galaxy-s21-5g-g991-sm-g991bzvdmea-368339776?$650_519_PNG$",
@@ -124,7 +149,7 @@ export default function ResultsPage(){
  }:null;
  const samsungFamilyMeta=samsungExactFamilies.find(x=>x.re.test(String(model||"")))||null;
  const isSamsungGalaxy=/galaxy/i.test(String(model||""))&&(/samsung/i.test(String(brand||""))||/^(?:samsung\s+)?galaxy/i.test(String(model||"")));
- const samsungResolved=isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null; const samsungRich=samsungS24UltraMedia||samsungS21FEMedia||samsungS21Media||samsungS22Media||(samsungFamilyMeta?{...(samsungResolved||{}),finishes:samsungFamilyMeta.colors,storage:samsungFamilyMeta.storage,colors:samsungResolved?.colors||[],views:samsungResolved?.views||[],hero:samsungResolved?.hero||null}:samsungResolved);
+ const samsungResolved=isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null; const samsungRich=samsungS24UltraMedia||samsungFold5Media||samsungFlip5Media||samsungNote20UltraMedia||samsungNote20Media||samsungS21FEMedia||samsungS21Media||samsungS22Media||(samsungFamilyMeta?{...(samsungResolved||{}),finishes:samsungFamilyMeta.colors,storage:samsungFamilyMeta.storage,colors:samsungResolved?.colors||[],views:samsungResolved?.views||[],hero:samsungResolved?.hero||null}:samsungResolved);
  const rich=samsungRich||(!ambiguous?getPhoneRichMedia(brand,model):null);const curated=ambiguous?null:getCuratedPhoneMedia(brand,model);const identity=getMappedPhoneImageByIdentity(brand,model,modelNumber||"");const mappedCandidate=result?.phone_id&&result?.image_match_verified!==false?getMappedPhoneImage(result.phone_id):"";const mapped=mappedCandidate&&mappedCandidate!==PHONE_IMAGE_FALLBACK?mappedCandidate:"";const firstApiImage=Array.isArray(result?.images)?imageUrl(result.images.find(x=>typeof x==="string")||""):imageUrl(result?.image||"");const hero=rich?.hero||curated?.hero||identity||mapped||firstApiImage||"";const displayedHero=selectedMedia?.src||hero;
  const indexed=getModelVariantOptionsByIdentity(brand,model)||{};const richStorage=rich?.storage||[];const curatedStorage=curated?.storage||[];const canonicalStorage=richStorage.length?richStorage:curatedStorage;const storage=uniqueClean([...(canonicalStorage.length?canonicalStorage:(result?.variant_options?.storage_options||[])),...(canonicalStorage.length?[]:(indexed.storage_options||[]))].map(cleanStorageValue).filter(Boolean));const canonicalColors=rich?.finishes?.length?rich.finishes:(curated?.colors||[]);const colors=uniqueClean([...(canonicalColors.length?canonicalColors:(result?.variant_options?.color_options||[])),...(canonicalColors.length?[]:(indexed.color_options||[]))].map(cleanColorValue).filter(Boolean));const colorMedia=(rich?.colors||[]).filter(x=>x?.name&&imageUrl(x?.src));const viewMedia=(rich?.views||[]).filter(x=>x?.name&&imageUrl(x?.src));
  const displaySize=pick(specs,[["Display","display_size_inches"],["Display","screen_size_inches"],["Display","size_inches"],["Display","size"]]);const displayType=pick(specs,[["Display","display_type"],["Display","type"]]);const chipset=pick(specs,[["Platform","chipset"],["Platform","processor"],["Platform","cpu"]]);const battery=pick(specs,[["Battery","battery_capacity_mah"],["Battery","capacity"]]);const camera=pick(specs,[["Camera (Main)","main_camera"],["Camera (Main)","rear_camera_specs"],["Camera","main"]]);
