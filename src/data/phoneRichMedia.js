@@ -145,12 +145,12 @@ const APPLE_IPHONE_FAMILY_MEDIA=Object.freeze({
   "iphone 16 pro":{hero:"/phone-images/group-1238.webp",finishes:["Black Titanium","White Titanium","Natural Titanium","Desert Titanium"],storage:["128GB","256GB","512GB","1TB"]},
   "iphone 16 pro max":{hero:"/phone-images/group-1239.webp",finishes:["Black Titanium","White Titanium","Natural Titanium","Desert Titanium"],storage:["256GB","512GB","1TB"]},
   "iphone 16e":{hero:"/phone-images/group-1240.webp",finishes:["Black","White"],storage:["128GB","256GB","512GB"]},
-  "iphone 17":{hero:"/phone-images/group-1241.webp",storage:["256GB","512GB"]},
+  "iphone 17":{hero:"/phone-images/group-1241.webp",finishes:["Black","White","Mist Blue","Sage","Lavender"],storage:["256GB","512GB"]},
   "iphone 17 plus":{hero:"/phone-images/group-1242.webp"},
   "iphone 17 pro":{hero:"/phone-images/group-1243.webp",finishes:["Cosmic Orange","Deep Blue","Silver"],storage:["256GB","512GB","1TB"]},
   "iphone 17 pro max":{hero:"/phone-images/group-1244.webp",finishes:["Cosmic Orange","Deep Blue","Silver"],storage:["256GB","512GB","1TB","2TB"]},
   "iphone 17e":{hero:"/phone-images/group-1245.webp",storage:["256GB","512GB"]},
-  "iphone air":{hero:"/phone-images/group-1249.webp"},
+  "iphone air":{hero:"/phone-images/group-1249.webp",finishes:["Space Black","Cloud White","Light Gold","Sky Blue"],storage:["256GB","512GB","1TB"]},
   "iphone 18 pro max":{hero:"/phone-images/group-1246.webp"},
   "iphone 18e":{hero:"/phone-images/group-1247.webp"}
 });
