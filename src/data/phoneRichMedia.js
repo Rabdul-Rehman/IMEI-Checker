@@ -198,10 +198,13 @@ function appleIphoneFamily(model){
 const SAMSUNG_GALAXY_FAMILIES=Object.keys(PHONE_RICH_MEDIA).filter(k=>k.startsWith("samsung|")).map(k=>k.slice(8)).sort((a,b)=>b.length-a.length);
 function samsungGalaxyFamily(model){
   const m=normalize(model).replace(/^samsung\s+/,"");
-  return SAMSUNG_GALAXY_FAMILIES.find(f=>m===f||m.startsWith(f+" "))||null;
+  // Prefer the longest canonical family that occurs in the catalog title.
+  // TAC records can prepend/append model codes, region, SIM, 5G and storage text.
+  return SAMSUNG_GALAXY_FAMILIES.find(f=>m===f||m.startsWith(f+" ")||m.includes(" "+f+" ")||m.endsWith(" "+f))||null;
 }
 function samsungFamilyMedia(brand,model){
-  if(!normalize(brand).includes("samsung"))return null;
+  const b=normalize(brand),m=normalize(model);
+  if(!b.includes("samsung")&&!m.includes("samsung")&&!m.includes("galaxy"))return null;
   const family=samsungGalaxyFamily(model);if(!family)return null;
   const exact=PHONE_RICH_MEDIA["samsung|"+family];
   const hero=exact?.hero||(exact?.colors||[])[0]?.src||getMappedPhoneImageByIdentity(brand,model)||null;
