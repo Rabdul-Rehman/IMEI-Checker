@@ -5097,3 +5097,117 @@ html.dark-mode .st-mobile-menu-links a.active{background:#102a3e;border-color:#2
     line-height:1.15 !important;
   }
 }
+
+
+/* ============================================================
+   PHONE DATABASE DETAIL — MOBILE LAYOUT FIX
+   Keep catalog phone profiles inside the mobile viewport.
+   Scoped away from IMEI result pages.
+   ============================================================ */
+@media (max-width: 900px){
+  body:has(.detail-modern:not(.imei-result-page)){
+    overflow-x:hidden !important;
+  }
+  .detail-modern:not(.imei-result-page){
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    padding:18px 14px 44px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  .detail-modern:not(.imei-result-page) .phone-detail-main{
+    display:flex !important;
+    flex-direction:column !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    gap:22px !important;
+  }
+  .detail-modern:not(.imei-result-page) .phone-detail-left,
+  .detail-modern:not(.imei-result-page) .phone-detail-right{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-image{
+    width:100% !important;
+    max-width:100% !important;
+    height:330px !important;
+    min-width:0 !important;
+    padding:16px !important;
+    box-sizing:border-box !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-image > img,
+  .detail-modern:not(.imei-result-page) .detail-image .adaptive-device-photo{
+    max-width:100% !important;
+    max-height:100% !important;
+    object-fit:contain !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-meta,
+  .detail-modern:not(.imei-result-page) .detail-actions,
+  .detail-modern:not(.imei-result-page) .detail-summary{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-copy h1{
+    font-size:clamp(28px,9vw,38px) !important;
+    line-height:1.08 !important;
+    overflow-wrap:anywhere !important;
+  }
+  .detail-modern:not(.imei-result-page) .phone-spec-tabs,
+  .detail-modern:not(.imei-result-page) .phone-spec-tab-content,
+  .detail-modern:not(.imei-result-page) .phone-spec-group,
+  .detail-modern:not(.imei-result-page) .spec-grid-modern{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+  .detail-modern:not(.imei-result-page) .phone-spec-tab-buttons{
+    width:100% !important;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+  .detail-modern:not(.imei-result-page) .phone-spec-tab-buttons button{
+    min-width:max-content !important;
+  }
+  .detail-modern:not(.imei-result-page) .spec-grid-modern{
+    grid-template-columns:1fr !important;
+  }
+  .detail-modern:not(.imei-result-page) .spec-modern-card{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+  .detail-modern:not(.imei-result-page) .spec-modern-value,
+  .detail-modern:not(.imei-result-page) .spec-readable-text{
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-next-step{
+    width:100% !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    margin-top:26px !important;
+  }
+}
+@media (max-width: 560px){
+  .detail-modern:not(.imei-result-page){
+    padding-left:10px !important;
+    padding-right:10px !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-image{
+    height:300px !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-summary{
+    grid-template-columns:1fr !important;
+  }
+  .detail-modern:not(.imei-result-page) .detail-next-step{
+    flex-direction:column !important;
+    align-items:stretch !important;
+  }
+}
