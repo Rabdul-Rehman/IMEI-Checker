@@ -79,6 +79,16 @@ export default function ResultsPage(){
   {re:/galaxy\\s+z\\s*fold5/i,storage:["256GB","512GB","1TB"],colors:["Icy Blue","Phantom Black","Cream","Gray","Blue"]},
   {re:/galaxy\\s+z\\s*flip5/i,storage:["256GB","512GB"],colors:["Mint","Graphite","Cream","Lavender","Gray","Blue","Green","Yellow"]}
  ];
+ const s21fe=/galaxy\s+s21\s+fe/i.test(String(model||""));
+ const samsungS21FEMedia=s21fe?{
+   hero:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blgcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blgcpkd-530857745?$650_519_PNG$",
+   colors:[
+    {name:"Graphite",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990bzacpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990bzacpkd-530857761?$650_519_PNG$"},
+    {name:"White",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990bzwcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990bzwcpkd-530857777?$650_519_PNG$"},
+    {name:"Olive",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blgcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blgcpkd-530857745?$650_519_PNG$"},
+    {name:"Lavender",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blvcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blvcpkd-530857753?$650_519_PNG$"}
+   ],finishes:["Graphite","White","Olive","Lavender"],storage:["128GB","256GB"],views:[]
+ }:null;
  const s22base=/galaxy\s+s22(?:\s+5g)?(?!\s*(?:ultra|plus|\+))/i.test(String(model||""));
  const samsungS22Media=s22base?{
    hero:"https://images.samsung.com/mm/smartphones/galaxy-s22/buy/SM-S901_GalaxyS22_Front_PhantomWhite_Thumbnail.png",
@@ -104,7 +114,7 @@ export default function ResultsPage(){
  }:null;
  const samsungFamilyMeta=samsungExactFamilies.find(x=>x.re.test(String(model||"")))||null;
  const isSamsungGalaxy=/galaxy/i.test(String(model||""))&&(/samsung/i.test(String(brand||""))||/^(?:samsung\s+)?galaxy/i.test(String(model||"")));
- const samsungResolved=isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null; const samsungRich=samsungS24UltraMedia||samsungS22Media||(samsungFamilyMeta?{...(samsungResolved||{}),finishes:samsungFamilyMeta.colors,storage:samsungFamilyMeta.storage,colors:samsungResolved?.colors||[],views:samsungResolved?.views||[],hero:samsungResolved?.hero||null}:samsungResolved);
+ const samsungResolved=isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null; const samsungRich=samsungS24UltraMedia||samsungS21FEMedia||samsungS22Media||(samsungFamilyMeta?{...(samsungResolved||{}),finishes:samsungFamilyMeta.colors,storage:samsungFamilyMeta.storage,colors:samsungResolved?.colors||[],views:samsungResolved?.views||[],hero:samsungResolved?.hero||null}:samsungResolved);
  const rich=samsungRich||(!ambiguous?getPhoneRichMedia(brand,model):null);const curated=ambiguous?null:getCuratedPhoneMedia(brand,model);const identity=getMappedPhoneImageByIdentity(brand,model,modelNumber||"");const mappedCandidate=result?.phone_id&&result?.image_match_verified!==false?getMappedPhoneImage(result.phone_id):"";const mapped=mappedCandidate&&mappedCandidate!==PHONE_IMAGE_FALLBACK?mappedCandidate:"";const firstApiImage=Array.isArray(result?.images)?imageUrl(result.images.find(x=>typeof x==="string")||""):imageUrl(result?.image||"");const hero=rich?.hero||curated?.hero||identity||mapped||firstApiImage||"";const displayedHero=selectedMedia?.src||hero;
  const indexed=getModelVariantOptionsByIdentity(brand,model)||{};const richStorage=rich?.storage||[];const curatedStorage=curated?.storage||[];const canonicalStorage=richStorage.length?richStorage:curatedStorage;const storage=uniqueClean([...(canonicalStorage.length?canonicalStorage:(result?.variant_options?.storage_options||[])),...(canonicalStorage.length?[]:(indexed.storage_options||[]))].map(cleanStorageValue).filter(Boolean));const canonicalColors=rich?.finishes?.length?rich.finishes:(curated?.colors||[]);const colors=uniqueClean([...(canonicalColors.length?canonicalColors:(result?.variant_options?.color_options||[])),...(canonicalColors.length?[]:(indexed.color_options||[]))].map(cleanColorValue).filter(Boolean));const colorMedia=(rich?.colors||[]).filter(x=>x?.name&&imageUrl(x?.src));const viewMedia=(rich?.views||[]).filter(x=>x?.name&&imageUrl(x?.src));
  const displaySize=pick(specs,[["Display","display_size_inches"],["Display","screen_size_inches"],["Display","size_inches"],["Display","size"]]);const displayType=pick(specs,[["Display","display_type"],["Display","type"]]);const chipset=pick(specs,[["Platform","chipset"],["Platform","processor"],["Platform","cpu"]]);const battery=pick(specs,[["Battery","battery_capacity_mah"],["Battery","capacity"]]);const camera=pick(specs,[["Camera (Main)","main_camera"],["Camera (Main)","rear_camera_specs"],["Camera","main"]]);
