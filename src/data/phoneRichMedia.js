@@ -117,6 +117,14 @@ const PHONE_RICH_MEDIA=Object.freeze({
   ,"apple|iphone 17 pro max":{hero:null,colors:appleStoreColorMedia("iphone-17-pro-finish-select-202509-6-9inch-",[{name:"Cosmic Orange",slug:"cosmicorange"},{name:"Deep Blue",slug:"deepblue"},{name:"Silver",slug:"silver"}]),views:[],finishes:["Cosmic Orange","Deep Blue","Silver"]}
   ,"apple|iphone air":{hero:null,colors:appleStoreColorMedia("iphone-air-finish-select-202509-",[{name:"Space Black",slug:"spaceblack"},{name:"Cloud White",slug:"cloudwhite"},{name:"Light Gold",slug:"lightgold"},{name:"Sky Blue",slug:"skyblue"}]),views:[],finishes:["Space Black","Cloud White","Light Gold","Sky Blue"]}
 
+  // Samsung Galaxy exact-color layer. Apple entries above are intentionally unchanged.
+  "samsung|galaxy s24":{hero:null,colors:[],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["128GB","256GB"]},
+  "samsung|galaxy s24 plus":{hero:null,colors:[],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["256GB","512GB"]},
+  "samsung|galaxy s24 ultra":{hero:null,colors:[],views:[],finishes:["Titanium Gray","Titanium Black","Titanium Violet","Titanium Yellow","Titanium Blue","Titanium Green","Titanium Orange"],storage:["256GB","512GB","1TB"]},
+  "samsung|galaxy s23":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
+  "samsung|galaxy s23 plus":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
+  "samsung|galaxy s23 ultra":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
+
 
 });
 
