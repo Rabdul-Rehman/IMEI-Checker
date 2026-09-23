@@ -59,8 +59,17 @@ export default function ResultsPage(){
  const specs=useMemo(()=>{const v=parseJson(result?.specs_json);return v&&typeof v==="object"?v:{};},[result]);
  const brand=result?.brand_name||result?.reported_brand||"Unknown";const model=result?.reported_model_name||result?.model_name||"Unknown device";const modelNumber=result?.reported_model_number||result?.model_number||null;const tac=result?.tac||imei.slice(0,8);const maskedImei=`•••••••••••${imei.slice(-4)}`;const checkDigit=imei.slice(14);const confidenceNumber=Number(result?.match_confidence);const confidence=Number.isFinite(confidenceNumber)?`${Math.round(confidenceNumber<=1?confidenceNumber*100:confidenceNumber)}%`:"—";const matchStatus=result?.match_status||"Unknown"; const isMatched=/matched/i.test(matchStatus)&&!/unmatched/i.test(matchStatus);
  const ambiguous=isAmbiguousCanonicalPhoneModel(brand,model);
- const samsungS24Ultra=/galaxy\s+s24\s+ultra/i.test(String(model||""));
- const samsungS24UltraMedia=samsungS24Ultra?{
+ const samsungExactFamilies=[
+  {re:/galaxy\\s+s24\\s+ultra/i,storage:["256GB","512GB","1TB"],colors:["Titanium Gray","Titanium Black","Titanium Violet","Titanium Yellow","Titanium Blue","Titanium Green","Titanium Orange"]},
+  {re:/galaxy\\s+s23\\s+ultra/i,storage:["256GB","512GB","1TB"],colors:["Green","Phantom Black","Cream","Lavender","Graphite","Lime","Sky Blue","Red"]},
+  {re:/galaxy\\s+s23\\s*(?:plus|\\+)/i,storage:["256GB","512GB"],colors:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
+  {re:/galaxy\\s+s23(?!\\s*(?:ultra|plus|\\+))/i,storage:["128GB","256GB"],colors:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
+  {re:/galaxy\\s+s22\\s+ultra/i,storage:["128GB","256GB","512GB","1TB"],colors:["Burgundy","Phantom Black","Phantom White","Green"]},
+  {re:/galaxy\\s+z\\s*fold5/i,storage:["256GB","512GB","1TB"],colors:["Icy Blue","Phantom Black","Cream","Gray","Blue"]},
+  {re:/galaxy\\s+z\\s*flip5/i,storage:["256GB","512GB"],colors:["Mint","Graphite","Cream","Lavender","Gray","Blue","Green","Yellow"]}
+ ];
+ const s24u=samsungExactFamilies[0].re.test(String(model||""));
+ const samsungS24UltraMedia=s24u?{
    hero:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Gray_Galaxy_S24_Ultra.jpg?$LazyLoad_Home_JPG$",
    colors:[
     {name:"Titanium Gray",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Gray_Galaxy_S24_Ultra.jpg?$LazyLoad_Home_JPG$"},
@@ -68,11 +77,11 @@ export default function ResultsPage(){
     {name:"Titanium Violet",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Violet__Galaxy_S24_Ultra.jpg?$LazyLoad_Home_JPG$"},
     {name:"Titanium Yellow",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Yellow_Galaxy_S24_Ultra.jpg?$LazyLoad_Home_JPG$"}
    ],
-   finishes:["Titanium Gray","Titanium Black","Titanium Violet","Titanium Yellow","Titanium Blue","Titanium Green","Titanium Orange"],
-   storage:["256GB","512GB","1TB"],views:[]
+   finishes:samsungExactFamilies[0].colors,storage:samsungExactFamilies[0].storage,views:[]
  }:null;
+ const samsungFamilyMeta=samsungExactFamilies.find(x=>x.re.test(String(model||"")))||null;
  const isSamsungGalaxy=/galaxy/i.test(String(model||""))&&(/samsung/i.test(String(brand||""))||/^(?:samsung\s+)?galaxy/i.test(String(model||"")));
- const samsungRich=samsungS24UltraMedia||(isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null);
+ const samsungResolved=isSamsungGalaxy?getPhoneRichMedia("Samsung",model):null; const samsungRich=samsungS24UltraMedia||(samsungFamilyMeta?{...(samsungResolved||{}),finishes:samsungFamilyMeta.colors,storage:samsungFamilyMeta.storage,colors:samsungResolved?.colors||[],views:samsungResolved?.views||[],hero:samsungResolved?.hero||null}:samsungResolved);
  const rich=samsungRich||(!ambiguous?getPhoneRichMedia(brand,model):null);const curated=ambiguous?null:getCuratedPhoneMedia(brand,model);const identity=getMappedPhoneImageByIdentity(brand,model,modelNumber||"");const mappedCandidate=result?.phone_id&&result?.image_match_verified!==false?getMappedPhoneImage(result.phone_id):"";const mapped=mappedCandidate&&mappedCandidate!==PHONE_IMAGE_FALLBACK?mappedCandidate:"";const firstApiImage=Array.isArray(result?.images)?imageUrl(result.images.find(x=>typeof x==="string")||""):imageUrl(result?.image||"");const hero=rich?.hero||curated?.hero||identity||mapped||firstApiImage||"";const displayedHero=selectedMedia?.src||hero;
  const indexed=getModelVariantOptionsByIdentity(brand,model)||{};const richStorage=rich?.storage||[];const curatedStorage=curated?.storage||[];const canonicalStorage=richStorage.length?richStorage:curatedStorage;const storage=uniqueClean([...(canonicalStorage.length?canonicalStorage:(result?.variant_options?.storage_options||[])),...(canonicalStorage.length?[]:(indexed.storage_options||[]))].map(cleanStorageValue).filter(Boolean));const canonicalColors=rich?.finishes?.length?rich.finishes:(curated?.colors||[]);const colors=uniqueClean([...(canonicalColors.length?canonicalColors:(result?.variant_options?.color_options||[])),...(canonicalColors.length?[]:(indexed.color_options||[]))].map(cleanColorValue).filter(Boolean));const colorMedia=(rich?.colors||[]).filter(x=>x?.name&&imageUrl(x?.src));const viewMedia=(rich?.views||[]).filter(x=>x?.name&&imageUrl(x?.src));
  const displaySize=pick(specs,[["Display","display_size_inches"],["Display","screen_size_inches"],["Display","size_inches"],["Display","size"]]);const displayType=pick(specs,[["Display","display_type"],["Display","type"]]);const chipset=pick(specs,[["Platform","chipset"],["Platform","processor"],["Platform","cpu"]]);const battery=pick(specs,[["Battery","battery_capacity_mah"],["Battery","capacity"]]);const camera=pick(specs,[["Camera (Main)","main_camera"],["Camera (Main)","rear_camera_specs"],["Camera","main"]]);
