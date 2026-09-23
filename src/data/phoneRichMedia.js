@@ -1,3 +1,4 @@
+// Production deployment trigger: Samsung rich media branch
 import { getMappedPhoneImageByIdentity, getModelVariantOptionsByIdentity } from "./modelPhoneImageIndex";
 import generatedMedia from "./phoneRichMedia.generated.json";
 
