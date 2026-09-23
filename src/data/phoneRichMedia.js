@@ -118,12 +118,27 @@ const PHONE_RICH_MEDIA=Object.freeze({
   ,"apple|iphone air":{hero:null,colors:appleStoreColorMedia("iphone-air-finish-select-202509-",[{name:"Space Black",slug:"spaceblack"},{name:"Cloud White",slug:"cloudwhite"},{name:"Light Gold",slug:"lightgold"},{name:"Sky Blue",slug:"skyblue"}]),views:[],finishes:["Space Black","Cloud White","Light Gold","Sky Blue"]}
 
   // Samsung Galaxy exact-color layer. Apple entries above are intentionally unchanged.
-  ,"samsung|galaxy s24":{hero:null,colors:[],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["128GB","256GB"]},
-  "samsung|galaxy s24 plus":{hero:null,colors:[],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["256GB","512GB"]},
-  "samsung|galaxy s24 ultra":{hero:null,colors:[],views:[],finishes:["Titanium Gray","Titanium Black","Titanium Violet","Titanium Yellow","Titanium Blue","Titanium Green","Titanium Orange"],storage:["256GB","512GB","1TB"]},
-  "samsung|galaxy s23":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
-  "samsung|galaxy s23 plus":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
-  "samsung|galaxy s23 ultra":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender"]},
+  ,"samsung|galaxy s24":{hero:null,colors:[
+    {name:"Cobalt Violet",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Cobalt-Violet_Galaxy-S24.jpg"},
+    {name:"Amber Yellow",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Amber-Yellow_Galaxy-S24.jpg"},
+    {name:"Onyx Black",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Onyx-Black_Galaxy-S24.jpg"},
+    {name:"Marble Gray",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Marble-Gray_Galaxy-S24.jpg"}
+  ],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["128GB","256GB"],source:"Samsung official product media"},
+  "samsung|galaxy s24 plus":{hero:null,colors:[
+    {name:"Cobalt Violet",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Cobalt-Violet_Galaxy-S24.jpg"},
+    {name:"Amber Yellow",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Amber-Yellow_Galaxy-S24.jpg"},
+    {name:"Onyx Black",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Onyx-Black_Galaxy-S24.jpg"},
+    {name:"Marble Gray",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Marble-Gray_Galaxy-S24.jpg"}
+  ],views:[],finishes:["Cobalt Violet","Amber Yellow","Onyx Black","Marble Gray","Jade Green","Sapphire Blue","Sandstone Orange"],storage:["256GB","512GB"],source:"Samsung official product media"},
+  "samsung|galaxy s24 ultra":{hero:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Gray_Galaxy_S24_Ultra.jpg",colors:[
+    {name:"Titanium Gray",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Gray_Galaxy_S24_Ultra.jpg"},
+    {name:"Titanium Black",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Black_Galaxy_S24_Ultra.jpg"},
+    {name:"Titanium Violet",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Violet__Galaxy_S24_Ultra.jpg"},
+    {name:"Titanium Yellow",src:"https://images.samsung.com/is/image/samsung/assets/pk/2401/smartphones/galaxy-s24-ultra/specs/163x346_Titanium-Yellow_Galaxy_S24_Ultra.jpg"}
+  ],views:[],finishes:["Titanium Gray","Titanium Black","Titanium Violet","Titanium Yellow","Titanium Blue","Titanium Green","Titanium Orange"],storage:["256GB","512GB","1TB"],source:"Samsung official product media"},
+  "samsung|galaxy s23":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
+  "samsung|galaxy s23 plus":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender","Graphite","Lime"]},
+  "samsung|galaxy s23 ultra":{hero:null,colors:[],views:[],finishes:["Green","Phantom Black","Cream","Lavender","Graphite","Lime","Sky Blue","Red"]},
 
 
 });
@@ -180,6 +195,19 @@ function appleIphoneFamily(model){
   const m=normalize(model).replace(/^apple\s+/,"");
   return APPLE_IPHONE_FAMILIES.find(f=>m===f||m.startsWith(f+" "))||null;
 }
+const SAMSUNG_GALAXY_FAMILIES=Object.keys(PHONE_RICH_MEDIA).filter(k=>k.startsWith("samsung|")).map(k=>k.slice(8)).sort((a,b)=>b.length-a.length);
+function samsungGalaxyFamily(model){
+  const m=normalize(model).replace(/^samsung\s+/,"");
+  return SAMSUNG_GALAXY_FAMILIES.find(f=>m===f||m.startsWith(f+" "))||null;
+}
+function samsungFamilyMedia(brand,model){
+  if(normalize(brand)!=="samsung")return null;
+  const family=samsungGalaxyFamily(model);if(!family)return null;
+  const exact=PHONE_RICH_MEDIA["samsung|"+family];
+  const hero=exact?.hero||(exact?.colors||[])[0]?.src||getMappedPhoneImageByIdentity(brand,model)||null;
+  return cleanMedia({...exact,hero,source:exact?.source||"Canonical Samsung Galaxy family media"});
+}
+
 function appleFamilyMedia(brand,model){
   if(normalize(brand)!=="apple")return null;
   const family=appleIphoneFamily(model);if(!family)return null;
@@ -194,6 +222,7 @@ function appleFamilyMedia(brand,model){
 
 export function getPhoneRichMedia(brand,model){
   const apple=appleFamilyMedia(brand,model);if(apple&&(apple.hero||apple.colors.length||apple.views.length))return apple;
+  const samsung=samsungFamilyMedia(brand,model);if(samsung&&(samsung.hero||samsung.colors.length||samsung.views.length))return samsung;
   const key=keyFor(brand,model);
   const curated=cleanMedia(PHONE_RICH_MEDIA[key]);
   if(curated&&(curated.hero||curated.colors.length||curated.views.length))return curated;
