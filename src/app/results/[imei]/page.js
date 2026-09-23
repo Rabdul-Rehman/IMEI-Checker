@@ -81,12 +81,12 @@ export default function ResultsPage(){
  ];
  const s21fe=/galaxy\s+s21\s+fe/i.test(String(model||""));
  const samsungS21FEMedia=s21fe?{
-   hero:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blgcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blgcpkd-530857745?$650_519_PNG$",
+   hero:"https://image-us.samsung.com/SamsungUS/home/mobile/phones/pdp/galaxy-s21-fe-5g/gallery/SM-G990U-graphite-1.png",
    colors:[
-    {name:"Graphite",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990bzacpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990bzacpkd-530857761?$650_519_PNG$"},
-    {name:"White",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990bzwcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990bzwcpkd-530857777?$650_519_PNG$"},
-    {name:"Olive",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blgcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blgcpkd-530857745?$650_519_PNG$"},
-    {name:"Lavender",src:"https://images.samsung.com/is/image/samsung/p6pim/pk/sm-g990blvcpkd/gallery/pk-galaxy-s21-fe-g990-403480-sm-g990blvcpkd-530857753?$650_519_PNG$"}
+    {name:"Graphite",src:"https://image-us.samsung.com/SamsungUS/home/mobile/phones/pdp/galaxy-s21-fe-5g/gallery/SM-G990U-graphite-1.png"},
+    {name:"Olive",src:"https://images.samsung.com/is/image/samsung/assets/sg/2201/preorder/1_image_carousel/4_product_image/S21FE_Carousel_ProductImage_Olive_MO.jpg?imbypass=true"},
+    {name:"Lavender",src:"https://media.ldlc.com/r1600/ld/products/00/05/95/81/LD0005958194.jpg"},
+    {name:"White",src:"https://electronicsforce.com/cdn/shop/products/s21fewhite_87f6e230-0ff9-4b97-8b57-97f12670b3f7.jpg?v=1709624296&width=1200"}
    ],finishes:["Graphite","White","Olive","Lavender"],storage:["128GB","256GB"],views:[]
  }:null;
  const s22base=/galaxy\s+s22(?:\s+5g)?(?!\s*(?:ultra|plus|\+))/i.test(String(model||""));
