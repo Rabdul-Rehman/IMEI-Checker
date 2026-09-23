@@ -67,6 +67,15 @@ export default function ResultsPage(){
   {re:/galaxy\\s+s22\\s+ultra/i,storage:["128GB","256GB","512GB","1TB"],colors:["Burgundy","Phantom Black","Phantom White","Green"]},
   {re:/galaxy\\s+s22\\s*(?:plus|\\+)/i,storage:["128GB","256GB"],colors:["Phantom White","Phantom Black","Green","Pink Gold","Graphite","Cream","Sky Blue","Violet"]},
   {re:/galaxy\\s+s22(?:\\s+5g)?(?!\\s*(?:ultra|plus|\\+))/i,storage:["128GB","256GB"],colors:["Phantom White","Phantom Black","Green","Pink Gold","Graphite","Cream","Sky Blue","Violet"]},
+  {re:/galaxy\\s+s21\\s+ultra/i,storage:["128GB","256GB","512GB"],colors:["Phantom Black","Phantom Silver"]},
+  {re:/galaxy\\s+s21\\s*(?:plus|\\+)/i,storage:["128GB","256GB"],colors:["Phantom Violet","Phantom Black","Phantom Silver"]},
+  {re:/galaxy\\s+s21(?:\\s+5g)?(?!\\s*(?:ultra|plus|\\+|fe))/i,storage:["128GB","256GB"],colors:["Phantom Violet","Phantom Gray","Phantom White","Phantom Pink"]},
+  {re:/galaxy\\s+s21\\s+fe/i,storage:["128GB","256GB"],colors:["Graphite","White","Olive","Lavender"]},
+  {re:/galaxy\\s+s20\\s+ultra/i,storage:["128GB","512GB"],colors:["Cosmic Gray","Cosmic Black"]},
+  {re:/galaxy\\s+s20\\s*(?:plus|\\+)/i,storage:["128GB","512GB"],colors:["Cosmic Black","Cosmic Gray","Cloud Blue"]},
+  {re:/galaxy\\s+s20(?:\\s+5g)?(?!\\s*(?:ultra|plus|\\+|fe))/i,storage:["128GB"],colors:["Cosmic Gray","Cloud Blue","Cloud Pink"]},
+  {re:/galaxy\\s+note\\s*20\\s+ultra/i,storage:["256GB","512GB"],colors:["Mystic Bronze","Mystic Black","Mystic White"]},
+  {re:/galaxy\\s+note\\s*20(?!\\s+ultra)/i,storage:["256GB"],colors:["Mystic Bronze","Mystic Green","Mystic Gray"]},
   {re:/galaxy\\s+z\\s*fold5/i,storage:["256GB","512GB","1TB"],colors:["Icy Blue","Phantom Black","Cream","Gray","Blue"]},
   {re:/galaxy\\s+z\\s*flip5/i,storage:["256GB","512GB"],colors:["Mint","Graphite","Cream","Lavender","Gray","Blue","Green","Yellow"]}
  ];
